@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zulvix | Kenya's Premier Daily Earning & Asset Tap Platform</title>
+    <title>Greenara | Kenya's Premier Daily Earning & Asset Tap Platform</title>
     <style>
         :root {
             --bg-dark: #070d0a;
@@ -131,7 +131,7 @@
     <div id="auth-container">
         <div class="auth-card">
             <div class="auth-logo-box">⚡</div>
-            <div class="auth-title">Zulvix</div>
+            <div class="auth-title">Greenara</div>
             <div class="auth-sub">Kenya's Digital Asset Tap & Earn Platform</div>
 
             <div id="auth-error" style="color: #ff4d4d; font-size: 0.85rem; margin-bottom: 10px; text-align: center; display: none;"></div>
@@ -146,7 +146,7 @@
             </div>
 
             <button class="btn btn-green" style="width: 100%; margin-top: 10px;" onclick="handleAuthentication()">Register & Start Earning</button>
-            <p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 15px;">By registering, you agree to Zulvix's daily reward terms and automated 3% referral boosts.</p>
+            <p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 15px;">By registering, you agree to Greenara's daily reward terms and automated 3% referral boosts.</p>
         </div>
     </div>
 
@@ -155,7 +155,7 @@
         <div class="brand-wrapper">
             <div class="header-logo-box">⚡</div>
             <div class="brand-info">
-                <h1>Zulvix</h1>
+                <h1>Greenara</h1>
                 <span>Verified KES Earning System</span>
             </div>
         </div>
@@ -223,11 +223,11 @@
     <div id="ai-modal" class="modal">
         <div class="modal-content" style="max-width: 480px;">
             <div class="modal-header">
-                <h2>🤖 Zulvix AI Assistant</h2>
+                <h2>🤖 GreenBot AI Assistant</h2>
                 <button class="close-btn" onclick="closeModal('ai-modal')">&times;</button>
             </div>
             <div class="ai-chat-box" id="ai-chat-messages">
-                <div class="ai-msg bot">Hello! I am the Zulvix AI assistant. Ask me anything about how to unlock levels, deposit fees, M-Pesa payments, or the 12-hour tap countdown!</div>
+                <div class="ai-msg bot">Hello! I am GreenBot, your Greenara AI assistant. Ask me anything about how to unlock levels, deposit fees, M-Pesa payments, or the 12-hour tap countdown!</div>
             </div>
             <div class="flex gap-2">
                 <input type="text" id="ai-input" class="form-control" placeholder="Ask a question..." onkeypress="if(event.key==='Enter')sendAiMessage()">
@@ -339,7 +339,7 @@
     </div>
 
     <!-- Floating Assistant & Support Buttons -->
-    <div class="floating-ai" onclick="openAiModal()" title="Zulvix AI Assistant">
+    <div class="floating-ai" onclick="openAiModal()" title="GreenBot AI Assistant">
         🤖
     </div>
     <div class="floating-support" onclick="openAdminPortal()" title="Customer Support / Admin Login">
@@ -625,7 +625,7 @@
         }
 
         function copyInviteLink() {
-            navigator.clipboard.writeText(`https://zulvix.co.ke/register?ref=${currentUser}`);
+            navigator.clipboard.writeText(`https://greenara.co.ke/register?ref=${currentUser}`);
             alert("Referral link copied! Each successful invite automatically grants a +3% bonus boost to your daily earnings.");
         }
 
