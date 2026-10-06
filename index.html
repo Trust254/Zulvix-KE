@@ -1398,3 +1398,83 @@ function toggleAuthMode(mode) {
 
 /* =========================================================
    GENERIC API
+<script>
+
+/* =========================================================
+   FINAL UI REFRESH
+========================================================= */
+
+document.getElementById(
+  'profileName'
+).textContent =
+  appState.currentUser.name ||
+  'User';
+
+document.getElementById(
+  'profilePhone'
+).textContent =
+  appState.currentUser.phone ||
+  '-';
+
+const tapButton =
+  document.getElementById(
+    'tapButton'
+  );
+
+if (tapButton) {
+  tapButton.disabled =
+    appState.tapsLeft <= 0;
+}
+
+startCountdown();
+
+renderTransactions();
+
+const levelsPage =
+  document.getElementById(
+    'page-levels'
+  );
+
+if (
+  levelsPage &&
+  !levelsPage.classList.contains('hidden')
+) {
+  renderLevels();
+}
+
+
+/* =========================================================
+   START APPLICATION
+========================================================= */
+
+document.addEventListener(
+  'DOMContentLoaded',
+  async () => {
+
+    checkAuthUI();
+
+    const token =
+      getUserToken();
+
+    if (token) {
+
+      const success =
+        await refreshMe();
+
+      if (success) {
+
+        showToast(
+          'Your secure session has been restored.'
+        );
+
+      }
+
+    }
+
+  }
+);
+
+</script>
+
+</body>
+</html>
