@@ -23,6 +23,28 @@
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDO31-0KLRmO-FXbAaFHaHTnk_F5DTNC4Q",
+            authDomain: "zulvix-ke.firebaseapp.com",
+            projectId: "zulvix-ke",
+            storageBucket: "zulvix-ke.firebasestorage.app",
+            messagingSenderId: "823595914074",
+            appId: "1:823595914074:web:4f4c0d95fd4fd8142fd963"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Expose Firebase tools to global window scope for our app logic
+        window.db = db;
+        window.FB_SDK = { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot };
+        window.dispatchEvent(new Event('firebase-ready'));
+    </script>
     <style>
         body { background-color: #070d0a; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }
         .glow-green { box-shadow: 0 0 15px rgba(0, 255, 136, 0.3); }
@@ -51,7 +73,7 @@
                     Z
                 </div>
                 <h1 class="font-extrabold text-brandGreen tracking-wide text-xl">ZULVIX-KE</h1>
-                <p id="authSubtitle" class="text-xs text-zinc-400">Secure Tap & Earn Portal</p>
+                <p id="authSubtitle" class="text-xs text-zinc-400">Secure Cloud Tap & Earn Portal</p>
             </div>
 
             <!-- AI Robot Assistant Helper Box -->
@@ -61,7 +83,7 @@
                 </div>
                 <div class="text-[11px] text-zinc-300 space-y-1">
                     <p class="font-bold text-brandGreen">Zulvix AI Assistant:</p>
-                    <p id="robotTipText">Register first, or enter correct credentials to sign in. Level 1 is free!</p>
+                    <p id="robotTipText">Cloud database connected! Register your account or sign in from any phone.</p>
                 </div>
             </div>
 
@@ -147,7 +169,7 @@
                 <div class="space-y-0.5 flex-grow">
                     <div class="flex justify-between items-center">
                         <span class="text-xs font-bold text-brandGreen">Zulvix Robot Assistant</span>
-                        <span class="text-[9px] bg-zinc-800 text-brandGold px-2 py-0.5 rounded-full font-bold">Online</span>
+                        <span class="text-[9px] bg-zinc-800 text-brandGold px-2 py-0.5 rounded-full font-bold">Cloud Live</span>
                     </div>
                     <p id="dashboardRobotTip" class="text-xs text-zinc-300">Complete your 6 daily taps to trigger the 12-hour countdown timer!</p>
                 </div>
@@ -186,7 +208,7 @@
                     </button>
                 </div>
                 
-                <!-- Countdown Overlay Box (Hidden until daily limit hit) -->
+                <!-- Countdown Overlay Box -->
                 <div id="countdownBox" class="hidden bg-zinc-900 border border-brandGold/30 rounded-xl p-3 text-center space-y-1">
                     <p class="text-[11px] text-brandGold font-bold uppercase"><i class="fa-solid fa-clock mr-1"></i> Daily Taps Exhausted</p>
                     <p class="text-xs text-zinc-400">Next tapping session unlocks in:</p>
@@ -226,9 +248,7 @@
                 <p class="text-xs text-zinc-400">Upgrading to a higher tier automatically closes lower active tiers so you can focus solely on your highest active asset.</p>
             </div>
 
-            <div class="space-y-3 pb-6" id="levelsListContainer">
-                <!-- Populated dynamically with 8 tiers -->
-            </div>
+            <div class="space-y-3 pb-6" id="levelsListContainer"></div>
         </section>
 
         <!-- TAB 3: WALLET & TRANSACTIONS -->
@@ -318,15 +338,12 @@
     </nav>
 
     <!-- MODALS SECTION -->
-    <!-- Deposit Modal with Lipa na M-Pesa Instructions Added -->
     <div id="depositModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-brandCard border border-brandGreen/40 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center">
                 <h3 class="font-bold text-white text-base">Top Up Dashboard (M-Pesa)</h3>
                 <button onclick="closeDepositModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            
-            <!-- Lipa na M-Pesa Paybill Instructions Box -->
             <div class="bg-zinc-900 border border-brandGreen/30 p-3 rounded-xl space-y-2 text-xs">
                 <p class="font-bold text-brandGreen"><i class="fa-solid fa-mobile-screen-button mr-1"></i> Lipa na M-Pesa Till/Paybill:</p>
                 <div class="grid grid-cols-2 gap-2 text-zinc-300">
@@ -335,7 +352,6 @@
                 </div>
                 <p class="text-[10px] text-zinc-400 pt-1 border-t border-zinc-800">Send money to the paybill above, then submit your request below for processing.</p>
             </div>
-
             <div class="space-y-3">
                 <div>
                     <label class="text-xs text-zinc-400 block mb-1">Amount (Ksh)</label>
@@ -352,7 +368,7 @@
         </div>
     </div>
 
-    <!-- Upgrade / Tier Modal with Lipa na M-Pesa Details -->
+    <!-- Upgrade / Tier Modal -->
     <div id="upgradeModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-brandCard border border-brandGold/40 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center">
@@ -408,7 +424,7 @@
             <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
                 <div>
                     <h3 class="font-bold text-white text-base">Admin Management Control Center</h3>
-                    <p class="text-[10px] text-brandGreen">Portal Ledger & Approvals Management</p>
+                    <p class="text-[10px] text-brandGreen">Cloud Firestore Ledger & Approvals Management</p>
                 </div>
                 <button onclick="closeAdminModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
@@ -436,7 +452,7 @@
 
                 <!-- 1. Users Section -->
                 <div id="adm-section-users" class="space-y-2">
-                    <h4 class="text-xs font-bold text-zinc-300 uppercase">Registered Users Database</h4>
+                    <h4 class="text-xs font-bold text-zinc-300 uppercase">Registered Users Database (Cloud)</h4>
                     <div id="adminUsersList" class="space-y-2 max-h-60 overflow-y-auto"></div>
                 </div>
 
@@ -478,9 +494,8 @@
         </div>
     </div>
 
-    <!-- APPLICATION SCRIPT -->
+    <!-- APPLICATION SCRIPT WITH CLOUD FIRESTORE SYNC -->
     <script>
-        // 8 Expanded Asset Tiers Config with Value-Based Images / Icons
         const LEVELS_CONFIG = [
             { id: 1, name: 'Iron Box', icon: 'fa-box-archive', unlockFee: 0, userDeposit: 0, perTap: 5, dailyTotal: 30 },
             { id: 2, name: 'Smart TV', icon: 'fa-tv', unlockFee: 800, userDeposit: 2000, perTap: 20, dailyTotal: 120 },
@@ -528,23 +543,86 @@
             document.getElementById('notificationToast').classList.add('translate-x-full');
         }
 
-        function loadAppState() {
-            const saved = localStorage.getItem('zulvix_ke_state_v9');
-            if (saved) {
-                try {
-                    appState = JSON.parse(saved);
-                    if (!appState.unlockedLevels) appState.unlockedLevels = [1];
-                } catch (e) {
-                    console.error(e);
+        // Cloud Database Sync Listeners
+        window.addEventListener('firebase-ready', async () => {
+            const db = window.db;
+            const { collection, onSnapshot, doc, getDoc } = window.FB_SDK;
+
+            // Real-time listener for all registered users
+            onSnapshot(collection(db, "users"), (snapshot) => {
+                appState.usersDb = [];
+                snapshot.forEach((docSnap) => {
+                    appState.usersDb.push(docSnap.data());
+                });
+                
+                // If logged in, update current session user data from cloud
+                if (appState.isLoggedIn && appState.currentUser.phone) {
+                    const latestMe = appState.usersDb.find(u => u.phone === appState.currentUser.phone);
+                    if (latestMe) {
+                        appState.balance = latestMe.balance || 0;
+                        appState.currentLevelId = latestMe.level || 1;
+                        appState.unlockedLevels = latestMe.unlockedLevels || [1];
+                        appState.tapsLeft = latestMe.tapsLeft !== undefined ? latestMe.tapsLeft : 6;
+                        appState.nextTapResetTime = latestMe.nextTapResetTime || null;
+                        appState.transactions = latestMe.transactions || [];
+                    }
                 }
+                updateUI();
+                renderAdminData();
+            });
+
+            // Real-time listener for admin requests (Level Upgrades)
+            onSnapshot(collection(db, "levelRequests"), (snapshot) => {
+                appState.levelRequests = [];
+                snapshot.forEach((docSnap) => { appState.levelRequests.push({ id: docSnap.id, ...docSnap.data() }); });
+                renderAdminData();
+            });
+
+            // Real-time listener for Deposits
+            onSnapshot(collection(db, "depositRequests"), (snapshot) => {
+                appState.depositRequests = [];
+                snapshot.forEach((docSnap) => { appState.depositRequests.push({ id: docSnap.id, ...docSnap.data() }); });
+                renderAdminData();
+            });
+
+            // Real-time listener for Withdrawals
+            onSnapshot(collection(db, "withdrawRequests"), (snapshot) => {
+                appState.withdrawRequests = [];
+                snapshot.forEach((docSnap) => { appState.withdrawRequests.push({ id: docSnap.id, ...docSnap.data() }); });
+                renderAdminData();
+            });
+
+            // Real-time listener for Complaints
+            onSnapshot(collection(db, "complaints"), (snapshot) => {
+                appState.complaints = [];
+                snapshot.forEach((docSnap) => { appState.complaints.push({ id: docSnap.id, ...docSnap.data() }); });
+                renderAdminData();
+            });
+
+            // Real-time listener for Admin Portal Metadata (Retention)
+            onSnapshot(doc(db, "metadata", "adminPortal"), (docSnap) => {
+                if (docSnap.exists()) {
+                    appState.portalRetention = docSnap.data().portalRetention || 0;
+                }
+                renderAdminData();
+            });
+
+            loadLocalSession();
+        });
+
+        function loadLocalSession() {
+            const savedPhone = localStorage.getItem('zulvix_active_phone');
+            if (savedPhone) {
+                appState.isLoggedIn = true;
+                appState.currentUser.phone = savedPhone;
             }
             checkAuthUI();
-            updateUI();
-            checkCountdownTimer();
         }
 
-        function saveAppState() {
-            localStorage.setItem('zulvix_ke_state_v9', JSON.stringify(appState));
+        async function saveCloudUser(userData) {
+            const db = window.db;
+            const { doc, setDoc } = window.FB_SDK;
+            await setDoc(doc(db, "users", userData.phone), userData, { merge: true });
         }
 
         function checkAuthUI() {
@@ -566,16 +644,16 @@
                 loginCont.classList.add('hidden');
                 regCont.classList.remove('hidden');
                 subtitle.innerText = "Register Your New Account";
-                robotTip.innerText = "Fill in your details to create your account. Level 1 is instantly free!";
+                robotTip.innerText = "Fill in your details to create your cloud account. Level 1 is instantly free!";
             } else {
                 regCont.classList.add('hidden');
                 loginCont.classList.remove('hidden');
-                subtitle.innerText = "Secure Sign In Portal";
-                robotTip.innerText = "Enter your correct registered mobile number and password to access your dashboard.";
+                subtitle.innerText = "Secure Cloud Sign In Portal";
+                robotTip.innerText = "Enter your correct registered mobile number and password to access your dashboard from any phone.";
             }
         }
 
-        function handleRegister() {
+        async function handleRegister() {
             const name = document.getElementById('regFullName').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
             const pass = document.getElementById('regPassword').value.trim();
@@ -585,34 +663,45 @@
                 return;
             }
 
-            const existing = appState.usersDb.find(u => u.phone === phone);
-            if (existing) {
+            const db = window.db;
+            const { doc, getDoc } = window.FB_SDK;
+            const userDocRef = doc(db, "users", phone);
+            const userSnap = await getDoc(userDocRef);
+
+            if (userSnap.exists()) {
                 showToast("Account Exists", "This phone number is already registered. Please sign in.", false);
                 toggleAuthMode('login');
                 return;
             }
 
+            const newUser = {
+                name,
+                phone,
+                password: pass,
+                level: 1,
+                balance: 0,
+                unlockedLevels: [1],
+                tapsLeft: 6,
+                nextTapResetTime: null,
+                transactions: [{
+                    type: 'Account Created',
+                    amount: 'Level 1 Active (Free)',
+                    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }]
+            };
+
+            await saveCloudUser(newUser);
+
             appState.isLoggedIn = true;
             appState.currentUser = { name, phone };
-            appState.balance = 0;
-            appState.currentLevelId = 1;
-            appState.unlockedLevels = [1];
-            appState.tapsLeft = 6;
+            localStorage.setItem('zulvix_active_phone', phone);
 
-            appState.usersDb.push({ name, phone, level: 1, balance: 0, password: pass });
-            appState.transactions.unshift({
-                type: 'Account Created',
-                amount: 'Level 1 Active (Free)',
-                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            });
-
-            saveAppState();
             checkAuthUI();
             updateUI();
-            showToast("Welcome!", "Registration successful! Level 1 activated.");
+            showToast("Welcome!", "Cloud registration successful! Level 1 activated.");
         }
 
-        function handleLogin() {
+        async function handleLogin() {
             const phone = document.getElementById('loginPhone').value.trim();
             const pass = document.getElementById('loginPassword').value.trim();
 
@@ -621,30 +710,35 @@
                 return;
             }
 
-            const userRecord = appState.usersDb.find(u => u.phone === phone);
-            if (!userRecord) {
+            const db = window.db;
+            const { doc, getDoc } = window.FB_SDK;
+            const userSnap = await getDoc(doc(db, "users", phone));
+
+            if (!userSnap.exists()) {
                 showToast("Account Not Found", "No account found with this number. Please register first.", false);
                 toggleAuthMode('register');
                 return;
             }
 
-            if (userRecord.password && userRecord.password !== pass) {
+            const userData = userSnap.data();
+            if (userData.password && userData.password !== pass) {
                 showToast("Invalid Credentials", "Incorrect password entered. Please try again.", false);
                 return;
             }
 
             appState.isLoggedIn = true;
-            appState.currentUser = { name: userRecord.name, phone: userRecord.phone };
-            saveAppState();
+            appState.currentUser = { name: userData.name, phone: userData.phone };
+            localStorage.setItem('zulvix_active_phone', phone);
+
             checkAuthUI();
             updateUI();
-            showToast("Signed In", `Welcome back, ${userRecord.name}!`);
+            showToast("Signed In", `Welcome back, ${userData.name}!`);
         }
 
         function handleLogout() {
             if (confirm("Are you sure you want to sign out?")) {
                 appState.isLoggedIn = false;
-                saveAppState();
+                localStorage.removeItem('zulvix_active_phone');
                 checkAuthUI();
             }
         }
@@ -667,8 +761,7 @@
             activeBtn.classList.add('text-brandGreen');
         }
 
-        // Tapping Engine & 12-Hour Countdown Logic
-        function handleTapAsset() {
+        async function handleTapAsset() {
             const now = Date.now();
             if (appState.nextTapResetTime && now < appState.nextTapResetTime) {
                 showToast("Countdown Active", "Please wait for the 12-hour timer to reset your taps.", false);
@@ -695,13 +788,13 @@
                 showToast("Taps Completed", "Daily taps exhausted! 12-hour countdown has started immediately.");
             }
 
-            saveAppState();
+            await syncCurrentUserToCloud();
             updateUI();
         }
 
-        function triggerCountdown() {
+        async function triggerCountdown() {
             appState.nextTapResetTime = Date.now() + (12 * 60 * 60 * 1000);
-            saveAppState();
+            await syncCurrentUserToCloud();
             checkCountdownTimer();
         }
 
@@ -727,7 +820,7 @@
                 if (appState.nextTapResetTime && now >= appState.nextTapResetTime) {
                     appState.tapsLeft = 6;
                     appState.nextTapResetTime = null;
-                    saveAppState();
+                    syncCurrentUserToCloud();
                     showToast("Taps Restored!", "Your 12-hour countdown is complete. You can continue tapping now!");
                 }
                 box.classList.add('hidden');
@@ -736,7 +829,23 @@
             }
         }
 
-        // Tier Upgrades Request with Lipa na M-Pesa Modal
+        async function syncCurrentUserToCloud() {
+            if (!appState.isLoggedIn || !appState.currentUser.phone) return;
+            const existingUser = appState.usersDb.find(u => u.phone === appState.currentUser.phone) || {};
+            const payload = {
+                ...existingUser,
+                name: appState.currentUser.name || existingUser.name,
+                phone: appState.currentUser.phone,
+                balance: appState.balance,
+                level: appState.currentLevelId,
+                unlockedLevels: appState.unlockedLevels,
+                tapsLeft: appState.tapsLeft,
+                nextTapResetTime: appState.nextTapResetTime,
+                transactions: appState.transactions
+            };
+            await saveCloudUser(payload);
+        }
+
         function openUpgradeModal(levelId) {
             const level = LEVELS_CONFIG.find(l => l.id === levelId);
             if (!level) return;
@@ -751,7 +860,7 @@
             document.getElementById('upgradeMpesaCodeInput').value = '';
         }
 
-        function confirmUpgradeSubmission() {
+        async function confirmUpgradeSubmission() {
             const mpesaCode = document.getElementById('upgradeMpesaCodeInput').value.trim();
             if (!mpesaCode) {
                 showToast("Missing M-Pesa Code", "Please enter your M-Pesa confirmation code.", false);
@@ -761,8 +870,12 @@
             const level = LEVELS_CONFIG.find(l => l.id === selectedUpgradeLevelId);
             if (!level) return;
 
-            appState.levelRequests.unshift({
-                id: Date.now(),
+            const db = window.db;
+            const { collection, addCode, setDoc, doc } = window.FB_SDK;
+            const reqId = "req_" + Date.now();
+
+            await setDoc(doc(db, "levelRequests", reqId), {
+                id: reqId,
                 name: appState.currentUser.name,
                 phone: appState.currentUser.phone,
                 levelId: level.id,
@@ -773,26 +886,24 @@
                 date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             });
 
-            saveAppState();
             closeUpgradeModal();
-            updateUI();
             showToast("Activation Submitted", `Lipa na M-Pesa payment for Level ${level.id} submitted for admin approval.`);
         }
 
-        function switchToLevel(levelId) {
+        async function switchToLevel(levelId) {
             if (levelId === 1 || (appState.unlockedLevels && appState.unlockedLevels.includes(levelId))) {
                 appState.currentLevelId = levelId;
-                saveAppState();
+                await syncCurrentUserToCloud();
                 updateUI();
                 switchTab('dashboard');
                 showToast("Tier Switched", `Now actively tapping on Level ${levelId}.`);
             }
         }
 
-        // Deposit Modal Actions
         function openDepositModal() { document.getElementById('depositModal').classList.remove('hidden'); }
         function closeDepositModal() { document.getElementById('depositModal').classList.add('hidden'); }
-        function submitDeposit() {
+        
+        async function submitDeposit() {
             const amountInput = document.getElementById('depositAmountInput');
             const phoneInput = document.getElementById('depositPhoneInput');
             const amt = parseFloat(amountInput.value);
@@ -802,25 +913,28 @@
                 return;
             }
 
-            appState.depositRequests.unshift({
-                id: Date.now(),
+            const db = window.db;
+            const { setDoc, doc } = window.FB_SDK;
+            const depId = "dep_" + Date.now();
+
+            await setDoc(doc(db, "depositRequests", depId), {
+                id: depId,
                 name: appState.currentUser.name,
                 phone: phoneInput.value || appState.currentUser.phone,
                 amount: amt,
                 date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             });
 
-            saveAppState();
             closeDepositModal();
             amountInput.value = '';
             phoneInput.value = '';
-            showToast("Deposit Submitted", "Your deposit request has been submitted for approval.");
+            showToast("Deposit Submitted", "Your deposit request has been submitted for admin approval.");
         }
 
-        // Withdrawal Modal Actions (Min 2k, Leave 2k active reserve, Max 150k daily)
         function openWithdrawModal() { document.getElementById('withdrawModal').classList.remove('hidden'); }
         function closeWithdrawModal() { document.getElementById('withdrawModal').classList.add('hidden'); }
-        function submitWithdrawal() {
+        
+        async function submitWithdrawal() {
             const amountInput = document.getElementById('withdrawAmountInput');
             const phoneInput = document.getElementById('withdrawPhoneInput');
             const amt = parseFloat(amountInput.value);
@@ -837,17 +951,9 @@
 
             const requiredReserve = 2000;
             if (appState.balance - amt < requiredReserve) {
-                showToast("Active Balance Required", `You must leave at least Ksh 2,000 in your account to maintain active status. Max withdrawable now: Ksh ${(appState.balance - requiredReserve).toLocaleString()}`, false);
+                showToast("Active Balance Required", `You must leave at least Ksh 2,000 in your account. Max withdrawable: Ksh ${(appState.balance - requiredReserve).toLocaleString()}`, false);
                 return;
             }
-
-            appState.withdrawRequests.unshift({
-                id: Date.now(),
-                name: appState.currentUser.name,
-                phone: phoneInput.value || appState.currentUser.phone,
-                amount: amt,
-                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            });
 
             appState.balance -= amt;
             appState.transactions.unshift({
@@ -856,7 +962,19 @@
                 date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             });
 
-            saveAppState();
+            await syncCurrentUserToCloud();
+
+            const db = window.db;
+            const { setDoc, doc } = window.FB_SDK;
+            const wId = "wit_" + Date.now();
+            await setDoc(doc(db, "withdrawRequests", wId), {
+                id: wId,
+                name: appState.currentUser.name,
+                phone: phoneInput.value || appState.currentUser.phone,
+                amount: amt,
+                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+
             updateUI();
             closeWithdrawModal();
             amountInput.value = '';
@@ -864,22 +982,25 @@
             showToast("Withdrawal Pending", `Withdrawal of Ksh ${amt.toLocaleString()} submitted successfully.`);
         }
 
-        function submitComplaint() {
+        async function submitComplaint() {
             const textInput = document.getElementById('complaintTextInput');
             const msg = textInput.value.trim();
             if (!msg) return;
 
-            appState.complaints.unshift({
-                id: Date.now(),
+            const db = window.db;
+            const { setDoc, doc } = window.FB_SDK;
+            const cId = "com_" + Date.now();
+
+            await setDoc(doc(db, "complaints", cId), {
+                id: cId,
                 name: appState.currentUser.name,
                 phone: appState.currentUser.phone,
                 message: msg,
                 date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             });
 
-            saveAppState();
             textInput.value = '';
-            showToast("Ticket Sent", "Support complaint sent successfully.");
+            showToast("Ticket Sent", "Support complaint sent successfully to admin.");
         }
 
         // Admin Management Control Center
@@ -919,82 +1040,90 @@
             activeBtn.classList.remove('text-zinc-400');
         }
 
-        function approveLevelRequest(reqId) {
-            const idx = appState.levelRequests.findIndex(r => r.id === reqId);
-            if (idx === -1) return;
-            const req = appState.levelRequests[idx];
+        async function approveLevelRequest(reqId) {
+            const req = appState.levelRequests.find(r => r.id === reqId);
+            if (!req) return;
 
-            appState.portalRetention += req.unlockFee;
-            appState.balance += req.userDeposit;
-            
-            appState.currentLevelId = req.levelId;
-            if (!appState.unlockedLevels.includes(req.levelId)) {
-                appState.unlockedLevels.push(req.levelId);
+            const targetUser = appState.usersDb.find(u => u.phone === req.phone);
+            if (targetUser) {
+                targetUser.balance = (targetUser.balance || 0) + req.userDeposit;
+                targetUser.level = req.levelId;
+                if (!targetUser.unlockedLevels) targetUser.unlockedLevels = [1];
+                if (!targetUser.unlockedLevels.includes(req.levelId)) {
+                    targetUser.unlockedLevels.push(req.levelId);
+                }
+                targetUser.tapsLeft = 6;
+                if (!targetUser.transactions) targetUser.transactions = [];
+                targetUser.transactions.unshift({
+                    type: `Level ${req.levelId} Approved (${req.levelName})`,
+                    amount: `+Ksh ${req.userDeposit.toLocaleString()} Deposit`,
+                    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+                await saveCloudUser(targetUser);
             }
-            appState.tapsLeft = 6;
 
-            appState.transactions.unshift({
-                type: `Level ${req.levelId} Approved (${req.levelName})`,
-                amount: `+Ksh ${req.userDeposit.toLocaleString()} Deposit`,
-                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            });
+            const newRetention = (appState.portalRetention || 0) + req.unlockFee;
+            const db = window.db;
+            const { setDoc, doc, deleteDoc } = window.FB_SDK;
 
-            appState.levelRequests.splice(idx, 1);
-            saveAppState();
-            updateUI();
+            await setDoc(doc(db, "metadata", "adminPortal"), { portalRetention: newRetention });
+            await deleteDoc(doc(db, "levelRequests", reqId));
+
             renderAdminData();
-            showToast("Level Approved!", `Congratulations! Level ${req.levelId} is approved. Lower levels closed automatically.`);
+            showToast("Level Approved!", `Level ${req.levelId} approved for ${req.name}.`);
         }
 
-        function approveDeposit(reqId) {
-            const idx = appState.depositRequests.findIndex(r => r.id === reqId);
-            if (idx === -1) return;
-            const req = appState.depositRequests[idx];
+        async function approveDeposit(reqId) {
+            const req = appState.depositRequests.find(r => r.id === reqId);
+            if (!req) return;
 
-            appState.balance += req.amount;
-            appState.transactions.unshift({
-                type: 'Approved Deposit',
-                amount: `+Ksh ${req.amount.toLocaleString()}`,
-                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            });
+            const targetUser = appState.usersDb.find(u => u.phone === req.phone);
+            if (targetUser) {
+                targetUser.balance = (targetUser.balance || 0) + req.amount;
+                if (!targetUser.transactions) targetUser.transactions = [];
+                targetUser.transactions.unshift({
+                    type: 'Approved Deposit',
+                    amount: `+Ksh ${req.amount.toLocaleString()}`,
+                    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+                await saveCloudUser(targetUser);
+            }
 
-            appState.depositRequests.splice(idx, 1);
-            saveAppState();
-            updateUI();
+            const db = window.db;
+            const { deleteDoc, doc } = window.FB_SDK;
+            await deleteDoc(doc(db, "depositRequests", reqId));
+
             renderAdminData();
-            showToast("Deposit Completed!", `Congratulations! Your deposit of Ksh ${req.amount.toLocaleString()} has been credited successfully.`);
+            showToast("Deposit Completed!", `Deposit of Ksh ${req.amount.toLocaleString()} credited successfully.`);
         }
 
-        function approveWithdrawal(reqId) {
-            const idx = appState.withdrawRequests.findIndex(r => r.id === reqId);
-            if (idx === -1) return;
-            const req = appState.withdrawRequests[idx];
-            appState.withdrawRequests.splice(idx, 1);
-            saveAppState();
+        async function approveWithdrawal(reqId) {
+            const db = window.db;
+            const { deleteDoc, doc } = window.FB_SDK;
+            await deleteDoc(doc(db, "withdrawRequests", reqId));
             renderAdminData();
-            showToast("Withdrawal Delivered!", `Congratulations! Your withdrawal of Ksh ${req.amount.toLocaleString()} has been delivered successfully to your M-Pesa.`);
+            showToast("Withdrawal Delivered!", "Payout marked as delivered.");
         }
 
-        function resolveComplaint(reqId) {
-            const idx = appState.complaints.findIndex(c => c.id === reqId);
-            if (idx === -1) return;
-            appState.complaints.splice(idx, 1);
-            saveAppState();
+        async function resolveComplaint(reqId) {
+            const db = window.db;
+            const { deleteDoc, doc } = window.FB_SDK;
+            await deleteDoc(doc(db, "complaints", reqId));
             renderAdminData();
             showToast("Ticket Resolved", "Complaint cleared.");
         }
 
         function renderAdminData() {
-            document.getElementById('portalRetentionBalance').innerText = `Ksh ${appState.portalRetention.toLocaleString()}`;
+            document.getElementById('portalRetentionBalance').innerText = `Ksh ${(appState.portalRetention || 0).toLocaleString()}`;
 
-            document.getElementById('adminUsersList').innerHTML = appState.usersDb.length === 0 ? '<p class="text-xs text-zinc-500 text-center py-2">No registered users.</p>' :
+            document.getElementById('adminUsersList').innerHTML = appState.usersDb.length === 0 ? '<p class="text-xs text-zinc-500 text-center py-2">No registered cloud users.</p>' :
                 appState.usersDb.map(u => `
                     <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 flex justify-between items-center text-xs">
                         <div>
                             <p class="font-bold text-white">${u.name}</p>
                             <span class="text-[10px] text-zinc-400">${u.phone} • Level ${u.level}</span>
                         </div>
-                        <span class="text-brandGold font-bold">Ksh ${u.balance || 0}</span>
+                        <span class="text-brandGold font-bold">Ksh ${(u.balance || 0).toLocaleString()}</span>
                     </div>
                 `).join('');
 
@@ -1010,7 +1139,7 @@
                             <div>Deposit: <b class="text-brandGold">Ksh ${r.userDeposit}</b></div>
                         </div>
                         <p class="text-[10px] text-zinc-400">M-Pesa Code: <strong class="text-white">${r.mpesaCode}</strong></p>
-                        <button onclick="approveLevelRequest(${r.id})" class="w-full bg-brandGreen hover:bg-emerald-400 text-black font-bold py-1.5 rounded-lg text-xs transition">
+                        <button onclick="approveLevelRequest('${r.id}')" class="w-full bg-brandGreen hover:bg-emerald-400 text-black font-bold py-1.5 rounded-lg text-xs transition">
                             Approve Level Activation
                         </button>
                     </div>
@@ -1023,7 +1152,7 @@
                             <p class="font-bold text-white">${d.name} (${d.phone})</p>
                             <span class="text-[10px] text-zinc-400">Amount: Ksh ${d.amount}</span>
                         </div>
-                        <button onclick="approveDeposit(${d.id})" class="bg-brandGreen text-black font-bold px-3 py-1 rounded-lg text-xs">Approve</button>
+                        <button onclick="approveDeposit('${d.id}')" class="bg-brandGreen text-black font-bold px-3 py-1 rounded-lg text-xs">Approve</button>
                     </div>
                 `).join('');
 
@@ -1034,7 +1163,7 @@
                             <p class="font-bold text-white">${w.name} (${w.phone})</p>
                             <span class="text-[10px] text-brandGold">Payout: Ksh ${w.amount}</span>
                         </div>
-                        <button onclick="approveWithdrawal(${w.id})" class="bg-brandGold text-black font-bold px-3 py-1 rounded-lg text-xs">Mark Delivered</button>
+                        <button onclick="approveWithdrawal('${w.id}')" class="bg-brandGold text-black font-bold px-3 py-1 rounded-lg text-xs">Mark Delivered</button>
                     </div>
                 `).join('');
 
@@ -1046,7 +1175,7 @@
                             <span class="text-[10px] text-zinc-500">${c.date}</span>
                         </div>
                         <p class="text-zinc-300">${c.message}</p>
-                        <button onclick="resolveComplaint(${c.id})" class="mt-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold px-2.5 py-1 rounded text-[10px]">Resolve</button>
+                        <button onclick="resolveComplaint('${c.id}')" class="mt-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold px-2.5 py-1 rounded text-[10px]">Resolve</button>
                     </div>
                 `).join('');
         }
@@ -1063,13 +1192,6 @@
             document.getElementById('tapAssetIcon').className = `fa-solid ${currentLevel.icon} text-3xl mb-1`;
             document.getElementById('profileNameDisplay').innerText = appState.currentUser.name || 'Zulvix User';
             document.getElementById('profilePhoneDisplay').innerText = `Active Member • ${appState.currentUser.phone || '+254'}`;
-
-            const robotTips = [
-                `You are currently tapping on Level ${currentLevel.id} (${currentLevel.name}). Keep it up!`,
-                `Remember: Min withdrawal is Ksh 2,000, and Ksh 2,000 must remain as active balance.`,
-                `When you upgrade to a higher tier, your lower active levels close automatically!`
-            ];
-            document.getElementById('dashboardRobotTip').innerText = robotTips[Math.floor(Math.random() * robotTips.length)];
 
             const levelsContainer = document.getElementById('levelsListContainer');
             levelsContainer.innerHTML = LEVELS_CONFIG.map(lvl => {
@@ -1111,7 +1233,7 @@
             }).join('');
 
             const historyList = document.getElementById('transactionHistoryList');
-            if (appState.transactions.length === 0) {
+            if (!appState.transactions || appState.transactions.length === 0) {
                 historyList.innerHTML = `<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 text-center text-xs text-zinc-500">No transactions recorded yet.</div>`;
             } else {
                 historyList.innerHTML = appState.transactions.map(tx => `
@@ -1125,10 +1247,6 @@
                 `).join('');
             }
         }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            loadAppState();
-        });
     </script>
 </body>
 </html>
