@@ -256,16 +256,6 @@
         .view-section.active {
             display: block;
         }
-
-        .deposit-info-box {
-            background: #18241d;
-            border: 1px dashed var(--accent-gold);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            font-size: 13px;
-            line-height: 1.6;
-        }
     </style>
 </head>
 <body>
@@ -332,7 +322,7 @@
         <div id="view-levels" class="view-section">
             <div class="card">
                 <h3 style="margin-bottom: 5px;">Level Selection & Tiers</h3>
-                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Level 1 is free. Higher levels require activation via Lipa na M-Pesa.</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Level 1 is free and open. Higher levels require activation.</p>
                 
                 <!-- Level 1 -->
                 <div class="level-item">
@@ -363,20 +353,11 @@
             </div>
         </div>
 
-        <!-- WALLET & DEPOSIT VIEW -->
+        <!-- WALLET VIEW -->
         <div id="view-wallet" class="view-section">
             <div class="card">
-                <h3>Wallet & Deposit Information</h3>
+                <h3>Wallet & Earnings</h3>
                 <p style="margin-top: 10px; font-size: 14px;">Available Balance: <span id="wallet-balance" style="color: var(--accent-gold); font-weight: bold;">Ksh 0.00</span></p>
-                
-                <div class="deposit-info-box">
-                    <strong style="color: var(--accent-green); display: block; margin-bottom: 5px;">M-Pesa Deposit / Activation Guide:</strong>
-                    <div><strong>Paybill Number:</strong> <span style="color: var(--accent-gold);">522533</span></div>
-                    <div><strong>Account Number:</strong> <span style="color: var(--accent-gold);">8012296</span></div>
-                    <p style="margin-top: 8px; font-size: 12px; color: var(--text-muted);">
-                        Enter the exact total amount required for tier activation or deposit. The amount splits automatically between your platform activation fee and your user deposit credited to your dashboard balance.
-                    </p>
-                </div>
             </div>
         </div>
     </div>
@@ -389,6 +370,7 @@
     </nav>
 
     <script>
+        // Default System State & LocalStorage Persistence Initialization
         let appState = JSON.parse(localStorage.getItem('zulvix_app_state')) || {
             isAuthenticated: false,
             balance: 0.00,
@@ -407,6 +389,7 @@
             localStorage.setItem('zulvix_app_state', JSON.stringify(appState));
         }
 
+        // Check Authentication status on page load
         window.onload = function() {
             if (appState.isAuthenticated) {
                 document.getElementById('login-modal').style.display = 'none';
@@ -440,7 +423,7 @@
         function performTap() {
             const now = new Date().getTime();
             if (appState.cooldownUntil && now < appState.cooldownUntil) {
-                return;
+                return; // Cooldown active
             }
 
             if (appState.tapsRemaining > 0) {
@@ -448,6 +431,7 @@
                 appState.balance += appState.rewardPerTap;
 
                 if (appState.tapsRemaining === 0) {
+                    // Trigger 12 hours countdown (12 * 60 * 60 * 1000 ms)
                     appState.cooldownUntil = new Date().getTime() + (12 * 60 * 60 * 1000);
                 }
 
@@ -464,6 +448,7 @@
             const timerDisplay = document.getElementById('timer-display');
 
             if (distance <= 0) {
+                // Reset cooldown
                 appState.tapsRemaining = appState.maxTaps;
                 appState.cooldownUntil = null;
                 saveAppState();
@@ -484,10 +469,10 @@
                 appState.rewardPerTap = reward;
                 saveAppState();
                 updateUI();
-                alert(`Successfully switched to ${name}`);
+                alert(`Successfully switched to ${name} (Free Level)`);
                 switchView('home', document.querySelector('nav button'));
             } else {
-                if (confirm(`Switching to ${name} requires Ksh ${activationFee}.\n\nPay via Paybill: 522533, Account: 8012296. Proceed to activate?`)) {
+                if (confirm(`Switching to ${name} requires activation fee or approval. Proceed?`)) {
                     appState.activeLevel = levelId;
                     appState.tierName = name;
                     appState.rewardPerTap = reward;
