@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Greenara | Kenya's Premier Daily Earning & Asset Tap Platform</title>
+    <title>Zulvix-KE | Daily Earning & Asset Tap Platform</title>
     <style>
         :root {
             --bg-dark: #070d0a;
@@ -53,7 +53,7 @@
         .brand-info h1 { font-size: 1.25rem; font-weight: 800; color: var(--neon-green); letter-spacing: 0.5px; }
         .brand-info span { font-size: 0.75rem; color: var(--text-muted); }
 
-        .user-pill-wrap { display: flex; gap: 10px; align-items: center; }
+        .user-pill-wrap { display: flex; gap: 12px; align-items: center; }
         .user-pill { background: var(--card-bg); border: 1px solid var(--card-border); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; }
         .user-pill span { color: var(--gold); font-weight: 700; }
 
@@ -135,19 +135,24 @@
         .ai-msg { padding: 10px 14px; border-radius: 8px; max-width: 85%; line-height: 1.4; }
         .ai-msg.bot { background: #15291e; color: var(--text-main); align-self: flex-start; border-left: 3px solid var(--gold); }
         .ai-msg.user { background: rgba(0,255,136,0.15); color: var(--neon-green); align-self: flex-end; border-right: 3px solid var(--neon-green); }
+
+        /* Footer */
+        footer { background: #050a08; border-top: 1px solid var(--card-border); text-align: center; padding: 20px; font-size: 0.85rem; color: var(--text-muted); margin-top: auto; }
+        footer a { color: var(--neon-green); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
     <!-- Notification Toast Bar -->
-    <div id="notification-banner">🔔 <span id="notification-text">Welcome to Greenara!</span></div>
+    <div id="notification-banner">🔔 <span id="notification-text">Welcome to Zulvix-KE!</span></div>
 
     <!-- Registration / Login Screen -->
     <div id="auth-container">
         <div class="auth-card">
             <div class="auth-logo-box">⚡</div>
-            <div class="auth-title">Greenara</div>
-            <div class="auth-sub">Kenya's Digital Asset Tap & Earn Platform</div>
+            <div class="auth-title">Zulvix-KE</div>
+            <div class="auth-sub">Digital Asset Tap & Earn Platform</div>
 
             <div class="auth-tabs">
                 <button class="auth-tab active" id="tab-login-btn" onclick="switchAuthMode('login')">Login</button>
@@ -174,7 +179,7 @@
         <div class="brand-wrapper">
             <div class="header-logo-box">⚡</div>
             <div class="brand-info">
-                <h1>Greenara</h1>
+                <h1>Zulvix-KE</h1>
                 <span>Verified KES Earning System</span>
             </div>
         </div>
@@ -183,21 +188,18 @@
                 <span>👤 <span id="display-user">User</span></span>
                 <span>💰 <span id="user-balance">30.00</span> Ksh</span>
             </div>
-            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;" onclick="logoutUser()">Logout</button>
+            <button class="btn btn-outline" style="padding: 6px 14px; font-size: 0.8rem; border-color: #ff4d4d; color: #ff4d4d;" onclick="logoutUser()">Logout</button>
         </div>
     </header>
 
     <!-- Main Dashboard -->
     <div class="main-container">
 
-        <!-- Live Required Deposit Tracker -->
+        <!-- Live Required Deposit Tracker (Deposit Now Button Removed per instructions) -->
         <div class="deposit-tracker-box">
             <div>
                 <h4>Required Deposit Status</h4>
                 <p id="deposit-tracker-text">No active unlock pending. Level 1 is active & free.</p>
-            </div>
-            <div>
-                <button class="btn btn-gold" style="padding: 8px 14px; font-size: 0.8rem;" onclick="openDepositModal()">Deposit Now</button>
             </div>
         </div>
 
@@ -227,14 +229,14 @@
 
     </div>
 
-    <!-- Payment / Activation Modal -->
+    <!-- Payment / Activation Modal with Strict Amount Verification -->
     <div id="payment-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="payment-modal-title">Level Activation</h2>
                 <button class="close-btn" onclick="closeModal('payment-modal')">&times;</button>
             </div>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">Make your payment via Lipa na M-Pesa to unlock automated daily earnings:</p>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">Make your exact required payment via Lipa na M-Pesa to unlock automated daily earnings:</p>
 
             <div class="mpesa-instruction">
                 <div class="mpesa-brand">LIPA NA M-PESA</div>
@@ -244,11 +246,18 @@
             </div>
 
             <div class="form-group">
-                <label>M-Pesa Confirmation Code (e.g. QWE1234XYZ)</label>
-                <input type="text" id="mpesa-code-input" class="form-control" placeholder="Enter transaction message code">
+                <label>Exact Deposit Amount Required (Ksh)</label>
+                <input type="number" id="deposit-amount-input" class="form-control" placeholder="Enter exact calculated amount">
             </div>
 
-            <button class="btn btn-green" style="width: 100%; margin-top: 10px;" onclick="submitActivationRequest()">Submit Request to Support</button>
+            <div class="form-group">
+                <label>M-Pesa Confirmation Code (e.g. QWE1234XYZ)</label>
+                <input type="text" id="mpesa-code-input" class="form-control" placeholder="Enter transaction message code" style="text-transform: uppercase;">
+            </div>
+
+            <div id="deposit-error-msg" style="color: #ff4d4d; font-size: 0.85rem; margin-bottom: 10px; display: none;"></div>
+
+            <button class="btn btn-green" style="width: 100%; margin-top: 5px;" onclick="submitActivationRequest()">Submit Request to Support</button>
         </div>
     </div>
 
@@ -256,11 +265,11 @@
     <div id="ai-modal" class="modal">
         <div class="modal-content" style="max-width: 480px;">
             <div class="modal-header">
-                <h2>🤖 GreenBot AI Assistant</h2>
+                <h2>🤖 Zulvix AI Assistant</h2>
                 <button class="close-btn" onclick="closeModal('ai-modal')">&times;</button>
             </div>
             <div class="ai-chat-box" id="ai-chat-messages">
-                <div class="ai-msg bot">Hello! I am GreenBot, your Greenara AI assistant. Ask me anything about how to unlock levels, deposit fees, M-Pesa payments, or the 12-hour tap countdown!</div>
+                <div class="ai-msg bot">Hello! I am your Zulvix AI assistant. Ask me anything about how to unlock levels, exact deposit totals, M-Pesa payments, or support tickets!</div>
             </div>
             <div class="flex gap-2">
                 <input type="text" id="ai-input" class="form-control" placeholder="Ask a question..." onkeypress="if(event.key==='Enter')sendAiMessage()">
@@ -277,18 +286,19 @@
                 <button class="close-btn" onclick="closeModal('complaint-modal')">&times;</button>
             </div>
             <div class="form-group">
-                <label>Describe your issue or question</label>
+                <label>Describe your issue or question for management</label>
                 <textarea id="complaint-text" class="form-control" rows="4" placeholder="e.g. Delay in activating my microwave level..."></textarea>
             </div>
-            <button class="btn btn-green" style="width: 100%;" onclick="submitComplaint()">Send to Customer Support</button>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Management support email: <a href="mailto:Zulvixsupport@gmail.com" style="color:var(--gold);">Zulvixsupport@gmail.com</a></p>
+            <button class="btn btn-green" style="width: 100%;" onclick="submitComplaint()">Send to Management Support</button>
         </div>
     </div>
 
-    <!-- Customer Support Dashboard Modal -->
+    <!-- Customer Support / Admin Dashboard Modal -->
     <div id="admin-modal" class="modal">
         <div class="modal-content" style="max-width: 950px;">
             <div class="modal-header">
-                <h2>Customer Support & Admin Control Center</h2>
+                <h2>Management Support Control Center</h2>
                 <button class="close-btn" onclick="closeModal('admin-modal')">&times;</button>
             </div>
 
@@ -306,7 +316,7 @@
                         <tr>
                             <th>User</th>
                             <th>Level Requested</th>
-                            <th>Activation Fee (Support)</th>
+                            <th>Activation Fee</th>
                             <th>Deposit Fee (User Bal)</th>
                             <th>M-Pesa Code</th>
                             <th>Action</th>
@@ -372,12 +382,17 @@
     </div>
 
     <!-- Floating Assistant & Support Buttons -->
-    <div class="floating-ai" onclick="openAiModal()" title="GreenBot AI Assistant">
-        🤖
-    </div>
-    <div class="floating-support" onclick="openAdminPortal()" title="Customer Support / Admin Login">
-        💬
-    </div>
+    <div class="floating-ai" onclick="openAiModal()" title="Zulvix AI Assistant">🤖</div>
+    <div class="floating-support" onclick="openAdminPortal()" title="Management Support Login">💬</div>
+
+    <!-- Footer with 2015 Publishing Year, Terms & Support Email -->
+    <footer>
+        <p>&copy; 2015 – 2026 Zulvix-KE. All rights reserved.</p>
+        <p style="margin-top: 6px;">
+            <a href="javascript:alert('Terms & Conditions: Users must be 18+ to operate digital asset tap levels. All M-Pesa transactions are verified securely.')">Terms & Conditions Applied</a> | 
+            Management Support: <a href="mailto:Zulvixsupport@gmail.com">Zulvixsupport@gmail.com</a>
+        </p>
+    </footer>
 
     <script>
         // Data Structures & State
@@ -438,7 +453,6 @@
             }
 
             if(authMode === 'register') {
-                // Check strong password: min 8 chars, contains letters and numbers
                 const strongRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/;
                 if(!strongRegex.test(p)) {
                     err.innerText = "Password must be at least 8 characters long and include letters and numbers.";
@@ -455,7 +469,7 @@
 
                 allRegisteredUsers.push({ username: u, password: p, balance: 30, levelsUnlocked: [1], status: "Active" });
                 userBalance = 30;
-                alert("Registration successful! Welcome to Greenara with Level 1 unlocked for free.");
+                alert("Registration successful! Welcome to Zulvix-KE with Level 1 unlocked for free.");
             } else {
                 let existing = allRegisteredUsers.find(x => x.username === u && x.password === p);
                 if(!existing) {
@@ -592,7 +606,7 @@
             let trackerText = document.getElementById('deposit-tracker-text');
             if(userReqs.length > 0) {
                 let latest = userReqs[userReqs.length - 1];
-                trackerText.innerHTML = `Pending verification for <strong>${latest.level}</strong> (Code: <code>${latest.code}</code>). Awaiting Customer Support approval.`;
+                trackerText.innerHTML = `Pending verification for <strong>${latest.level}</strong> (Code: <code>${latest.code}</code>). Awaiting Management Support approval.`;
             } else {
                 trackerText.innerHTML = `No active deposit requests pending. Choose any level above to view required activation & deposit totals.`;
             }
@@ -605,18 +619,16 @@
             text.innerText = message;
             banner.style.display = 'block';
 
-            // Trigger Device Vibration if supported
             if("vibrate" in navigator) {
                 navigator.vibrate([200, 100, 200]);
             }
 
-            // Play chime sound using Web Audio API
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5 note
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
                 gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
@@ -631,19 +643,25 @@
             }, 8000);
         }
 
-        // Modals Control
+        // Modals Control & Strict Calculation Verification
         function openPaymentModal(lvlId) {
             selectedLevelForPayment = levelsData.find(x => x.id === lvlId);
             let total = selectedLevelForPayment.activationFee + selectedLevelForPayment.depositFee;
             document.getElementById('payment-modal-title').innerText = `Unlock Level ${lvlId}: ${selectedLevelForPayment.name}`;
-            document.getElementById('payment-amount-display').innerText = `Total Amount: ${total.toLocaleString()} Ksh\n(Activation Fee: ${selectedLevelForPayment.activationFee.toLocaleString()} | Deposit Fee added to your balance: ${selectedLevelForPayment.depositFee.toLocaleString()})`;
+            document.getElementById('payment-amount-display').innerText = `Exact Total Amount Required: ${total.toLocaleString()} Ksh\n(Activation Fee: ${selectedLevelForPayment.activationFee.toLocaleString()} | Deposit Fee: ${selectedLevelForPayment.depositFee.toLocaleString()})`;
+            document.getElementById('deposit-amount-input').value = "";
+            document.getElementById('mpesa-code-input').value = "";
+            document.getElementById('deposit-error-msg').style.display = 'none';
             document.getElementById('payment-modal').style.display = 'flex';
         }
 
         function openDepositModal() {
             selectedLevelForPayment = { id: 'topup', name: 'Account Deposit', activationFee: 0, depositFee: 1000 };
-            document.getElementById('payment-modal-title').innerText = "Account Deposit via M-Pesa";
-            document.getElementById('payment-amount-display').innerText = "Paybill: 522533 | Account: 8012296\n(Enter deposit amount to top up your balance)";
+            document.getElementById('payment-modal-title').innerText = "Account Deposit Top-Up";
+            document.getElementById('payment-amount-display').innerText = "Paybill: 522533 | Account: 8012296\nRequired Minimum Deposit: 1,000 Ksh";
+            document.getElementById('deposit-amount-input').value = "";
+            document.getElementById('mpesa-code-input').value = "";
+            document.getElementById('deposit-error-msg').style.display = 'none';
             document.getElementById('payment-modal').style.display = 'flex';
         }
 
@@ -663,7 +681,7 @@
                         status: "Pending"
                     });
 
-                    alert(`Withdrawal request for ${amountVal} Ksh submitted to Customer Support successfully. Pending payout verification.`);
+                    alert(`Withdrawal request for ${amountVal} Ksh submitted to Management Support successfully. Pending payout verification.`);
                     refreshAdminDashboard();
                 } else {
                     alert("Insufficient balance for this withdrawal.");
@@ -685,17 +703,32 @@
             document.getElementById(modalId).style.display = 'none';
         }
 
+        // Strict Deposit Validation Check (Must match calculation and include code)
         function submitActivationRequest() {
+            let enteredAmount = parseFloat(document.getElementById('deposit-amount-input').value);
             let code = document.getElementById('mpesa-code-input').value.trim();
-            if(!code) {
-                alert("Please enter your M-Pesa transaction confirmation code.");
+            let errBox = document.getElementById('deposit-error-msg');
+
+            let isTopup = selectedLevelForPayment.id === 'topup';
+            let requiredAmount = isTopup ? 1000 : (selectedLevelForPayment.activationFee + selectedLevelForPayment.depositFee);
+
+            if(isNaN(enteredAmount) || enteredAmount !== requiredAmount) {
+                errBox.innerText = `Incorrect amount entered! You must input the exact required deposit total of Ksh ${requiredAmount.toLocaleString()} for this selection.`;
+                errBox.style.display = 'block';
                 return;
             }
 
-            let isTopup = selectedLevelForPayment.id === 'topup';
+            if(!code || code.length < 5) {
+                errBox.innerText = "Please enter a valid M-Pesa transaction confirmation code.";
+                errBox.style.display = 'block';
+                return;
+            }
+
+            errBox.style.display = 'none';
+
             let requestName = isTopup ? 'General Deposit Top-Up' : `Level ${selectedLevelForPayment.id} (${selectedLevelForPayment.name})`;
             let actFee = isTopup ? 0 : selectedLevelForPayment.activationFee;
-            let depFee = isTopup ? 1000 : selectedLevelForPayment.depositFee;
+            let depFee = isTopup ? enteredAmount : selectedLevelForPayment.depositFee;
 
             activationRequests.push({
                 user: currentUser,
@@ -706,8 +739,9 @@
                 status: "Pending"
             });
 
-            alert("Activation & Payment request submitted to Customer Support successfully! Awaiting verification.");
+            alert("Activation & Payment request submitted to Management Support successfully! Awaiting verification.");
             closeModal('payment-modal');
+            document.getElementById('deposit-amount-input').value = "";
             document.getElementById('mpesa-code-input').value = "";
             updateDepositTracker();
             refreshAdminDashboard();
@@ -726,7 +760,7 @@
                 status: "Pending"
             });
 
-            alert("Support ticket sent to Customer Support successfully.");
+            alert("Support ticket sent to Management Support successfully. You can also reach us via Zulvixsupport@gmail.com.");
             closeModal('complaint-modal');
             document.getElementById('complaint-text').value = "";
             refreshAdminDashboard();
@@ -742,14 +776,14 @@
             input.value = "";
 
             setTimeout(() => {
-                let reply = "I can help with that! To unlock levels, send the exact total via Lipa na M-Pesa (Paybill 522533, Account 8012296) and submit your M-Pesa code. Customer support will retain the activation fee and credit your deposit fee straight to your dashboard balance for withdrawal!";
+                let reply = "I can help with that! To unlock levels, check the exact total required, pay via Lipa na M-Pesa (Paybill 522533, Account 8012296), enter the exact calculated amount and M-Pesa code. Management support will credit your deposit balance immediately upon verification!";
                 let lower = q.toLowerCase();
                 if(lower.includes('withdraw')) {
-                    reply = "You can withdraw your earnings and deposit funds anytime by clicking the 'Withdraw Funds' button on your dashboard.";
+                    reply = "You can withdraw your dashboard balance anytime by clicking the 'Withdraw Funds' button.";
+                } else if(lower.includes('email') || lower.includes('support')) {
+                    reply = "For any management support issues or complaints, please email us directly at Zulvixsupport@gmail.com.";
                 } else if(lower.includes('countdown') || lower.includes('tap')) {
-                    reply = "Each level gives you 6 daily taps. Once completed, a 12-hour countdown starts before you can tap again.";
-                } else if(lower.includes('level 1')) {
-                    reply = "Level 1 (Iron Box) is 100% FREE! You get 6 daily taps worth 30 Ksh total right after registering.";
+                    reply = "Each level grants 6 daily taps. Once completed, a 12-hour countdown begins before your next cycle.";
                 }
                 chatBox.innerHTML += `<div class="ai-msg bot">${reply}</div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
@@ -757,20 +791,20 @@
         }
 
         function copyInviteLink() {
-            navigator.clipboard.writeText(`https://greenara.co.ke/register?ref=${currentUser}`);
+            navigator.clipboard.writeText(`https://trust254.github.io/Zulvix-KE/?ref=${currentUser}`);
             alert("Referral link copied! Each successful invite automatically grants a +3% bonus boost to your daily earnings.");
         }
 
-        // Customer Support & Admin Portal Flow
+        // Management Support Portal Flow
         function openAdminPortal() {
-            let username = prompt("Enter Customer Support ID:");
+            let username = prompt("Enter Management Support ID:");
             let pass = prompt("Enter Support Password:");
 
             if(username === "3879" && pass === "Scott@254") {
                 refreshAdminDashboard();
                 document.getElementById('admin-modal').style.display = 'flex';
             } else if(username !== null) {
-                alert("Invalid Support Credentials.");
+                alert("Invalid Management Support Credentials.");
             }
         }
 
@@ -780,7 +814,6 @@
             document.getElementById('user-count').innerText = allRegisteredUsers.length;
             document.getElementById('comp-count').innerText = complaintsList.filter(c => c.status === "Pending").length;
 
-            // Render Requests Table
             let reqTbody = document.getElementById('admin-requests-tbody');
             if(activationRequests.length === 0) {
                 reqTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No requests yet</td></tr>`;
@@ -794,13 +827,12 @@
                             <td>${req.activationFee.toLocaleString()} Ksh (System)</td>
                             <td>${req.depositFee.toLocaleString()} Ksh (User Bal)</td>
                             <td><code>${req.code}</code></td>
-                            <td>${req.status === 'Pending' ? `<button class="btn btn-green" style="padding: 4px 10px; font-size: 0.75rem;" onclick="approveRequest(${idx})">Approve & Credit Deposit</button>` : '<span style="color:var(--neon-green)">Approved</span>'}</td>
+                            <td>${req.status === 'Pending' ? `<button class="btn btn-green" style="padding: 4px 10px; font-size: 0.75rem;" onclick="approveRequest(${idx})">Approve & Credit</button>` : '<span style="color:var(--neon-green)">Approved</span>'}</td>
                         </tr>
                     `;
                 });
             }
 
-            // Render Withdrawals Table
             let withdrawTbody = document.getElementById('admin-withdrawals-tbody');
             if(withdrawalRequests.length === 0) {
                 withdrawTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No pending withdrawals</td></tr>`;
@@ -818,7 +850,6 @@
                 });
             }
 
-            // Render Users Table
             let usersTbody = document.getElementById('admin-users-tbody');
             usersTbody.innerHTML = "";
             allRegisteredUsers.forEach(usr => {
@@ -832,7 +863,6 @@
                 `;
             });
 
-            // Render Complaints Table
             let compTbody = document.getElementById('admin-complaints-tbody');
             if(complaintsList.length === 0) {
                 compTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No active complaints</td></tr>`;
@@ -869,7 +899,7 @@
                 }
             }
 
-            alert(`Request approved! Activation fee retained by system; ${req.depositFee} Ksh credited to ${req.user}'s dashboard balance.`);
+            alert(`Request approved! ${req.depositFee} Ksh credited to ${req.user}'s dashboard balance.`);
             refreshAdminDashboard();
             updateDepositTracker();
 
