@@ -316,13 +316,24 @@
     </nav>
 
     <!-- MODALS SECTION -->
-    <!-- Deposit Modal -->
+    <!-- Deposit Modal with Lipa na M-Pesa Instructions Added -->
     <div id="depositModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-brandCard border border-brandGreen/40 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center">
                 <h3 class="font-bold text-white text-base">Top Up Dashboard (M-Pesa)</h3>
                 <button onclick="closeDepositModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
+            
+            <!-- Lipa na M-Pesa Paybill Instructions Box -->
+            <div class="bg-zinc-900 border border-brandGreen/30 p-3 rounded-xl space-y-2 text-xs">
+                <p class="font-bold text-brandGreen"><i class="fa-solid fa-mobile-screen-button mr-1"></i> Lipa na M-Pesa Till/Paybill:</p>
+                <div class="grid grid-cols-2 gap-2 text-zinc-300">
+                    <div>Paybill: <strong class="text-white">522533</strong></div>
+                    <div>Acc No: <strong class="text-white">8012296</strong></div>
+                </div>
+                <p class="text-[10px] text-zinc-400 pt-1 border-t border-zinc-800">Send money to the paybill above, then submit your request below for processing.</p>
+            </div>
+
             <div class="space-y-3">
                 <div>
                     <label class="text-xs text-zinc-400 block mb-1">Amount (Ksh)</label>
@@ -767,7 +778,6 @@
         }
 
         function switchToLevel(levelId) {
-            // Check if level is unlocked
             if (levelId === 1 || (appState.unlockedLevels && appState.unlockedLevels.includes(levelId))) {
                 appState.currentLevelId = levelId;
                 saveAppState();
@@ -823,7 +833,6 @@
                 return;
             }
 
-            // Must leave 2,000 Ksh active balance reserve in the account
             const requiredReserve = 2000;
             if (appState.balance - amt < requiredReserve) {
                 showToast("Active Balance Required", `You must leave at least Ksh 2,000 in your account to maintain active status. Max withdrawable now: Ksh ${(appState.balance - requiredReserve).toLocaleString()}`, false);
@@ -916,7 +925,6 @@
             appState.portalRetention += req.unlockFee;
             appState.balance += req.userDeposit;
             
-            // Activate higher level and automatically close/replace lower active levels
             appState.currentLevelId = req.levelId;
             if (!appState.unlockedLevels.includes(req.levelId)) {
                 appState.unlockedLevels.push(req.levelId);
@@ -1054,7 +1062,6 @@
             document.getElementById('profileNameDisplay').innerText = appState.currentUser.name || 'Zulvix User';
             document.getElementById('profilePhoneDisplay').innerText = `Active Member • ${appState.currentUser.phone || '+254'}`;
 
-            // Robot Dynamic Tip
             const robotTips = [
                 `You are currently tapping on Level ${currentLevel.id} (${currentLevel.name}). Keep it up!`,
                 `Remember: Min withdrawal is Ksh 2,000, and Ksh 2,000 must remain as active balance.`,
@@ -1062,7 +1069,6 @@
             ];
             document.getElementById('dashboardRobotTip').innerText = robotTips[Math.floor(Math.random() * robotTips.length)];
 
-            // Render 8 Levels List with Auto-Closure of Lower Levels
             const levelsContainer = document.getElementById('levelsListContainer');
             levelsContainer.innerHTML = LEVELS_CONFIG.map(lvl => {
                 const isActive = lvl.id === appState.currentLevelId;
@@ -1102,7 +1108,6 @@
                 `;
             }).join('');
 
-            // Render Transactions
             const historyList = document.getElementById('transactionHistoryList');
             if (appState.transactions.length === 0) {
                 historyList.innerHTML = `<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 text-center text-xs text-zinc-500">No transactions recorded yet.</div>`;
