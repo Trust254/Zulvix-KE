@@ -1,384 +1,511 @@
-```html
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Render & GitHub Automation Hub</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        neonGreen: '#00ff88',
-                        neonGold: '#f3c614',
-                        darkBg: '#0a0f0d',
-                        cardBg: '#121c17'
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Zulvix-Ke Tap & Earn Engine</title>
     <style>
-        .glow-green { box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
-        .glow-gold { box-shadow: 0 0 20px rgba(243, 198, 20, 0.3); }
-        .text-glow-green { text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
-        .text-glow-gold { text-shadow: 0 0 10px rgba(243, 198, 20, 0.5); }
-        
-        /* Custom Scrollbar for terminal logs */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #0a0f0d; }
-        ::-webkit-scrollbar-thumb { background: #1a2e23; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #00ff88; }
+        :root {
+            --bg-color: #0b0f0c;
+            --card-bg: #131a15;
+            --accent-green: #00ff66;
+            --accent-gold: #ffcc00;
+            --text-main: #ffffff;
+            --text-muted: #889988;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 70px;
+        }
+
+        /* Top Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--card-bg);
+            border-bottom: 1px solid #1f2e22;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-box {
+            background: var(--accent-green);
+            color: #000;
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .balance-pill {
+            background: #1a261d;
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        /* Container & Sections */
+        .container {
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid #1f2e22;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .tier-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .badge-active {
+            background: rgba(0, 255, 102, 0.15);
+            color: var(--accent-green);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Tap Button Circle */
+        .tap-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .tap-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-gold));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(0, 255, 102, 0.3);
+            transition: transform 0.1s ease;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .tap-circle:active {
+            transform: scale(0.95);
+        }
+
+        .timer-display {
+            margin-top: 15px;
+            color: var(--accent-gold);
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* Levels list styling */
+        .level-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #18241d;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #223326;
+        }
+
+        .btn-action {
+            background: var(--accent-gold);
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Login Modal Overlay */
+        #login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 8, 6, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: var(--card-bg);
+            border: 1px solid #223326;
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .login-box h2 {
+            margin-bottom: 20px;
+            color: var(--accent-green);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: #0b0f0c;
+            border: 1px solid #223326;
+            border-radius: 8px;
+            color: #fff;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: var(--accent-green);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-green);
+            color: #000;
+            border: none;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .error-msg {
+            color: #ff4444;
+            font-size: 12px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        /* Bottom Navigation */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--card-bg);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid #1f2e22;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .nav-item.active {
+            color: var(--accent-green);
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        .deposit-info-box {
+            background: #18241d;
+            border: 1px dashed var(--accent-gold);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
     </style>
 </head>
-<body class="bg-darkBg text-gray-200 h-full flex flex-col font-sans antialiased selection:bg-neonGreen selection:text-darkBg">
+<body>
 
-    <header class="bg-cardBg border-b border-neonGreen/20 px-6 py-4 flex items-center justify-between shrink-0">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-neonGreen/10 border border-neonGreen flex items-center justify-center glow-green">
-                <i class="fa-solid fa-terminal text-neonGreen text-lg"></i>
+    <!-- Security Login Screen (PIN & Password Required) -->
+    <div id="login-modal">
+        <div class="login-box">
+            <h2>Secure Portal Login</h2>
+            <div class="input-group">
+                <label>Security PIN</label>
+                <input type="password" id="pin-input" placeholder="Enter PIN">
             </div>
+            <div class="input-group">
+                <label>Account Password</label>
+                <input type="password" id="password-input" placeholder="Enter Password">
+            </div>
+            <button class="btn-submit" onclick="handleLogin()">Access Dashboard</button>
+            <div id="login-error" class="error-msg">Invalid PIN or Password. (PIN: 3879, Pass: Scott@254)</div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header>
+        <div class="logo-area">
+            <div class="logo-box">Z</div>
             <div>
-                <h1 class="text-xl font-bold tracking-wider text-neonGreen text-glow-green">AUTODEPLOY HUB</h1>
-                <p class="text-xs text-neonGold/80 tracking-widest font-mono uppercase">GitHub & Render Orchestration</p>
+                <strong>ZULVIX-KE</strong>
+                <div style="font-size: 10px; color: var(--text-muted);">TAP & EARN ENGINE</div>
             </div>
         </div>
-        <div class="flex items-center space-x-4">
-            <span id="connection-status" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-mono bg-yellow-500/10 text-neonGold border border-neonGold/30">
-                <span class="w-2 h-2 mr-2 rounded-full bg-neonGold animate-pulse"></span> Config Required
-            </span>
-            <button onclick="openConfigModal()" class="px-4 py-2 bg-neonGreen/10 hover:bg-neonGreen/20 text-neonGreen border border-neonGreen/50 rounded-lg text-sm font-mono transition-all duration-300 flex items-center space-x-2 glow-green">
-                <i class="fa-solid fa-gear"></i>
-                <span>Credentials</span>
-            </button>
-        </div>
+        <div class="balance-pill" id="header-balance">Ksh 0.00</div>
     </header>
 
-    <main class="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
-        
-        <!-- Left Panel: Configuration & Actions -->
-        <section class="lg:col-span-5 flex flex-col space-y-6 overflow-y-auto pr-2">
-            
-            <!-- Project Setup Card -->
-            <div class="bg-cardBg border border-neonGreen/20 rounded-2xl p-5 shadow-xl">
-                <h2 class="text-md font-mono font-bold text-neonGold mb-4 flex items-center space-x-2">
-                    <i class="fa-solid fa-rocket"></i>
-                    <span>NEW REPO & RENDER DEPLOY</span>
-                </h2>
-                <form id="deploy-form" onsubmit="handleDeploy(event)" class="space-y-4">
+    <!-- Main Content Container -->
+    <div class="container">
+
+        <!-- HOME VIEW -->
+        <div id="view-home" class="view-section active">
+            <div class="card">
+                <div class="tier-header">
                     <div>
-                        <label class="block text-xs font-mono text-gray-400 mb-1">Repository Name</label>
-                        <input type="text" id="repo-name" required placeholder="my-awesome-service" class="w-full bg-darkBg border border-gray-800 focus:border-neonGreen rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none transition-colors">
+                        <div style="font-size: 12px; color: var(--text-muted);">ACCOUNT TIER</div>
+                        <h3 id="current-tier-name" style="color: var(--accent-green);">Level 1: Iron Box</h3>
                     </div>
+                    <span class="badge-active">ACTIVE</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 10px;">
+                    <span>Dashboard Balance: <strong id="balance-display" style="color: var(--accent-gold);">Ksh 0.00</strong></span>
+                    <span>Taps Remaining: <strong id="taps-display">6 / 6</strong></span>
+                </div>
+            </div>
+
+            <!-- Tap Section -->
+            <div class="tap-container">
+                <div class="tap-circle" id="tap-btn" onclick="performTap()">
+                    <span style="font-size: 24px;">⚡</span>
+                    <span>TAP ASSET</span>
+                </div>
+                <div class="timer-display" id="timer-display"></div>
+            </div>
+        </div>
+
+        <!-- LEVELS VIEW -->
+        <div id="view-levels" class="view-section">
+            <div class="card">
+                <h3 style="margin-bottom: 5px;">Level Selection & Tiers</h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Level 1 is free. Higher levels require activation via Lipa na M-Pesa.</p>
+                
+                <!-- Level 1 -->
+                <div class="level-item">
                     <div>
-                        <label class="block text-xs font-mono text-gray-400 mb-1">Repository Description</label>
-                        <input type="text" id="repo-desc" placeholder="Automated Node.js Service deployed via Render API" class="w-full bg-darkBg border border-gray-800 focus:border-neonGreen rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none transition-colors">
+                        <strong>Level 1: Iron Box</strong>
+                        <div style="font-size: 11px; color: var(--accent-green);">Free Tier • Ksh 5/tap</div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-mono text-gray-400 mb-1">Render Service Type</label>
-                            <select id="service-type" class="w-full bg-darkBg border border-gray-800 focus:border-neonGreen rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none transition-colors">
-                                <option value="web_service">Web Service</option>
-                                <option value="background_worker">Background Worker</option>
-                                <option value="static_site">Static Site</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-mono text-gray-400 mb-1">Branch</label>
-                            <input type="text" id="branch-name" value="main" class="w-full bg-darkBg border border-gray-800 focus:border-neonGreen rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none transition-colors">
-                        </div>
-                    </div>
+                    <button class="btn-action" onclick="switchLevel(1, 'Level 1: Iron Box', 5, 0)">Select</button>
+                </div>
+
+                <!-- Level 2 -->
+                <div class="level-item">
                     <div>
-                        <label class="block text-xs font-mono text-gray-400 mb-1">Initial Project Files (JSON template or ZIP structure)</label>
-                        <textarea id="project-files" rows="4" placeholder='[{"path": "index.js", "content": "console.log(\"Hello Render!\");"}, {"path": "package.json", "content": "{\n  \"name\": \"app\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"start\": \"node index.js\"\n  }\n}"}]' class="w-full bg-darkBg border border-gray-800 focus:border-neonGreen rounded-xl p-3 text-xs font-mono text-neonGreen outline-none transition-colors"></textarea>
+                        <strong>Level 2: Smart TV</strong>
+                        <div style="font-size: 11px; color: var(--text-muted);">Activation: Ksh 800 • Ksh 20/tap</div>
                     </div>
-                    <button type="submit" id="submit-btn" class="w-full py-3 bg-neonGreen hover:bg-neonGreen/90 text-darkBg font-bold font-mono rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 glow-green cursor-pointer">
-                        <i class="fa-solid fa-play"></i>
-                        <span>CREATE & DEPLOY AUTOMATION</span>
-                    </button>
-                </form>
-            </div>
+                    <button class="btn-action" onclick="switchLevel(2, 'Level 2: Smart TV', 20, 800)">Upgrade</button>
+                </div>
 
-            <!-- Quick Management Card -->
-            <div class="bg-cardBg border border-neonGold/20 rounded-2xl p-5 shadow-xl">
-                <h2 class="text-md font-mono font-bold text-neonGold mb-4 flex items-center space-x-2">
-                    <i class="fa-solid fa-sliders"></i>
-                    <span>ACTIVE SERVICES & CONTROLS</span>
-                </h2>
-                <div class="space-y-3">
-                    <div class="flex items-center space-x-2">
-                        <input type="text" id="service-id-input" placeholder="srv-xxxxxx (Render Service ID)" class="flex-1 bg-darkBg border border-gray-800 focus:border-neonGold rounded-xl px-4 py-2 text-xs font-mono text-white outline-none">
-                        <button onclick="fetchServiceStatus()" class="px-4 py-2 bg-neonGold/10 hover:bg-neonGold/20 text-neonGold border border-neonGold/40 rounded-xl text-xs font-mono transition-all">Inspect</button>
+                <!-- Level 3 -->
+                <div class="level-item">
+                    <div>
+                        <strong>Level 3: Motorbike</strong>
+                        <div style="font-size: 11px; color: var(--text-muted);">Activation: Ksh 2,500 • Ksh 55/tap</div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 pt-2">
-                        <button onclick="triggerManualDeploy()" class="py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-mono transition-all flex items-center justify-center space-x-2">
-                            <i class="fa-solid fa-rotate"></i>
-                            <span>Trigger Deploy</span>
-                        </button>
-                        <button onclick="restartService()" class="py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-mono transition-all flex items-center justify-center space-x-2">
-                            <i class="fa-solid fa-power-off"></i>
-                            <span>Restart Service</span>
-                        </button>
-                    </div>
+                    <button class="btn-action" onclick="switchLevel(3, 'Level 3: Motorbike', 55, 2500)">Upgrade</button>
                 </div>
             </div>
+        </div>
 
-        </section>
-
-        <!-- Right Panel: Terminal Output & Live Logs -->
-        <section class="lg:col-span-7 flex flex-col bg-cardBg border border-neonGreen/20 rounded-2xl overflow-hidden shadow-2xl">
-            <div class="bg-[#0f1713] px-5 py-3 border-b border-neonGreen/20 flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
-                    <div class="w-3 h-3 rounded-full bg-neonGold/80"></div>
-                    <div class="w-3 h-3 rounded-full bg-neonGreen/80"></div>
-                    <span class="ml-2 text-xs font-mono text-gray-400">automation_terminal.log</span>
-                </div>
-                <button onclick="clearLogs()" class="text-xs font-mono text-gray-400 hover:text-neonGreen transition-colors">
-                    <i class="fa-solid fa-trash-can mr-1"></i> Clear
-                </button>
-            </div>
-            <div id="terminal-output" class="flex-1 p-5 font-mono text-xs text-neonGreen overflow-y-auto space-y-2 bg-[#070b09]">
-                <div class="text-gray-500">[System] Welcome to Render & GitHub Automation Suite.</div>
-                <div class="text-neonGold">[Info] Please click 'Credentials' above or configure your backend .env file with GitHub & Render tokens.</div>
-                <div class="text-gray-500">[Ready] Awaiting command execution...</div>
-            </div>
-            <div class="bg-[#0f1713] px-5 py-3 border-t border-neonGreen/20 flex items-center justify-between text-xs font-mono text-gray-400">
-                <div id="active-backend-status">Backend Status: Connecting...</div>
-                <div class="text-neonGold">Theme: Neon Green & Gold</div>
-            </div>
-        </section>
-
-    </main>
-
-    <div id="config-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="bg-cardBg border border-neonGreen/40 rounded-2xl w-full max-w-lg p-6 shadow-2xl glow-green">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-mono font-bold text-neonGreen flex items-center space-x-2">
-                    <i class="fa-solid fa-key"></i>
-                    <span>Backend Credentials & Config</span>
-                </h3>
-                <button onclick="closeConfigModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <p class="text-xs text-gray-400 mb-4 font-mono">Provide your local Express Server URL and API credentials. If running the server locally, default is http://localhost:3000.</p>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-mono text-gray-400 mb-1">Express Server Endpoint</label>
-                    <input type="text" id="server-url" value="http://localhost:3000" class="w-full bg-darkBg border border-gray-800 focus:border-neonGreen rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-mono text-gray-400 mb-1">GitHub Personal Access Token (PAT)</label>
-                    <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx" class="w-full bg-darkBg border border-gray-800 focus:border-neonGreen rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-mono text-gray-400 mb-1">Render API Key</label>
-                    <input type="password" id="render-token" placeholder="rnd_xxxxxxxxxxxx" class="w-full bg-darkBg border border-gray-800 focus:border-neonGreen rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none">
-                </div>
-                <div class="pt-2 flex justify-end space-x-3">
-                    <button onclick="closeConfigModal()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-mono">Cancel</button>
-                    <button onclick="saveConfig()" class="px-5 py-2 bg-neonGreen hover:bg-neonGreen/90 text-darkBg font-bold font-mono rounded-xl glow-green">Save & Test</button>
+        <!-- WALLET & DEPOSIT VIEW -->
+        <div id="view-wallet" class="view-section">
+            <div class="card">
+                <h3>Wallet & Deposit Information</h3>
+                <p style="margin-top: 10px; font-size: 14px;">Available Balance: <span id="wallet-balance" style="color: var(--accent-gold); font-weight: bold;">Ksh 0.00</span></p>
+                
+                <div class="deposit-info-box">
+                    <strong style="color: var(--accent-green); display: block; margin-bottom: 5px;">M-Pesa Deposit / Activation Guide:</strong>
+                    <div><strong>Paybill Number:</strong> <span style="color: var(--accent-gold);">522533</span></div>
+                    <div><strong>Account Number:</strong> <span style="color: var(--accent-gold);">8012296</span></div>
+                    <p style="margin-top: 8px; font-size: 12px; color: var(--text-muted);">
+                        Enter the exact total amount required for tier activation or deposit. The amount splits automatically between your platform activation fee and your user deposit credited to your dashboard balance.
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Bottom Navigation Bar -->
+    <nav>
+        <button class="nav-item active" onclick="switchView('home', this)">🏠<br>Home</button>
+        <button class="nav-item" onclick="switchView('levels', this)">🗂<br>Levels</button>
+        <button class="nav-item" onclick="switchView('wallet', this)">💰<br>Wallet</button>
+    </nav>
+
     <script>
-        let config = {
-            serverUrl: localStorage.getItem('serverUrl') || 'http://localhost:3000',
-            githubToken: localStorage.getItem('githubToken') || '',
-            renderToken: localStorage.getItem('renderToken') || ''
+        let appState = JSON.parse(localStorage.getItem('zulvix_app_state')) || {
+            isAuthenticated: false,
+            balance: 0.00,
+            activeLevel: 1,
+            tierName: "Level 1: Iron Box",
+            rewardPerTap: 5,
+            tapsRemaining: 6,
+            maxTaps: 6,
+            cooldownUntil: null
         };
+
+        const CORRECT_PIN = "3879";
+        const CORRECT_PASS = "Scott@254";
+
+        function saveAppState() {
+            localStorage.setItem('zulvix_app_state', JSON.stringify(appState));
+        }
 
         window.onload = function() {
-            checkServerHealth();
+            if (appState.isAuthenticated) {
+                document.getElementById('login-modal').style.display = 'none';
+            }
+            updateUI();
+            setInterval(checkCountdownTimer, 1000);
         };
 
-        function openConfigModal() {
-            document.getElementById('server-url').value = config.serverUrl;
-            document.getElementById('github-token').value = config.githubToken;
-            document.getElementById('render-token').value = config.renderToken;
-            document.getElementById('config-modal').classList.remove('hidden');
-            document.getElementById('config-modal').classList.add('flex');
-        }
+        function handleLogin() {
+            const enteredPin = document.getElementById('pin-input').value;
+            const enteredPass = document.getElementById('password-input').value;
+            const errorDiv = document.getElementById('login-error');
 
-        function closeConfigModal() {
-            document.getElementById('config-modal').classList.remove('flex');
-            document.getElementById('config-modal').classList.add('hidden');
-        }
-
-        function saveConfig() {
-            config.serverUrl = document.getElementById('server-url').value;
-            config.githubToken = document.getElementById('github-token').value;
-            config.renderToken = document.getElementById('render-token').value;
-
-            localStorage.setItem('serverUrl', config.serverUrl);
-            localStorage.setItem('githubToken', config.githubToken);
-            localStorage.setItem('renderToken', config.renderToken);
-
-            closeConfigModal();
-            logToTerminal('[Config] Credentials updated successfully in local storage.', 'neonGold');
-            checkServerHealth();
-        }
-
-        function logToTerminal(text, type = 'neonGreen') {
-            const terminal = document.getElementById('terminal-output');
-            const div = document.createElement('div');
-            div.className = type === 'neonGold' ? 'text-neonGold' : (type === 'red' ? 'text-red-400' : 'text-neonGreen');
-            div.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
-            terminal.appendChild(div);
-            terminal.scrollTop = terminal.scrollHeight;
-        }
-
-        function clearLogs() {
-            document.getElementById('terminal-output').innerHTML = '<div class="text-gray-500">[System] Terminal cleared.</div>';
-        }
-
-        async function checkServerHealth() {
-            const statusEl = document.getElementById('connection-status');
-            const backendStatusEl = document.getElementById('active-backend-status');
-            try {
-                const res = await fetch(`${config.serverUrl}/health`);
-                if (res.ok) {
-                    statusEl.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-mono bg-neonGreen/10 text-neonGreen border border-neonGreen/30';
-                    statusEl.innerHTML = '<span class="w-2 h-2 mr-2 rounded-full bg-neonGreen animate-pulse"></span> Connected to Backend';
-                    backendStatusEl.textContent = `Backend Status: Online (${config.serverUrl})`;
-                    logToTerminal(`[Health] Successfully connected to Express backend at ${config.serverUrl}`);
-                } else {
-                    throw new Error('Server responded with error');
-                }
-            } catch (err) {
-                statusEl.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-mono bg-red-500/10 text-red-400 border border-red-500/30';
-                statusEl.innerHTML = '<span class="w-2 h-2 mr-2 rounded-full bg-red-500 animate-pulse"></span> Backend Offline';
-                backendStatusEl.textContent = 'Backend Status: Offline (Start your node server)';
-                logToTerminal(`[Warning] Could not reach backend at ${config.serverUrl}. Make sure your Express server is running.`, 'red');
+            if (enteredPin === CORRECT_PIN && enteredPass === CORRECT_PASS) {
+                appState.isAuthenticated = true;
+                saveAppState();
+                document.getElementById('login-modal').style.display = 'none';
+            } else {
+                errorDiv.style.display = 'block';
             }
         }
 
-        async function handleDeploy(event) {
-            event.preventDefault();
-            const repoName = document.getElementById('repo-name').value;
-            const repoDesc = document.getElementById('repo-desc').value;
-            const serviceType = document.getElementById('service-type').value;
-            const branch = document.getElementById('branch-name').value;
-            let filesRaw = document.getElementById('project-files').value;
+        function updateUI() {
+            document.getElementById('header-balance').innerText = `Ksh ${appState.balance.toFixed(2)}`;
+            document.getElementById('balance-display').innerText = `Ksh ${appState.balance.toFixed(2)}`;
+            document.getElementById('wallet-balance').innerText = `Ksh ${appState.balance.toFixed(2)}`;
+            document.getElementById('taps-display').innerText = `${appState.tapsRemaining} / ${appState.maxTaps}`;
+            document.getElementById('current-tier-name').innerText = appState.tierName;
+        }
 
-            let files = [];
-            try {
-                if (filesRaw.trim()) {
-                    files = JSON.parse(filesRaw);
-                } else {
-                    files = [
-                        { path: "index.js", content: "const express = require('express');\nconst app = express();\nconst PORT = process.env.PORT || 3000;\n\napp.get('/', (req, res) => res.send('Hello from Render & GitHub Automation Hub!'));\napp.listen(PORT, () => console.log('Server running on port ' + PORT));" },
-                        { path: "package.json", content: JSON.stringify({ name: repoName, version: "1.0.0", main: "index.js", scripts: { start: "node index.js" }, dependencies: { express: "^4.18.2" } }, null, 2) },
-                        { path: "README.md", content: `# ${repoName}\n\nAutomated deployment via Render & GitHub automation script.` }
-                    ];
-                }
-            } catch (e) {
-                logToTerminal('[Error] Invalid JSON format in Project Files input.', 'red');
+        function performTap() {
+            const now = new Date().getTime();
+            if (appState.cooldownUntil && now < appState.cooldownUntil) {
                 return;
             }
 
-            logToTerminal(`[Workflow] Starting creation of GitHub repository "${repoName}"...`, 'neonGold');
+            if (appState.tapsRemaining > 0) {
+                appState.tapsRemaining -= 1;
+                appState.balance += appState.rewardPerTap;
 
-            try {
-                const response = await fetch(`${config.serverUrl}/api/automate/deploy`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-github-token': config.githubToken,
-                        'x-render-token': config.renderToken
-                    },
-                    body: JSON.stringify({ repoName, repoDesc, serviceType, branch, files })
-                });
-
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    logToTerminal(`[Success] GitHub Repository created & files pushed: ${data.repoUrl}`);
-                    logToTerminal(`[Success] Render Service created & deployment triggered! Service ID: ${data.serviceId}`, 'neonGold');
-                    if (data.serviceId) {
-                        document.getElementById('service-id-input').value = data.serviceId;
-                    }
-                } else {
-                    throw new Error(data.error || 'Automation pipeline failed');
+                if (appState.tapsRemaining === 0) {
+                    appState.cooldownUntil = new Date().getTime() + (12 * 60 * 60 * 1000);
                 }
-            } catch (err) {
-                logToTerminal(`[Error] Deployment failed: ${err.message}`, 'red');
+
+                saveAppState();
+                updateUI();
             }
         }
 
-        async function fetchServiceStatus() {
-            const serviceId = document.getElementById('service-id-input').value.trim();
-            if (!serviceId) {
-                logToTerminal('[Error] Please enter a Render Service ID.', 'red');
-                return;
-            }
-            logToTerminal(`[Render] Fetching status for service ${serviceId}...`, 'neonGold');
-            try {
-                const res = await fetch(`${config.serverUrl}/api/render/service/${serviceId}`, {
-                    headers: { 'x-render-token': config.renderToken }
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    logToTerminal(`[Render] Service Name: ${data.service?.name} | Status: ${data.service?.suspended || 'Active'} | URL: ${data.service?.serviceDetails?.url || 'N/A'}`);
-                } else {
-                    throw new Error(data.error || 'Failed to fetch service');
-                }
-            } catch (err) {
-                logToTerminal(`[Error] ${err.message}`, 'red');
+        function checkCountdownTimer() {
+            if (!appState.cooldownUntil) return;
+
+            const now = new Date().getTime();
+            const distance = appState.cooldownUntil - now;
+            const timerDisplay = document.getElementById('timer-display');
+
+            if (distance <= 0) {
+                appState.tapsRemaining = appState.maxTaps;
+                appState.cooldownUntil = null;
+                saveAppState();
+                timerDisplay.innerText = "";
+                updateUI();
+            } else {
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                timerDisplay.innerText = `Next Taps Available In: ${hours}h ${minutes}m ${seconds}s`;
             }
         }
 
-        async function triggerManualDeploy() {
-            const serviceId = document.getElementById('service-id-input').value.trim();
-            if (!serviceId) {
-                logToTerminal('[Error] Please enter a Render Service ID.', 'red');
-                return;
-            }
-            logToTerminal(`[Render] Triggering manual deploy for ${serviceId}...`, 'neonGold');
-            try {
-                const res = await fetch(`${config.serverUrl}/api/render/deploy/${serviceId}`, {
-                    method: 'POST',
-                    headers: { 'x-render-token': config.renderToken }
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    logToTerminal(`[Success] Deploy triggered successfully! Commit ID: ${data.deploy?.commit?.id || 'Latest'}`);
-                } else {
-                    throw new Error(data.error || 'Failed to trigger deploy');
+        function switchLevel(levelId, name, reward, activationFee) {
+            if (levelId === 1 || activationFee === 0) {
+                appState.activeLevel = levelId;
+                appState.tierName = name;
+                appState.rewardPerTap = reward;
+                saveAppState();
+                updateUI();
+                alert(`Successfully switched to ${name}`);
+                switchView('home', document.querySelector('nav button'));
+            } else {
+                if (confirm(`Switching to ${name} requires Ksh ${activationFee}.\n\nPay via Paybill: 522533, Account: 8012296. Proceed to activate?`)) {
+                    appState.activeLevel = levelId;
+                    appState.tierName = name;
+                    appState.rewardPerTap = reward;
+                    saveAppState();
+                    updateUI();
+                    alert(`Level updated to ${name}`);
+                    switchView('home', document.querySelector('nav button'));
                 }
-            } catch (err) {
-                logToTerminal(`[Error] ${err.message}`, 'red');
             }
         }
 
-        async function restartService() {
-            const serviceId = document.getElementById('service-id-input').value.trim();
-            if (!serviceId) {
-                logToTerminal('[Error] Please enter a Render Service ID.', 'red');
-                return;
-            }
-            logToTerminal(`[Render] Restarting service ${serviceId}...`, 'neonGold');
-            try {
-                const res = await fetch(`${config.serverUrl}/api/render/restart/${serviceId}`, {
-                    method: 'POST',
-                    headers: { 'x-render-token': config.renderToken }
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    logToTerminal(`[Success] Service restart initiated successfully.`);
-                } else {
-                    throw new Error(data.error || 'Failed to restart service');
-                }
-            } catch (err) {
-                logToTerminal(`[Error] ${err.message}`, 'red');
-            }
+        function switchView(viewName, element) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            element.classList.add('active');
         }
     </script>
 </body>
 </html>
-```
