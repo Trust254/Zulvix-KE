@@ -317,7 +317,7 @@
         let withdrawalRequests = JSON.parse(localStorage.getItem('zulvix_withdrawals')) || [];
         let complaintsList = JSON.parse(localStorage.getItem('zulvix_complaints')) || [];
 
-        // Updated structure: activationFee + depositFee = Total Required
+        // Levels config with persistent cooldown tracking support
         const levelsData = [
             { id: 1, name: "Iron Box", img: "https://images.unsplash.com/photo-1585435557343-3b092031a831?w=600&auto=format&fit=crop&q=80", activationFee: 0, depositFee: 0, dailyPayout: 30, perTap: 5, tapsLeft: 6, cooldownEnd: 0 },
             { id: 2, name: "Microwave", img: "https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?w=600&auto=format&fit=crop&q=80", activationFee: 800, depositFee: 2000, dailyPayout: 150, perTap: 25, tapsLeft: 6, cooldownEnd: 0 },
@@ -428,8 +428,14 @@
                     err.style.display = 'block';
                     return;
                 }
-                // Create new user record
-                let newUser = { username: u, password: p, balance: 30.00, levelsUnlocked: [1] };
+                // Create new user record with default cooldown tracking object
+                let newUser = { 
+                    username: u, 
+                    password: p, 
+                    balance: 30.00, 
+                    levelsUnlocked: [1],
+                    cooldowns: {} // Stores levelId -> cooldownEnd timestamp
+                };
                 registeredUsersList.push(newUser);
                 saveState();
 
@@ -454,6 +460,23 @@
             currentUser = existingUser.username;
             userBalance = existingUser.balance;
             userLevelsUnlocked = existingUser.levelsUnlocked;
+
+            // Load saved cooldowns into local level objects
+            let userCooldowns = existingUser.cooldowns || {};
+            levelsData.forEach(lvl => {
+                if(userCooldowns[lvl.id]) {
+                    lvl.cooldownEnd = userCooldowns[lvl.id];
+                    if(lvl.cooldownEnd > Date.now()) {
+                        lvl.tapsLeft = 0;
+                    } else {
+                        lvl.cooldownEnd = 0;
+                        lvl.tapsLeft = 6;
+                    }
+                } else {
+                    lvl.cooldownEnd = 0;
+                    lvl.tapsLeft = 6;
+                }
+            });
 
             document.getElementById('display-user').innerText = currentUser;
             document.getElementById('user-balance').innerText = userBalance.toFixed(2);
@@ -521,6 +544,8 @@
 
         function updateCooldowns() {
             let now = Date.now();
+            let stateUpdated = false;
+
             levelsData.forEach(lvl => {
                 if(lvl.cooldownEnd > 0) {
                     let diff = Math.floor((lvl.cooldownEnd - now) / 1000);
@@ -533,10 +558,22 @@
                     } else {
                         lvl.cooldownEnd = 0;
                         lvl.tapsLeft = 6;
+                        
+                        // Clear cooldown from user record in database
+                        let uObj = registeredUsersList.find(u => u.username === currentUser);
+                        if(uObj) {
+                            if(!uObj.cooldowns) uObj.cooldowns = {};
+                            delete uObj.cooldowns[lvl.id];
+                            stateUpdated = true;
+                        }
                         renderLevels();
                     }
                 }
             });
+
+            if(stateUpdated) {
+                saveState();
+            }
         }
 
         function tapAsset(lvlId) {
@@ -546,10 +583,14 @@
                 userBalance += lvl.perTap;
                 document.getElementById('user-balance').innerText = userBalance.toFixed(2);
                 
-                // Update user object record in database
                 let uObj = registeredUsersList.find(u => u.username === currentUser);
                 if(uObj) {
                     uObj.balance = userBalance;
+                    if(lvl.tapsLeft === 0) {
+                        lvl.cooldownEnd = Date.now() + (12 * 60 * 60 * 1000);
+                        if(!uObj.cooldowns) uObj.cooldowns = {};
+                        uObj.cooldowns[lvlId] = lvl.cooldownEnd;
+                    }
                     saveState();
                 }
 
@@ -557,7 +598,6 @@
                 if(tapElem) tapElem.innerText = lvl.tapsLeft;
 
                 if(lvl.tapsLeft === 0) {
-                    lvl.cooldownEnd = Date.now() + (12 * 60 * 60 * 1000);
                     alert(`Finished 6 taps for Level ${lvlId}. 12-hour cooldown started.`);
                     renderLevels();
                 } else {
@@ -757,7 +797,6 @@
             req.status = "Approved";
             saveState();
 
-            // Target the specific user account who made the request
             let targetUser = registeredUsersList.find(u => u.username === req.user);
             if(targetUser) {
                 if(req.level.includes("Level")) {
@@ -772,7 +811,6 @@
                 targetUser.balance += req.depositFee;
                 saveState();
 
-                // If currently logged in as this user, sync active session view
                 if(currentUser === targetUser.username) {
                     userBalance = targetUser.balance;
                     userLevelsUnlocked = [...targetUser.levelsUnlocked];
