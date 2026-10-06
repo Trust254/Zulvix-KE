@@ -1341,4 +1341,60 @@ let countdownInterval = null;
 
 
 /* =========================================================
+   LOGIN / REGISTER SWITCH
+   ========================================================= */
+
+function toggleAuthMode(mode) {
+
+    const loginForm =
+        document.getElementById("loginFormContainer");
+
+    const registerForm =
+        document.getElementById("registerFormContainer");
+
+    const subtitle =
+        document.getElementById("authSubtitle");
+
+    const robotTip =
+        document.getElementById("robotTipText");
+
+    if (!loginForm || !registerForm) {
+        console.error("Auth form elements not found.");
+        return;
+    }
+
+    if (mode === "register") {
+
+        loginForm.classList.add("hidden");
+        registerForm.classList.remove("hidden");
+
+        if (subtitle) {
+            subtitle.textContent =
+                "Register Your New Account";
+        }
+
+        if (robotTip) {
+            robotTip.textContent =
+                "Fill in your details to create your account. Level 1 is instantly free!";
+        }
+
+    } else {
+
+        registerForm.classList.add("hidden");
+        loginForm.classList.remove("hidden");
+
+        if (subtitle) {
+            subtitle.textContent =
+                "Secure Sign In Portal";
+        }
+
+        if (robotTip) {
+            robotTip.textContent =
+                "Enter your correct registered mobile number and password to access your dashboard.";
+        }
+    }
+}
+
+
+/* =========================================================
    GENERIC API
