@@ -15,7 +15,7 @@
             --danger: #ff4757;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; padding-bottom: 80px; }
         
         .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 20px; }
         
@@ -66,6 +66,17 @@
         .level-meta { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
         .stat-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; }
         
+        /* Floating AI Assistant Robot */
+        .ai-fab { position: fixed; bottom: 20px; right: 20px; background: var(--neon-green); color: #000; width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,255,136,0.4); z-index: 2500; font-weight: bold; }
+        #ai-chat-modal { position: fixed; inset: 0; background: rgba(7, 13, 10, 0.85); z-index: 4000; display: none; justify-content: center; align-items: center; padding: 20px; }
+        .ai-chat-box { background: var(--card-bg); border: 1px solid var(--neon-green); border-radius: 12px; width: 100%; max-width: 400px; height: 450px; display: flex; flex-direction: column; overflow: hidden; }
+        .ai-header { background: #1a3324; padding: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: var(--neon-green); }
+        .ai-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; }
+        .ai-msg { padding: 10px; border-radius: 8px; max-width: 80%; line-height: 1.4; }
+        .ai-msg.bot { background: #12261b; color: var(--text-main); align-self: flex-start; border: 1px solid #1a3324; }
+        .ai-msg.user { background: var(--neon-green); color: #000; align-self: flex-end; font-weight: 500; }
+        .ai-input-area { padding: 10px; display: flex; gap: 8px; border-top: 1px solid #1a3324; background: #040907; }
+
         /* Modals */
         .modal { position: fixed; inset: 0; background: rgba(7, 13, 10, 0.9); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: var(--card-bg); border: 1px solid var(--neon-green); padding: 20px; border-radius: 12px; width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto; }
@@ -141,6 +152,26 @@
         </div>
     </div>
 
+    <!-- FLOATING AI ASSISTANT ROBOT FAB -->
+    <div class="ai-fab" onclick="toggleAiModal()" title="Zulvix AI Assistant">🤖</div>
+
+    <!-- AI ASSISTANT CHAT MODAL -->
+    <div id="ai-chat-modal">
+        <div class="ai-chat-box">
+            <div class="ai-header">
+                <span>🤖 Zulvix AI Assistant</span>
+                <button style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1rem;" onclick="toggleAiModal()">✕</button>
+            </div>
+            <div id="ai-messages" class="ai-messages">
+                <div class="ai-msg bot">Hello! I'm your Zulvix AI assistant. Ask me anything about withdrawals, deposits, active levels, or platform rules!</div>
+            </div>
+            <div class="ai-input-area">
+                <input type="text" id="ai-input" class="form-control" placeholder="Ask a question..." style="padding: 8px; font-size: 0.85rem;" onkeypress="if(event.key === 'Enter') sendAiMessage()">
+                <button class="btn btn-green" style="width: auto; padding: 8px 12px; font-size: 0.85rem;" onclick="sendAiMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
     <!-- PAYMENT MODAL -->
     <div id="payment-modal" class="modal">
         <div class="modal-content" style="max-width: 400px;">
@@ -191,10 +222,10 @@
         <div class="modal-content" style="max-width: 400px;">
             <h3 style="margin-bottom: 10px; color: var(--neon-green);">Rules & Regulations</h3>
             <ul style="font-size: 0.85rem; color: var(--text-main); padding-left: 20px; line-height: 1.6; display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                <li><strong>Withdrawal Limits:</strong> Minimum withdrawal is <strong>Ksh 2,000</strong>; Maximum withdrawal is <strong>Ksh 100,000</strong> per day.</li>
+                <li><strong>Account Reserve Rule:</strong> A minimum balance of <strong>Ksh 2,000</strong> must remain in your account at all times to keep your account active and fully operational.</li>
                 <li><strong>Withdrawal Hours:</strong> Withdrawals are processed daily between <strong>8:00 AM and 6:00 PM</strong> EAT.</li>
-                <li><strong>Multiple Accounts:</strong> Operating multiple accounts under a single individual verification is strictly prohibited and leads to suspension.</li>
                 <li><strong>Cooldown Compliance:</strong> Users must respect the 12-hour cooling timer after completing daily asset taps.</li>
-                <li><strong>Deposit Verification:</strong> All activation and top-up deposits must match exact amounts with verified M-Pesa tracking numbers.</li>
             </ul>
             <button class="btn btn-gold" onclick="closeModal('rules-modal')">Close</button>
         </div>
@@ -307,6 +338,44 @@
         function toggleMenu() {
             let menu = document.getElementById('side-menu');
             menu.classList.toggle('open');
+        }
+
+        function toggleAiModal() {
+            let modal = document.getElementById('ai-chat-modal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function sendAiMessage() {
+            let input = document.getElementById('ai-input');
+            let txt = input.value.trim();
+            if(!txt) return;
+
+            let chatBox = document.getElementById('ai-messages');
+            chatBox.innerHTML += `<div class="ai-msg user">${txt}</div>`;
+            input.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            setTimeout(() => {
+                let reply = getAiResponse(txt.toLowerCase());
+                chatBox.innerHTML += `<div class="ai-msg bot">${reply}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 600);
+        }
+
+        function getAiResponse(query) {
+            if(query.includes('withdraw') || query.includes('minimum') || query.includes('limit')) {
+                return "Withdrawals are open daily from 8:00 AM to 6:00 PM EAT. Minimum withdrawal is Ksh 2,000, and maximum is Ksh 100,000 per day. Also, a minimum balance of Ksh 2,000 must remain in your account to keep it active!";
+            } else if(query.includes('deposit') || query.includes('paybill') || query.includes('topup')) {
+                return "To deposit or top up, use Paybill 522533, Account 8012296. Minimum top-up is Ksh 1,000. Submit your exact amount and M-Pesa tracking code through the deposit form.";
+            } else if(query.includes('level') || query.includes('tap') || query.includes('earn')) {
+                return "You can tap your unlocked digital asset up to 6 times every 12 hours to earn instant cash payouts straight to your balance.";
+            } else if(query.includes('support') || query.includes('email') || query.includes('contact')) {
+                return "You can reach our human support team directly via email at zulvixke@gmail.com or through the support form in the menu.";
+            } else if(query.includes('2015') || query.includes('about')) {
+                return "Zulvix-KE is a verified digital asset platform originally established and published in 2015.";
+            } else {
+                return "I understand you're asking about Zulvix-KE. For assistance with withdrawals, deposits, or unlocking asset levels, feel free to check our rules menu or email zulvixke@gmail.com!";
+            }
         }
 
         function logoutAccount() {
@@ -512,20 +581,30 @@
                 return;
             }
 
-            let amt = prompt("Enter amount to withdraw (Ksh):", userBalance);
+            let amt = prompt(`Enter amount to withdraw (Ksh):\n(Min: 2,000 Ksh, Max: 100,000 Ksh. Must leave 2,000 Ksh reserve)`, userBalance);
             if(amt && !isNaN(amt) && parseFloat(amt) > 0) {
                 let val = parseFloat(amt);
-                if(val <= userBalance) {
-                    userBalance -= val;
-                    document.getElementById('user-balance').innerText = userBalance.toFixed(2);
-                    withdrawalRequests.push({ user: currentUser, amount: val, status: "Pending" });
-                    
-                    triggerVibration([300, 150, 300]);
-                    alert(`Withdrawal Notification:\nYour withdrawal request for Ksh ${val.toLocaleString()} has been received and is pending transfer.`);
-                    refreshAdminDashboard();
-                } else {
-                    alert("Insufficient balance.");
+
+                if(val < 2000) {
+                    alert("Minimum withdrawal amount is Ksh 2,000.");
+                    return;
                 }
+                if(val > 100000) {
+                    alert("Maximum daily withdrawal limit is Ksh 100,000.");
+                    return;
+                }
+                if((userBalance - val) < 2000) {
+                    alert("Withdrawal denied! You must maintain a minimum balance of Ksh 2,000 to keep your account active.");
+                    return;
+                }
+
+                userBalance -= val;
+                document.getElementById('user-balance').innerText = userBalance.toFixed(2);
+                withdrawalRequests.push({ user: currentUser, amount: val, status: "Pending" });
+                
+                triggerVibration([300, 150, 300]);
+                alert(`Withdrawal Notification:\nYour withdrawal request for Ksh ${val.toLocaleString()} has been received and is pending transfer.`);
+                refreshAdminDashboard();
             }
         }
 
