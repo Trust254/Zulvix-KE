@@ -3,358 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zulvix-KE | Daily Earning & Asset Tap Platform</title>
+    <title>Zulvix-KE | Digital Asset Tap & Earn Platform</title>
     <style>
         :root {
-            --bg-dark: #070d0a;
-            --card-bg: #101d16;
-            --card-border: #1b3325;
+            --bg-color: #070d0a;
+            --card-bg: #0d1712;
             --neon-green: #00ff88;
             --gold: #f3c614;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --accent-glow: rgba(0, 255, 136, 0.15);
+            --text-main: #e2f0ea;
+            --text-muted: #8fa89b;
+            --danger: #ff4757;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-        body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
-
-        .hidden { display: none !important; }
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .gap-2 { gap: 8px; }
-        .gap-4 { gap: 16px; }
-
-        #notification-banner { background: linear-gradient(90deg, #00ff88, #f3c614); color: var(--bg-dark); padding: 12px 20px; font-weight: 700; text-align: center; font-size: 0.9rem; position: sticky; top: 0; z-index: 100; display: none; box-shadow: 0 4px 15px rgba(0,255,136,0.3); }
-
-        #auth-container { position: fixed; inset: 0; background: var(--bg-dark); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .auth-card { background: var(--card-bg); border: 2px solid var(--neon-green); width: 100%; max-width: 420px; padding: 30px; border-radius: 16px; box-shadow: 0 0 30px rgba(0,255,136,0.1); }
-        .auth-logo-box { width: 70px; height: 70px; background: linear-gradient(135deg, #00ff88, #113322); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; box-shadow: 0 0 15px rgba(0,255,136,0.3); font-size: 2rem; }
-        .header-logo-box { width: 42px; height: 42px; background: linear-gradient(135deg, #00ff88, #113322); border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(0,255,136,0.2); font-size: 1.3rem; flex-shrink: 0; }
-
-        .auth-title { text-align: center; font-size: 1.6rem; color: var(--neon-green); margin-bottom: 5px; font-weight: 800; }
-        .auth-sub { text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 25px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
-        .form-control { width: 100%; padding: 12px; background: #050a08; border: 1px solid var(--card-border); border-radius: 8px; color: white; font-size: 0.95rem; }
-        .form-control:focus { outline: none; border-color: var(--neon-green); box-shadow: 0 0 8px var(--accent-glow); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
         
-        .auth-tabs { display: flex; margin-bottom: 20px; border: 1px solid var(--card-border); border-radius: 8px; overflow: hidden; }
-        .auth-tab { flex: 1; padding: 10px; text-align: center; background: #050a08; color: var(--text-muted); cursor: pointer; font-weight: 600; font-size: 0.9rem; border: none; }
-        .auth-tab.active { background: var(--neon-green); color: var(--bg-dark); }
-
-        header { background: linear-gradient(180deg, #0d1a13 0%, var(--bg-dark) 100%); border-bottom: 1px solid var(--card-border); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); }
-        .brand-wrapper { display: flex; align-items: center; gap: 12px; }
-        .brand-info h1 { font-size: 1.25rem; font-weight: 800; color: var(--neon-green); letter-spacing: 0.5px; }
-        .brand-info span { font-size: 0.75rem; color: var(--text-muted); }
-
-        .user-pill-wrap { display: flex; gap: 12px; align-items: center; }
-        .user-pill { background: var(--card-bg); border: 1px solid var(--card-border); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; }
-        .user-pill span { color: var(--gold); font-weight: 700; }
-
-        .main-container { max-width: 1200px; margin: 0 auto; width: 100%; padding: 25px; flex: 1; }
-
-        .banner { background: linear-gradient(135deg, #102219, #0d1a13); border: 1px solid #1f3b2d; border-left: 5px solid var(--gold); padding: 20px; border-radius: 12px; margin-bottom: 25px; }
-        .banner h3 { color: var(--gold); font-size: 1.05rem; margin-bottom: 8px; }
-        .banner p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
-
-        .deposit-tracker-box { background: rgba(243, 198, 20, 0.08); border: 1px dashed var(--gold); padding: 15px; border-radius: 10px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-        .deposit-tracker-box div h4 { color: var(--gold); font-size: 0.95rem; margin-bottom: 3px; }
-        .deposit-tracker-box div p { font-size: 0.85rem; color: var(--text-muted); }
-
-        .action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 30px; }
-        .btn { padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; transition: 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
-        .btn-green { background: var(--neon-green); color: var(--bg-dark); box-shadow: 0 0 15px rgba(0,255,136,0.2); }
-        .btn-green:hover { background: #00cc6a; transform: translateY(-2px); }
-        .btn-gold { background: var(--gold); color: var(--bg-dark); box-shadow: 0 0 15px rgba(243,198,20,0.2); }
-        .btn-gold:hover { background: #d4af37; transform: translateY(-2px); }
-        .btn-outline { background: transparent; border: 1px solid var(--card-border); color: var(--text-main); }
-        .btn-outline:hover { border-color: var(--neon-green); background: rgba(0,255,136,0.05); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
-
-        .section-heading { font-size: 1.3rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
-        .levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
-
-        .level-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; position: relative; }
-        .level-card:hover { border-color: rgba(0,255,136,0.4); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+        .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 20px; }
+        
+        /* Auth Screen */
+        #auth-container { position: fixed; inset: 0; background: rgba(7, 13, 10, 0.95); z-index: 1000; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .auth-card { background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: 16px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 0 20px rgba(0,255,136,0.2); }
+        .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid var(--text-muted); }
+        .auth-tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; color: var(--text-muted); font-weight: bold; }
+        .auth-tab.active { color: var(--neon-green); border-bottom: 2px solid var(--neon-green); }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--text-muted); }
+        .form-control { width: 100%; padding: 12px; background: #040907; border: 1px solid #1a3324; color: var(--text-main); border-radius: 8px; font-size: 1rem; }
+        .form-control:focus { outline: none; border-color: var(--neon-green); }
+        
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+        .btn-green { background: var(--neon-green); color: #000; }
+        .btn-green:hover { opacity: 0.9; }
+        .btn-gold { background: var(--gold); color: #000; }
+        
+        /* Dashboard Header */
+        .header { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 15px 20px; border-radius: 12px; border: 1px solid #1a3324; }
+        .balance-box { font-size: 1.2rem; font-weight: bold; color: var(--neon-green); }
+        
+        /* Level Cards */
+        .levels-grid { display: flex; flex-direction: column; gap: 15px; }
+        .level-card { background: var(--card-bg); border: 1px solid #1a3324; border-radius: 12px; overflow: hidden; display: flex; }
         .level-card.unlocked { border-color: var(--neon-green); }
-
-        .level-img-wrap { width: 100%; height: 180px; position: relative; background: #040806; overflow: hidden; }
-        .level-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; opacity: 0.85; }
-        .level-card:hover .level-img-wrap img { transform: scale(1.05); opacity: 1; }
-        .status-badge { position: absolute; top: 12px; right: 12px; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; backdrop-filter: blur(5px); }
-        .badge-free { background: rgba(0,255,136,0.9); color: var(--bg-dark); }
-        .badge-locked { background: rgba(243,198,20,0.9); color: var(--bg-dark); }
-        .badge-active { background: rgba(0,255,136,0.2); border: 1px solid var(--neon-green); color: var(--neon-green); }
-
-        .level-body { padding: 20px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
-        .level-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; }
-        .level-meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4; }
-        .stat-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 8px 0; border-top: 1px solid #162a1e; margin-bottom: 15px; }
-        .stat-row span:last-child { font-weight: 700; color: var(--neon-green); }
-
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); border: 1px solid var(--card-border); width: 100%; max-width: 540px; border-radius: 16px; padding: 30px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-header h2 { font-size: 1.3rem; color: var(--neon-green); font-weight: 800; }
-        .close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
-        .close-btn:hover { color: white; }
-
-        .mpesa-instruction { background: #050a08; border: 1px solid var(--gold); border-radius: 10px; padding: 15px; text-align: center; margin: 15px 0; }
-        .mpesa-brand { background: #4CAF50; color: white; padding: 4px 10px; font-size: 0.75rem; font-weight: 900; border-radius: 4px; display: inline-block; margin-bottom: 8px; letter-spacing: 1px; }
-
-        .admin-section { margin-top: 15px; }
-        .admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
-        .admin-table th, .admin-table td { border: 1px solid var(--card-border); padding: 10px; text-align: left; }
-        .admin-table th { background: #0c1811; color: var(--gold); }
-        .tab-nav { display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 1px solid var(--card-border); padding-bottom: 10px; flex-wrap: wrap; }
-        .tab-btn { background: none; border: none; color: var(--text-muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
-        .tab-btn.active { background: var(--neon-green); color: var(--bg-dark); }
-
-        .floating-support { position: fixed; bottom: 25px; right: 25px; background: var(--neon-green); color: var(--bg-dark); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; box-shadow: 0 4px 20px rgba(0,255,136,0.4); cursor: pointer; z-index: 100; transition: transform 0.2s; }
-        .floating-support:hover { transform: scale(1.1); }
-
-        .floating-ai { position: fixed; bottom: 95px; right: 25px; background: var(--gold); color: var(--bg-dark); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; box-shadow: 0 4px 20px rgba(243,198,20,0.4); cursor: pointer; z-index: 100; transition: transform 0.2s; }
-        .floating-ai:hover { transform: scale(1.1); }
-
-        .ai-chat-box { display: flex; flex-direction: column; height: 350px; background: #050a08; border: 1px solid var(--card-border); border-radius: 10px; padding: 12px; overflow-y: auto; margin-bottom: 15px; gap: 10px; font-size: 0.9rem; }
-        .ai-msg { padding: 10px 14px; border-radius: 8px; max-width: 85%; line-height: 1.4; }
-        .ai-msg.bot { background: #15291e; color: var(--text-main); align-self: flex-start; border-left: 3px solid var(--gold); }
-        .ai-msg.user { background: rgba(0,255,136,0.15); color: var(--neon-green); align-self: flex-end; border-right: 3px solid var(--neon-green); }
-
-        footer { background: #050a08; border-top: 1px solid var(--card-border); text-align: center; padding: 20px; font-size: 0.85rem; color: var(--text-muted); margin-top: auto; }
-        footer a { color: var(--neon-green); text-decoration: none; }
-        footer a:hover { text-decoration: underline; }
+        .level-img-wrap { width: 130px; position: relative; }
+        .level-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .status-badge { position: absolute; top: 8px; left: 8px; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+        .badge-free { background: var(--neon-green); color: #000; }
+        .badge-active { background: var(--gold); color: #000; }
+        .badge-locked { background: var(--danger); color: #fff; }
+        
+        .level-body { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .level-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 4px; }
+        .level-meta { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+        .stat-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; }
+        
+        /* Modals */
+        .modal { position: fixed; inset: 0; background: rgba(7, 13, 10, 0.9); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); border: 1px solid var(--neon-green); padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
+        .hidden { display: none !important; }
+        .error-text { color: var(--danger); font-size: 0.85rem; margin-top: 5px; display: none; }
     </style>
 </head>
 <body>
 
-    <div id="notification-banner">🔔 <span id="notification-text">Welcome to Zulvix-KE!</span></div>
-
-    <!-- Registration / Login Screen -->
+    <!-- AUTHENTICATION OVERLAY -->
     <div id="auth-container">
         <div class="auth-card">
-            <div class="auth-logo-box">⚡</div>
-            <div class="auth-title">Zulvix-KE</div>
-            <div class="auth-sub">Digital Asset Tap & Earn Platform</div>
-
+            <h2 style="text-align: center; margin-bottom: 15px; color: var(--neon-green);">Zulvix-KE</h2>
             <div class="auth-tabs">
-                <button class="auth-tab active" id="tab-login-btn" onclick="switchAuthMode('login')">Login</button>
-                <button class="auth-tab" id="tab-register-btn" onclick="switchAuthMode('register')">Register</button>
+                <div id="tab-login-btn" class="auth-tab active" onclick="switchAuthMode('login')">Login</div>
+                <div id="tab-register-btn" class="auth-tab" onclick="switchAuthMode('register')">Register</div>
             </div>
-
-            <div id="auth-error" style="color: #ff4d4d; font-size: 0.85rem; margin-bottom: 10px; text-align: center; display: none;"></div>
-
             <div class="form-group">
                 <label>Mobile Number / Username</label>
                 <input type="text" id="auth-username" class="form-control" placeholder="e.g. 0712345678">
             </div>
             <div class="form-group">
-                <label>Access Password <span id="pwd-hint" style="font-size:0.75rem; color:var(--text-muted);">(Min 8 chars, letters & numbers)</span></label>
-                <input type="password" id="auth-password" class="form-control" placeholder="••••••••">
+                <label>Access Password</label>
+                <input type="password" id="auth-password" class="form-control" placeholder="Enter password">
             </div>
-
-            <button id="auth-submit-btn" class="btn btn-green" style="width: 100%; margin-top: 10px;" onclick="handleAuthentication()">Login to Account</button>
+            <div id="auth-error" class="error-text"></div>
+            <button id="auth-submit-btn" class="btn btn-green" style="margin-top: 10px;" onclick="handleAuthentication()">Login to Account</button>
         </div>
     </div>
 
-    <!-- Main Application Header -->
-    <header>
-        <div class="brand-wrapper">
-            <div class="header-logo-box">⚡</div>
-            <div class="brand-info">
-                <h1>Zulvix-KE</h1>
-                <span>Verified KES Earning System</span>
-            </div>
-        </div>
-        <div class="user-pill-wrap">
-            <div class="user-pill">
-                <span>👤 <span id="display-user">User</span></span>
-                <span>💰 <span id="user-balance">30.00</span> Ksh</span>
-            </div>
-            <button class="btn btn-outline" style="padding: 6px 14px; font-size: 0.8rem; border-color: #ff4d4d; color: #ff4d4d;" onclick="logoutUser()">Logout</button>
-        </div>
-    </header>
-
-    <!-- Main Dashboard -->
-    <div class="main-container">
-        <div class="deposit-tracker-box">
+    <!-- MAIN DASHBOARD -->
+    <div class="container">
+        <div class="header">
             <div>
-                <h4>Required Deposit Status</h4>
-                <p id="deposit-tracker-text">No active unlock pending. Level 1 is active & free.</p>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Welcome back,</div>
+                <div id="display-user" style="font-weight: bold;">User</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Balance</div>
+                <div class="balance-box"><span id="user-balance">30.00</span> Ksh</div>
             </div>
         </div>
 
-        <div class="banner">
-            <h3>How to Activate Levels & Start Earning</h3>
-            <p><strong>Level 1 (Iron Box)</strong> is completely <strong>FREE</strong> upon registration! Open Level 1, tap your 6 daily taps to collect 5 Ksh per tap (total 30 Ksh/day). After finishing your 6 daily taps, a 12-hour countdown begins before you can tap again. For higher levels, pay via Lipa na M-Pesa (Activation Fee + User Deposit Fee). Once approved by Customer Support, your deposit fee is instantly credited to your dashboard balance available for withdrawal, and your level unlocks!</p>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-gold" style="font-size: 0.9rem; padding: 8px;" onclick="openDepositModal()">Deposit Top-Up</button>
+            <button class="btn btn-green" style="font-size: 0.9rem; padding: 8px;" onclick="openWithdrawModal()">Withdraw</button>
         </div>
 
-        <div class="action-grid">
-            <button class="btn btn-green" onclick="openDepositModal()">Deposit / Top Up</button>
-            <button class="btn btn-gold" onclick="openWithdrawModal()">Withdraw Funds</button>
-            <button class="btn btn-outline" onclick="copyInviteLink()">🔗 Copy Invite Link (+3% Bonus)</button>
-            <button class="btn btn-outline" onclick="openComplaintModal()">💬 Send Complaint / Ticket</button>
+        <div id="levels-container" class="levels-grid">
+            <!-- Dynamically populated level cards -->
         </div>
 
-        <div class="section-heading">
-            <span>Earning Asset Levels</span>
-            <span style="font-size: 0.85rem; color: var(--text-muted);">6 Taps Daily per Unlocked Level</span>
+        <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+            <button onclick="openComplaintModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer;">Support / Complaints</button>
+            <button onclick="openAdminPortal()" style="background: none; border: none; color: var(--gold); cursor: pointer;">Admin Portal</button>
         </div>
-
-        <div class="levels-grid" id="levels-container"></div>
     </div>
 
-    <!-- Payment / Activation Modal -->
+    <!-- PAYMENT MODAL -->
     <div id="payment-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="payment-modal-title">Level Activation</h2>
-                <button class="close-btn" onclick="closeModal('payment-modal')">&times;</button>
-            </div>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">Make your exact required payment via Lipa na M-Pesa to unlock automated daily earnings:</p>
-
-            <div class="mpesa-instruction">
-                <div class="mpesa-brand">LIPA NA M-PESA</div>
-                <p><strong>Paybill:</strong> 522533</p>
-                <p><strong>Account Number:</strong> 8012296</p>
-                <p id="payment-amount-display" style="color: var(--gold); margin-top: 10px; font-weight: 700;"></p>
-            </div>
-
+            <h3 id="payment-modal-title" style="margin-bottom: 10px; color: var(--neon-green);">Unlock Level</h3>
+            <p id="payment-amount-display" style="font-size: 0.9rem; margin-bottom: 15px; color: var(--text-muted);"></p>
             <div class="form-group">
-                <label>Exact Deposit Amount Required (Ksh)</label>
-                <input type="number" id="deposit-amount-input" class="form-control" placeholder="Enter exact calculated amount">
+                <label>Amount Sent (Ksh)</label>
+                <input type="number" id="deposit-amount-input" class="form-control" placeholder="Enter exact amount">
             </div>
-
             <div class="form-group">
-                <label>M-Pesa Confirmation Code (e.g. QWE1234XYZ)</label>
-                <input type="text" id="mpesa-code-input" class="form-control" placeholder="Enter transaction message code" style="text-transform: uppercase;">
+                <label>M-Pesa Transaction Code</label>
+                <input type="text" id="mpesa-code-input" class="form-control" placeholder="e.g. QHX921XYZ">
             </div>
-
-            <div id="deposit-error-msg" style="color: #ff4d4d; font-size: 0.85rem; margin-bottom: 10px; display: none;"></div>
-
-            <button class="btn btn-green" style="width: 100%; margin-top: 5px;" onclick="submitActivationRequest()">Submit Request to Support</button>
-        </div>
-    </div>
-
-    <!-- AI Assistant Robot Modal -->
-    <div id="ai-modal" class="modal">
-        <div class="modal-content" style="max-width: 480px;">
-            <div class="modal-header">
-                <h2>🤖 Zulvix AI Assistant</h2>
-                <button class="close-btn" onclick="closeModal('ai-modal')">&times;</button>
-            </div>
-            <div class="ai-chat-box" id="ai-chat-messages">
-                <div class="ai-msg bot">Hello! I am your Zulvix AI assistant. Ask me anything about how to unlock levels, exact deposit totals, M-Pesa payments, or support tickets!</div>
-            </div>
-            <div class="flex gap-2">
-                <input type="text" id="ai-input" class="form-control" placeholder="Ask a question..." onkeypress="if(event.key==='Enter')sendAiMessage()">
-                <button class="btn btn-green" onclick="sendAiMessage()">Send</button>
+            <div id="deposit-error-msg" class="error-text"></div>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn btn-green" onclick="submitActivationRequest()">Submit for Verification</button>
+                <button class="btn" style="background: #1a3324; color: var(--text-main);" onclick="closeModal('payment-modal')">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- User Complaint Modal -->
+    <!-- COMPLAINT MODAL -->
     <div id="complaint-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>Submit Support Ticket</h2>
-                <button class="close-btn" onclick="closeModal('complaint-modal')">&times;</button>
-            </div>
+            <h3 style="margin-bottom: 10px; color: var(--neon-green);">Submit Complaint</h3>
             <div class="form-group">
-                <label>Describe your issue or question for management</label>
-                <textarea id="complaint-text" class="form-control" rows="4" placeholder="e.g. Delay in activating my microwave level..."></textarea>
+                <textarea id="complaint-text" class="form-control" rows="4" placeholder="Describe your issue..."></textarea>
             </div>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Management support email: <a href="mailto:Zulvixsupport@gmail.com" style="color:var(--gold);">Zulvixsupport@gmail.com</a></p>
-            <button class="btn btn-green" style="width: 100%;" onclick="submitComplaint()">Send to Management Support</button>
+            <button class="btn btn-green" onclick="submitComplaint()">Send to Support</button>
+            <button class="btn" style="background: #1a3324; color: var(--text-main); margin-top: 10px;" onclick="closeModal('complaint-modal')">Close</button>
         </div>
     </div>
 
-    <!-- Customer Support / Admin Dashboard Modal -->
+    <!-- ADMIN MODAL -->
     <div id="admin-modal" class="modal">
-        <div class="modal-content" style="max-width: 950px;">
-            <div class="modal-header">
-                <h2>Management Support Control Center</h2>
-                <button class="close-btn" onclick="closeModal('admin-modal')">&times;</button>
+        <div class="modal-content" style="max-width: 600px;">
+            <h3 style="color: var(--gold); margin-bottom: 15px;">Management Control Center</h3>
+            <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                <button class="btn btn-green active" style="font-size: 0.8rem; padding: 6px;" onclick="switchAdminTab('requests', this)">Requests (<span id="req-count">0</span>)</button>
+                <button class="btn" style="font-size: 0.8rem; padding: 6px; background: #1a3324; color: var(--text-main);" onclick="switchAdminTab('withdrawals', this)">Withdrawals (<span id="withdraw-count">0</span>)</button>
+                <button class="btn" style="font-size: 0.8rem; padding: 6px; background: #1a3324; color: var(--text-main);" onclick="switchAdminTab('complaints', this)">Complaints (<span id="comp-count">0</span>)</button>
             </div>
-
-            <div class="tab-nav">
-                <button class="tab-btn active" onclick="switchAdminTab('requests', this)">Activation Requests (<span id="req-count">0</span>)</button>
-                <button class="tab-btn" onclick="switchAdminTab('withdrawals', this)">Withdrawal Requests (<span id="withdraw-count">0</span>)</button>
-                <button class="tab-btn" onclick="switchAdminTab('users', this)">Registered Users</button>
-                <button class="tab-btn" onclick="switchAdminTab('complaints', this)">Complaints (<span id="comp-count">0</span>)</button>
-            </div>
-
             <div id="admin-tab-requests" class="admin-section">
-                <table class="admin-table">
+                <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
                     <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Level Requested</th>
-                            <th>Activation Fee</th>
-                            <th>Deposit Fee</th>
-                            <th>M-Pesa Code</th>
-                            <th>Action</th>
+                        <tr style="border-bottom: 1px solid var(--text-muted); text-align: left;">
+                            <th>User</th><th>Level</th><th>Act.</th><th>Dep.</th><th>Code</th><th>Action</th>
                         </tr>
                     </thead>
-                    <tbody id="admin-requests-tbody">
-                        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No pending requests</td></tr>
-                    </tbody>
+                    <tbody id="admin-requests-tbody"></tbody>
                 </table>
             </div>
-
-            <div id="admin-tab-withdrawals" class="admin-section hidden">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Amount (Ksh)</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-withdrawals-tbody">
-                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No pending withdrawals</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="admin-tab-users" class="admin-section hidden">
-                <p style="font-size:0.85rem; color:var(--text-muted);">Users are stored securely inside the live backend SQLite database.</p>
-            </div>
-
-            <div id="admin-tab-complaints" class="admin-section hidden">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Complaint Message</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-complaints-tbody">
-                        <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No active complaints</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <button class="btn btn-gold" style="margin-top: 20px;" onclick="closeModal('admin-modal')">Close Portal</button>
         </div>
     </div>
 
-    <div class="floating-ai" onclick="openAiModal()" title="Zulvix AI Assistant">🤖</div>
-    <div class="floating-support" onclick="openAdminPortal()" title="Management Support Login">💬</div>
-
-    <footer>
-        <p>&copy; 2015 – 2026 Zulvix-KE. All rights reserved.</p>
-        <p style="margin-top: 6px;">
-            <a href="javascript:alert('Terms & Conditions: Users must be 18+ to operate digital asset tap levels.')">Terms & Conditions Applied</a> | 
-            Management Support: <a href="mailto:Zulvixsupport@gmail.com">Zulvixsupport@gmail.com</a>
-        </p>
-    </footer>
-
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // Change to your deployed Render backend URL when ready (e.g. 'https://zulvix-ke.onrender.com')
-        const BACKEND_URL = 'http://localhost:3000';
+        const BACKEND_URL = 'https://zulvix-ke-backend.onrender.com';
 
         let currentUser = null;
         let userBalance = 30.00;
@@ -429,7 +247,6 @@
                     return;
                 }
 
-                // Successful Login
                 currentUser = data.user.username;
                 userBalance = data.user.balance;
                 userLevelsUnlocked = data.user.levelsUnlocked;
@@ -444,13 +261,6 @@
                 err.innerText = "Unable to connect to backend server.";
                 err.style.display = 'block';
             }
-        }
-
-        function logoutUser() {
-            currentUser = null;
-            document.getElementById('auth-container').style.display = 'flex';
-            document.getElementById('auth-username').value = "";
-            document.getElementById('auth-password').value = "";
         }
 
         function renderLevels() {
@@ -581,7 +391,6 @@
         }
 
         function openComplaintModal() { document.getElementById('complaint-modal').style.display = 'flex'; }
-        function openAiModal() { document.getElementById('ai-modal').style.display = 'flex'; }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
 
         function submitActivationRequest() {
@@ -623,24 +432,6 @@
             alert("Complaint sent.");
             closeModal('complaint-modal');
             refreshAdminDashboard();
-        }
-
-        function sendAiMessage() {
-            let input = document.getElementById('ai-input');
-            let q = input.value.trim();
-            if(!q) return;
-            let chatBox = document.getElementById('ai-chat-messages');
-            chatBox.innerHTML += `<div class="ai-msg user">${q}</div>`;
-            input.value = "";
-            setTimeout(() => {
-                chatBox.innerHTML += `<div class="ai-msg bot">To unlock levels, pay via Lipa na M-Pesa (Paybill 522533, Account 8012296) and submit your code.</div>`;
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }, 500);
-        }
-
-        function copyInviteLink() {
-            navigator.clipboard.writeText(`https://trust254.github.io/Zulvix-KE/?ref=${currentUser}`);
-            alert("Referral link copied!");
         }
 
         function openAdminPortal() {
