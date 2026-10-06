@@ -36,10 +36,20 @@
         .btn-green:hover { opacity: 0.9; }
         .btn-gold { background: var(--gold); color: #000; }
         
-        /* Dashboard Header */
+        /* Dashboard Header & Hamburger */
         .header { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 15px 20px; border-radius: 12px; border: 1px solid #1a3324; }
         .balance-box { font-size: 1.2rem; font-weight: bold; color: var(--neon-green); }
         
+        .menu-icon { cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 5px; }
+        .menu-icon div { width: 25px; height: 3px; background: var(--neon-green); border-radius: 2px; }
+
+        /* Slide-out Menu */
+        #side-menu { position: fixed; inset: 0 150px 0 0; background: var(--card-bg); border-right: 2px solid var(--neon-green); z-index: 3000; transform: translateX(-100%); transition: transform 0.3s ease; padding: 20px; display: flex; flex-direction: column; gap: 15px; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        #side-menu.open { transform: translateX(0); }
+        .menu-close { align-self: flex-end; background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
+        .menu-item { padding: 10px; background: #040907; border: 1px solid #1a3324; border-radius: 6px; color: var(--text-main); text-align: left; cursor: pointer; font-weight: bold; }
+        .menu-item:hover { border-color: var(--neon-green); color: var(--neon-green); }
+
         /* Level Cards */
         .levels-grid { display: flex; flex-direction: column; gap: 15px; }
         .level-card { background: var(--card-bg); border: 1px solid #1a3324; border-radius: 12px; overflow: hidden; display: flex; }
@@ -58,7 +68,7 @@
         
         /* Modals */
         .modal { position: fixed; inset: 0; background: rgba(7, 13, 10, 0.9); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); border: 1px solid var(--neon-green); padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: var(--card-bg); border: 1px solid var(--neon-green); padding: 20px; border-radius: 12px; width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto; }
         .hidden { display: none !important; }
         .error-text { color: var(--danger); font-size: 0.85rem; margin-top: 5px; display: none; }
     </style>
@@ -86,12 +96,30 @@
         </div>
     </div>
 
+    <!-- SIDE MENU -->
+    <div id="side-menu">
+        <button class="menu-close" onclick="toggleMenu()">✕ Close</button>
+        <h3 style="color: var(--neon-green); font-size: 1.1rem; border-bottom: 1px solid #1a3324; padding-bottom: 8px;">Zulvix Menu</h3>
+        <button class="menu-item" onclick="openAboutModal()">About the Site</button>
+        <button class="menu-item" onclick="openRulesModal()">Rules & Regulations</button>
+        <button class="menu-item" onclick="openComplaintModal()">Customer Support</button>
+        <button class="menu-item" onclick="openAdminPortal()">Admin Portal</button>
+        <button class="menu-item" style="color: var(--danger); border-color: #331a1a; margin-top: auto;" onclick="logoutAccount()">Logout</button>
+    </div>
+
     <!-- MAIN DASHBOARD -->
     <div class="container">
         <div class="header">
-            <div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">Welcome back,</div>
-                <div id="display-user" style="font-weight: bold;">User</div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="menu-icon" onclick="toggleMenu()">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Welcome back,</div>
+                    <div id="display-user" style="font-weight: bold;">User</div>
+                </div>
             </div>
             <div style="text-align: right;">
                 <div style="font-size: 0.8rem; color: var(--text-muted);">Balance</div>
@@ -108,15 +136,14 @@
             <!-- Dynamically populated level cards -->
         </div>
 
-        <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-            <button onclick="openComplaintModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer;">Support / Complaints</button>
-            <button onclick="openAdminPortal()" style="background: none; border: none; color: var(--gold); cursor: pointer;">Admin Portal</button>
+        <div style="text-align: center; margin-top: 10px; font-size: 0.8rem; color: var(--text-muted);">
+            Support Email: <a href="mailto:zulvixke@gmail.com" style="color: var(--neon-green);">zulvixke@gmail.com</a>
         </div>
     </div>
 
     <!-- PAYMENT MODAL -->
     <div id="payment-modal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 400px;">
             <h3 id="payment-modal-title" style="margin-bottom: 10px; color: var(--neon-green);">Unlock Level</h3>
             <p id="payment-amount-display" style="font-size: 0.9rem; margin-bottom: 15px; color: var(--text-muted);"></p>
             <div class="form-group">
@@ -135,10 +162,11 @@
         </div>
     </div>
 
-    <!-- COMPLAINT MODAL -->
+    <!-- COMPLAINT / SUPPORT MODAL -->
     <div id="complaint-modal" class="modal">
-        <div class="modal-content">
-            <h3 style="margin-bottom: 10px; color: var(--neon-green);">Submit Complaint</h3>
+        <div class="modal-content" style="max-width: 400px;">
+            <h3 style="margin-bottom: 10px; color: var(--neon-green);">Customer Support</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Reach us directly at <a href="mailto:zulvixke@gmail.com" style="color: var(--neon-green);">zulvixke@gmail.com</a> or submit your query below:</p>
             <div class="form-group">
                 <textarea id="complaint-text" class="form-control" rows="4" placeholder="Describe your issue..."></textarea>
             </div>
@@ -147,25 +175,99 @@
         </div>
     </div>
 
+    <!-- ABOUT MODAL -->
+    <div id="about-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <h3 style="margin-bottom: 10px; color: var(--neon-green);">About Zulvix-KE</h3>
+            <p style="font-size: 0.9rem; color: var(--text-main); line-height: 1.5; margin-bottom: 15px;">
+                Zulvix-KE is a premier digital asset tap & earn platform originally established and published in <strong>2015</strong>. We provide secure, automated asset valuation loops and micro-task earnings for active digital participants across the region.
+            </p>
+            <button class="btn btn-gold" onclick="closeModal('about-modal')">Close</button>
+        </div>
+    </div>
+
+    <!-- RULES MODAL -->
+    <div id="rules-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <h3 style="margin-bottom: 10px; color: var(--neon-green);">Rules & Regulations</h3>
+            <ul style="font-size: 0.85rem; color: var(--text-main); padding-left: 20px; line-height: 1.6; display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                <li><strong>Withdrawal Hours:</strong> Withdrawals are processed daily between <strong>8:00 AM and 6:00 PM</strong> EAT.</li>
+                <li><strong>Multiple Accounts:</strong> Operating multiple accounts under a single individual verification is strictly prohibited and leads to suspension.</li>
+                <li><strong>Cooldown Compliance:</strong> Users must respect the 12-hour cooling timer after completing daily asset taps.</li>
+                <li><strong>Deposit Verification:</strong> All activation and top-up deposits must match exact amounts with verified M-Pesa tracking numbers.</li>
+            </ul>
+            <button class="btn btn-gold" onclick="closeModal('rules-modal')">Close</button>
+        </div>
+    </div>
+
     <!-- ADMIN MODAL -->
     <div id="admin-modal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-content">
             <h3 style="color: var(--gold); margin-bottom: 15px;">Management Control Center</h3>
-            <div style="display: flex; gap: 5px; margin-bottom: 15px;">
-                <button class="btn btn-green active" style="font-size: 0.8rem; padding: 6px;" onclick="switchAdminTab('requests', this)">Requests (<span id="req-count">0</span>)</button>
-                <button class="btn" style="font-size: 0.8rem; padding: 6px; background: #1a3324; color: var(--text-main);" onclick="switchAdminTab('withdrawals', this)">Withdrawals (<span id="withdraw-count">0</span>)</button>
-                <button class="btn" style="font-size: 0.8rem; padding: 6px; background: #1a3324; color: var(--text-main);" onclick="switchAdminTab('complaints', this)">Complaints (<span id="comp-count">0</span>)</button>
+            
+            <div style="display: flex; gap: 5px; margin-bottom: 15px; flex-wrap: wrap;">
+                <button id="admin-btn-requests" class="btn btn-green" style="font-size: 0.8rem; padding: 6px; flex: 1;" onclick="switchAdminTab('requests', this)">Requests (<span id="req-count">0</span>)</button>
+                <button id="admin-btn-withdrawals" class="btn" style="font-size: 0.8rem; padding: 6px; flex: 1; background: #1a3324; color: var(--text-main);" onclick="switchAdminTab('withdrawals', this)">Withdrawals (<span id="withdraw-count">0</span>)</button>
+                <button id="admin-btn-complaints" class="btn" style="font-size: 0.8rem; padding: 6px; flex: 1; background: #1a3324; color: var(--text-main);" onclick="switchAdminTab('complaints', this)">Complaints (<span id="comp-count">0</span>)</button>
+                <button id="admin-btn-users" class="btn" style="font-size: 0.8rem; padding: 6px; flex: 1; background: #1a3324; color: var(--text-main);" onclick="switchAdminTab('users', this)">Users (<span id="user-count">0</span>)</button>
             </div>
+
             <div id="admin-tab-requests" class="admin-section">
-                <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
-                    <thead>
-                        <tr style="border-bottom: 1px solid var(--text-muted); text-align: left;">
-                            <th>User</th><th>Level</th><th>Act.</th><th>Dep.</th><th>Code</th><th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-requests-tbody"></tbody>
-                </table>
+                <h4 style="font-size: 0.9rem; color: var(--neon-green); margin-bottom: 8px;">Activation & Deposit Requests</h4>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--text-muted); text-align: left;">
+                                <th style="padding: 6px;">User</th><th style="padding: 6px;">Level</th><th style="padding: 6px;">Dep.</th><th style="padding: 6px;">Code</th><th style="padding: 6px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-requests-tbody"></tbody>
+                    </table>
+                </div>
             </div>
+
+            <div id="admin-tab-withdrawals" class="admin-section hidden">
+                <h4 style="font-size: 0.9rem; color: var(--neon-green); margin-bottom: 8px;">Withdrawal Requests</h4>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--text-muted); text-align: left;">
+                                <th style="padding: 6px;">User</th><th style="padding: 6px;">Amount (Ksh)</th><th style="padding: 6px;">Status</th><th style="padding: 6px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-withdrawals-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="admin-tab-complaints" class="admin-section hidden">
+                <h4 style="font-size: 0.9rem; color: var(--neon-green); margin-bottom: 8px;">User Complaints & Support</h4>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--text-muted); text-align: left;">
+                                <th style="padding: 6px;">User</th><th style="padding: 6px;">Message</th><th style="padding: 6px;">Status</th><th style="padding: 6px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-complaints-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="admin-tab-users" class="admin-section hidden">
+                <h4 style="font-size: 0.9rem; color: var(--neon-green); margin-bottom: 8px;">All Registered Platform Users</h4>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--text-muted); text-align: left;">
+                                <th style="padding: 6px;">Username / Phone</th><th style="padding: 6px;">Balance</th><th style="padding: 6px;">Unlocked Levels</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <button class="btn btn-gold" style="margin-top: 20px;" onclick="closeModal('admin-modal')">Close Portal</button>
         </div>
     </div>
@@ -178,6 +280,7 @@
         let userBalance = 30.00;
         let userLevelsUnlocked = [1];
         let authMode = 'login';
+        let registeredUsersList = [];
 
         const levelsData = [
             { id: 1, name: "Iron Box", img: "https://images.unsplash.com/photo-1585435557343-3b092031a831?w=600&auto=format&fit=crop&q=80", activationFee: 0, depositFee: 0, dailyPayout: 30, perTap: 5, tapsLeft: 6, cooldownEnd: 0 },
@@ -192,6 +295,27 @@
         let withdrawalRequests = [];
         let complaintsList = [];
         let selectedLevelForPayment = null;
+
+        function triggerVibration(pattern = [200, 100, 200]) {
+            if ("navigator" in window && "vibrate" in navigator) {
+                try {
+                    navigator.vibrate(pattern);
+                } catch(e) {}
+            }
+        }
+
+        function toggleMenu() {
+            let menu = document.getElementById('side-menu');
+            menu.classList.toggle('open');
+        }
+
+        function logoutAccount() {
+            toggleMenu();
+            currentUser = null;
+            document.getElementById('auth-container').style.display = 'flex';
+            document.getElementById('auth-username').value = '';
+            document.getElementById('auth-password').value = '';
+        }
 
         function switchAuthMode(mode) {
             authMode = mode;
@@ -242,6 +366,9 @@
 
                 if(authMode === 'register') {
                     alert("Registration successful! You can now log in.");
+                    if(!registeredUsersList.some(user => user.username === u)) {
+                        registeredUsersList.push({ username: u, balance: 30.00, levelsUnlocked: [1] });
+                    }
                     switchAuthMode('login');
                     err.style.display = 'none';
                     return;
@@ -250,6 +377,10 @@
                 currentUser = data.user.username;
                 userBalance = data.user.balance;
                 userLevelsUnlocked = data.user.levelsUnlocked;
+
+                if(!registeredUsersList.some(user => user.username === currentUser)) {
+                    registeredUsersList.push({ username: currentUser, balance: userBalance, levelsUnlocked: userLevelsUnlocked });
+                }
 
                 document.getElementById('display-user').innerText = currentUser;
                 document.getElementById('user-balance').innerText = userBalance.toFixed(2);
@@ -375,6 +506,12 @@
         }
 
         function openWithdrawModal() {
+            let nowHour = new Date().getHours();
+            if(nowHour < 8 || nowHour >= 18) {
+                alert("Withdrawals are only open between 8:00 AM and 6:00 PM EAT.");
+                return;
+            }
+
             let amt = prompt("Enter amount to withdraw (Ksh):", userBalance);
             if(amt && !isNaN(amt) && parseFloat(amt) > 0) {
                 let val = parseFloat(amt);
@@ -382,7 +519,9 @@
                     userBalance -= val;
                     document.getElementById('user-balance').innerText = userBalance.toFixed(2);
                     withdrawalRequests.push({ user: currentUser, amount: val, status: "Pending" });
-                    alert("Withdrawal request sent to support.");
+                    
+                    triggerVibration([300, 150, 300]);
+                    alert(`Withdrawal Notification:\nYour withdrawal request for Ksh ${val.toLocaleString()} has been received and is pending transfer.`);
                     refreshAdminDashboard();
                 } else {
                     alert("Insufficient balance.");
@@ -390,7 +529,9 @@
             }
         }
 
-        function openComplaintModal() { document.getElementById('complaint-modal').style.display = 'flex'; }
+        function openComplaintModal() { toggleMenu(); document.getElementById('complaint-modal').style.display = 'flex'; }
+        function openAboutModal() { toggleMenu(); document.getElementById('about-modal').style.display = 'flex'; }
+        function openRulesModal() { toggleMenu(); document.getElementById('rules-modal').style.display = 'flex'; }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
 
         function submitActivationRequest() {
@@ -420,7 +561,8 @@
                 status: "Pending"
             });
 
-            alert("Request submitted successfully!");
+            triggerVibration([150, 100, 150]);
+            alert(`Deposit Notification:\nYour deposit request of Ksh ${requiredAmount.toLocaleString()} has been submitted successfully for confirmation.`);
             closeModal('payment-modal');
             refreshAdminDashboard();
         }
@@ -429,12 +571,13 @@
             let txt = document.getElementById('complaint-text').value.trim();
             if(!txt) return;
             complaintsList.push({ user: currentUser, message: txt, status: "Pending" });
-            alert("Complaint sent.");
+            alert("Complaint sent to zulvixke@gmail.com support team.");
             closeModal('complaint-modal');
             refreshAdminDashboard();
         }
 
         function openAdminPortal() {
+            toggleMenu();
             let username = prompt("Enter Management Support ID:");
             let pass = prompt("Enter Support Password:");
             if(username === "3879" && pass === "Scott@254") {
@@ -446,14 +589,61 @@
         }
 
         function refreshAdminDashboard() {
-            document.getElementById('req-count').innerText = activationRequests.filter(r => r.status === "Pending").length;
-            document.getElementById('withdraw-count').innerText = withdrawalRequests.filter(w => w.status === "Pending").length;
-            document.getElementById('comp-count').innerText = complaintsList.filter(c => c.status === "Pending").length;
+            let pendingReqs = activationRequests.filter(r => r.status === "Pending").length;
+            let pendingWithdrawals = withdrawalRequests.filter(w => w.status === "Pending").length;
+            let pendingComps = complaintsList.filter(c => c.status === "Pending").length;
+
+            document.getElementById('req-count').innerText = pendingReqs;
+            document.getElementById('withdraw-count').innerText = pendingWithdrawals;
+            document.getElementById('comp-count').innerText = pendingComps;
+            document.getElementById('user-count').innerText = registeredUsersList.length;
 
             let reqTbody = document.getElementById('admin-requests-tbody');
-            reqTbody.innerHTML = activationRequests.length === 0 ? `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No requests</td></tr>` : '';
+            reqTbody.innerHTML = activationRequests.length === 0 ? `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 10px;">No requests found</td></tr>` : '';
             activationRequests.forEach((req, idx) => {
-                reqTbody.innerHTML += `<tr><td>${req.user}</td><td>${req.level}</td><td>${req.activationFee}</td><td>${req.depositFee}</td><td><code>${req.code}</code></td><td>${req.status === 'Pending' ? `<button class="btn btn-green" style="padding: 4px;" onclick="approveRequest(${idx})">Approve</button>` : 'Approved'}</td></tr>`;
+                reqTbody.innerHTML += `
+                    <tr style="border-bottom: 1px solid #1a3324;">
+                        <td style="padding: 6px;">${req.user}</td>
+                        <td style="padding: 6px;">${req.level}</td>
+                        <td style="padding: 6px;">${req.depositFee}</td>
+                        <td style="padding: 6px;"><code>${req.code}</code></td>
+                        <td style="padding: 6px;">${req.status === 'Pending' ? `<button class="btn btn-green" style="padding: 4px 8px; font-size: 0.75rem;" onclick="approveRequest(${idx})">Approve</button>` : '<span style="color: var(--neon-green);">Approved</span>'}</td>
+                    </tr>`;
+            });
+
+            let withdrawTbody = document.getElementById('admin-withdrawals-tbody');
+            withdrawTbody.innerHTML = withdrawalRequests.length === 0 ? `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 10px;">No withdrawal requests</td></tr>` : '';
+            withdrawalRequests.forEach((w, idx) => {
+                withdrawTbody.innerHTML += `
+                    <tr style="border-bottom: 1px solid #1a3324;">
+                        <td style="padding: 6px;">${w.user}</td>
+                        <td style="padding: 6px;">${w.amount} Ksh</td>
+                        <td style="padding: 6px;">${w.status}</td>
+                        <td style="padding: 6px;">${w.status === 'Pending' ? `<button class="btn btn-green" style="padding: 4px 8px; font-size: 0.75rem;" onclick="approveWithdrawal(${idx})">Pay / Complete</button>` : '<span style="color: var(--neon-green);">Completed</span>'}</td>
+                    </tr>`;
+            });
+
+            let compTbody = document.getElementById('admin-complaints-tbody');
+            compTbody.innerHTML = complaintsList.length === 0 ? `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 10px;">No complaints</td></tr>` : '';
+            complaintsList.forEach((c, idx) => {
+                compTbody.innerHTML += `
+                    <tr style="border-bottom: 1px solid #1a3324;">
+                        <td style="padding: 6px;">${c.user}</td>
+                        <td style="padding: 6px;">${c.message}</td>
+                        <td style="padding: 6px;">${c.status}</td>
+                        <td style="padding: 6px;">${c.status === 'Pending' ? `<button class="btn btn-gold" style="padding: 4px 8px; font-size: 0.75rem;" onclick="resolveComplaint(${idx})">Mark Resolved</button>` : '<span style="color: var(--text-muted);">Resolved</span>'}</td>
+                    </tr>`;
+            });
+
+            let userTbody = document.getElementById('admin-users-tbody');
+            userTbody.innerHTML = registeredUsersList.length === 0 ? `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 10px;">No registered users recorded yet</td></tr>` : '';
+            registeredUsersList.forEach(usr => {
+                userTbody.innerHTML += `
+                    <tr style="border-bottom: 1px solid #1a3324;">
+                        <td style="padding: 6px; font-weight: bold; color: var(--neon-green);">${usr.username}</td>
+                        <td style="padding: 6px;">${usr.balance ? usr.balance.toFixed(2) : '30.00'} Ksh</td>
+                        <td style="padding: 6px;">Levels: ${usr.levelsUnlocked ? usr.levelsUnlocked.join(', ') : '1'}</td>
+                    </tr>`;
             });
         }
 
@@ -474,11 +664,34 @@
             alert("Approved successfully!");
         }
 
+        function approveWithdrawal(index) {
+            withdrawalRequests[index].status = "Completed";
+            refreshAdminDashboard();
+            alert("Withdrawal marked as completed.");
+        }
+
+        function resolveComplaint(index) {
+            complaintsList[index].status = "Resolved";
+            refreshAdminDashboard();
+            alert("Complaint resolved.");
+        }
+
         function switchAdminTab(tabName, btnElem) {
             document.querySelectorAll('.admin-section').forEach(sec => sec.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            ['requests', 'withdrawals', 'complaints', 'users'].forEach(t => {
+                let b = document.getElementById(`admin-btn-${t}`);
+                if(b) {
+                    b.classList.remove('btn-green', 'btn-gold');
+                    b.style.background = '#1a3324';
+                    b.style.color = 'var(--text-main)';
+                }
+            });
+
             document.getElementById(`admin-tab-${tabName}`).classList.remove('hidden');
-            btnElem.classList.add('active');
+            btnElem.style.background = 'var(--neon-green)';
+            btnElem.style.color = '#000';
+            btnElem.classList.add('btn-green');
         }
     </script>
 </body>
