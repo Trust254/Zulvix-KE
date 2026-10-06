@@ -23,29 +23,6 @@
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDO31-0KLRmO-FXbAaFHaHTnk_F5DTNC4Q",
-            authDomain: "zulvix-ke.firebaseapp.com",
-            projectId: "zulvix-ke",
-            storageBucket: "zulvix-ke.firebasestorage.app",
-            messagingSenderId: "823595914074",
-            appId: "1:823595914074:web:4f4c0d95fd4fd8142fd963"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // Expose Firebase tools to global window scope safely
-        window.db = db;
-        window.FB_SDK = { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot };
-        window.isFirebaseReady = true;
-        window.dispatchEvent(new Event('firebase-ready'));
-    </script>
     <style>
         body { background-color: #070d0a; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }
         .glow-green { box-shadow: 0 0 15px rgba(0, 255, 136, 0.3); }
@@ -161,8 +138,6 @@
         
         <!-- TAB 1: DASHBOARD / TAP ENGINE -->
         <section id="tab-dashboard" class="space-y-4">
-            
-            <!-- Dashboard AI Robot Assistant Box -->
             <div class="bg-brandCard border border-brandGreen/30 rounded-2xl p-4 shadow-lg flex items-center gap-3.5">
                 <div class="w-12 h-12 rounded-xl bg-brandGreen/20 text-brandGreen flex items-center justify-center text-xl flex-shrink-0 glow-green animate-pulse">
                     <i class="fa-solid fa-robot"></i>
@@ -496,7 +471,27 @@
     </div>
 
     <!-- APPLICATION SCRIPT WITH CLOUD FIRESTORE SYNC -->
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDO31-0KLRmO-FXbAaFHaHTnk_F5DTNC4Q",
+            authDomain: "zulvix-ke.firebaseapp.com",
+            projectId: "zulvix-ke",
+            storageBucket: "zulvix-ke.firebasestorage.app",
+            messagingSenderId: "823595914074",
+            appId: "1:823595914074:web:4f4c0d95fd4fd8142fd963"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Expose Firebase tools to global window scope safely
+        window.db = db;
+        window.FB_SDK = { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot };
+        window.isFirebaseReady = true;
+
         const LEVELS_CONFIG = [
             { id: 1, name: 'Iron Box', icon: 'fa-box-archive', unlockFee: 0, userDeposit: 0, perTap: 5, dailyTotal: 30 },
             { id: 2, name: 'Smart TV', icon: 'fa-tv', unlockFee: 800, userDeposit: 2000, perTap: 20, dailyTotal: 120 },
@@ -545,71 +540,59 @@
         }
 
         // Cloud Database Sync Listeners
-        window.addEventListener('firebase-ready', async () => {
-            const db = window.db;
-            const { collection, onSnapshot, doc } = window.FB_SDK;
-
-            // Real-time listener for all registered users
-            onSnapshot(collection(db, "users"), (snapshot) => {
-                appState.usersDb = [];
-                snapshot.forEach((docSnap) => {
-                    appState.usersDb.push(docSnap.data());
-                });
-                
-                // If logged in, update current session user data from cloud
-                if (appState.isLoggedIn && appState.currentUser.phone) {
-                    const latestMe = appState.usersDb.find(u => u.phone === appState.currentUser.phone);
-                    if (latestMe) {
-                        appState.balance = latestMe.balance || 0;
-                        appState.currentLevelId = latestMe.level || 1;
-                        appState.unlockedLevels = latestMe.unlockedLevels || [1];
-                        appState.tapsLeft = latestMe.tapsLeft !== undefined ? latestMe.tapsLeft : 6;
-                        appState.nextTapResetTime = latestMe.nextTapResetTime || null;
-                        appState.transactions = latestMe.transactions || [];
-                    }
+        onSnapshot(collection(db, "users"), (snapshot) => {
+            appState.usersDb = [];
+            snapshot.forEach((docSnap) => {
+                appState.usersDb.push(docSnap.data());
+            });
+            
+            if (appState.isLoggedIn && appState.currentUser.phone) {
+                const latestMe = appState.usersDb.find(u => u.phone === appState.currentUser.phone);
+                if (latestMe) {
+                    appState.balance = latestMe.balance || 0;
+                    appState.currentLevelId = latestMe.level || 1;
+                    appState.unlockedLevels = latestMe.unlockedLevels || [1];
+                    appState.tapsLeft = latestMe.tapsLeft !== undefined ? latestMe.tapsLeft : 6;
+                    appState.nextTapResetTime = latestMe.nextTapResetTime || null;
+                    appState.transactions = latestMe.transactions || [];
                 }
-                updateUI();
-                renderAdminData();
-            });
-
-            // Real-time listener for admin requests (Level Upgrades)
-            onSnapshot(collection(db, "levelRequests"), (snapshot) => {
-                appState.levelRequests = [];
-                snapshot.forEach((docSnap) => { appState.levelRequests.push({ id: docSnap.id, ...docSnap.data() }); });
-                renderAdminData();
-            });
-
-            // Real-time listener for Deposits
-            onSnapshot(collection(db, "depositRequests"), (snapshot) => {
-                appState.depositRequests = [];
-                snapshot.forEach((docSnap) => { appState.depositRequests.push({ id: docSnap.id, ...docSnap.data() }); });
-                renderAdminData();
-            });
-
-            // Real-time listener for Withdrawals
-            onSnapshot(collection(db, "withdrawRequests"), (snapshot) => {
-                appState.withdrawRequests = [];
-                snapshot.forEach((docSnap) => { appState.withdrawRequests.push({ id: docSnap.id, ...docSnap.data() }); });
-                renderAdminData();
-            });
-
-            // Real-time listener for Complaints
-            onSnapshot(collection(db, "complaints"), (snapshot) => {
-                appState.complaints = [];
-                snapshot.forEach((docSnap) => { appState.complaints.push({ id: docSnap.id, ...docSnap.data() }); });
-                renderAdminData();
-            });
-
-            // Real-time listener for Admin Portal Metadata (Retention)
-            onSnapshot(doc(db, "metadata", "adminPortal"), (docSnap) => {
-                if (docSnap.exists()) {
-                    appState.portalRetention = docSnap.data().portalRetention || 0;
-                }
-                renderAdminData();
-            });
-
-            loadLocalSession();
+            }
+            updateUI();
+            renderAdminData();
         });
+
+        onSnapshot(collection(db, "levelRequests"), (snapshot) => {
+            appState.levelRequests = [];
+            snapshot.forEach((docSnap) => { appState.levelRequests.push({ id: docSnap.id, ...docSnap.data() }); });
+            renderAdminData();
+        });
+
+        onSnapshot(collection(db, "depositRequests"), (snapshot) => {
+            appState.depositRequests = [];
+            snapshot.forEach((docSnap) => { appState.depositRequests.push({ id: docSnap.id, ...docSnap.data() }); });
+            renderAdminData();
+        });
+
+        onSnapshot(collection(db, "withdrawRequests"), (snapshot) => {
+            appState.withdrawRequests = [];
+            snapshot.forEach((docSnap) => { appState.withdrawRequests.push({ id: docSnap.id, ...docSnap.data() }); });
+            renderAdminData();
+        });
+
+        onSnapshot(collection(db, "complaints"), (snapshot) => {
+            appState.complaints = [];
+            snapshot.forEach((docSnap) => { appState.complaints.push({ id: docSnap.id, ...docSnap.data() }); });
+            renderAdminData();
+        });
+
+        onSnapshot(doc(db, "metadata", "adminPortal"), (docSnap) => {
+            if (docSnap.exists()) {
+                appState.portalRetention = docSnap.data().portalRetention || 0;
+            }
+            renderAdminData();
+        });
+
+        loadLocalSession();
 
         function loadLocalSession() {
             const savedPhone = localStorage.getItem('zulvix_active_phone');
@@ -621,9 +604,6 @@
         }
 
         async function saveCloudUser(userData) {
-            if (!window.db || !window.FB_SDK) return;
-            const db = window.db;
-            const { doc, setDoc } = window.FB_SDK;
             await setDoc(doc(db, "users", userData.phone), userData, { merge: true });
         }
 
@@ -656,11 +636,6 @@
         }
 
         async function handleRegister() {
-            if (!window.db || !window.FB_SDK) {
-                showToast("Connecting", "Please wait a second for cloud connection...", false);
-                return;
-            }
-
             const name = document.getElementById('regFullName').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
             const pass = document.getElementById('regPassword').value.trim();
@@ -670,10 +645,7 @@
                 return;
             }
 
-            const db = window.db;
-            const { doc, getDoc } = window.FB_SDK;
-            const userDocRef = doc(db, "users", phone);
-            const userSnap = await getDoc(userDocRef);
+            const userSnap = await getDoc(doc(db, "users", phone));
 
             if (userSnap.exists()) {
                 showToast("Account Exists", "This phone number is already registered. Please sign in.", false);
@@ -709,11 +681,6 @@
         }
 
         async function handleLogin() {
-            if (!window.db || !window.FB_SDK) {
-                showToast("Connecting", "Please wait a second for cloud connection...", false);
-                return;
-            }
-
             const phone = document.getElementById('loginPhone').value.trim();
             const pass = document.getElementById('loginPassword').value.trim();
 
@@ -722,8 +689,6 @@
                 return;
             }
 
-            const db = window.db;
-            const { doc, getDoc } = window.FB_SDK;
             const userSnap = await getDoc(doc(db, "users", phone));
 
             if (!userSnap.exists()) {
@@ -882,8 +847,6 @@
             const level = LEVELS_CONFIG.find(l => l.id === selectedUpgradeLevelId);
             if (!level) return;
 
-            const db = window.db;
-            const { setDoc, doc } = window.FB_SDK;
             const reqId = "req_" + Date.now();
 
             await setDoc(doc(db, "levelRequests", reqId), {
@@ -925,8 +888,6 @@
                 return;
             }
 
-            const db = window.db;
-            const { setDoc, doc } = window.FB_SDK;
             const depId = "dep_" + Date.now();
 
             await setDoc(doc(db, "depositRequests", depId), {
@@ -976,8 +937,6 @@
 
             await syncCurrentUserToCloud();
 
-            const db = window.db;
-            const { setDoc, doc } = window.FB_SDK;
             const wId = "wit_" + Date.now();
             await setDoc(doc(db, "withdrawRequests", wId), {
                 id: wId,
@@ -999,8 +958,6 @@
             const msg = textInput.value.trim();
             if (!msg) return;
 
-            const db = window.db;
-            const { setDoc, doc } = window.FB_SDK;
             const cId = "com_" + Date.now();
 
             await setDoc(doc(db, "complaints", cId), {
@@ -1015,7 +972,6 @@
             showToast("Ticket Sent", "Support complaint sent successfully to admin.");
         }
 
-        // Admin Management Control Center
         function openAdminModal() { document.getElementById('adminModal').classList.remove('hidden'); }
         function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); }
         
@@ -1075,9 +1031,6 @@
             }
 
             const newRetention = (appState.portalRetention || 0) + req.unlockFee;
-            const db = window.db;
-            const { setDoc, doc, deleteDoc } = window.FB_SDK;
-
             await setDoc(doc(db, "metadata", "adminPortal"), { portalRetention: newRetention });
             await deleteDoc(doc(db, "levelRequests", reqId));
 
@@ -1101,25 +1054,18 @@
                 await saveCloudUser(targetUser);
             }
 
-            const db = window.db;
-            const { deleteDoc, doc } = window.FB_SDK;
             await deleteDoc(doc(db, "depositRequests", reqId));
-
             renderAdminData();
             showToast("Deposit Completed!", `Deposit of Ksh ${req.amount.toLocaleString()} credited successfully.`);
         }
 
         async function approveWithdrawal(reqId) {
-            const db = window.db;
-            const { deleteDoc, doc } = window.FB_SDK;
             await deleteDoc(doc(db, "withdrawRequests", reqId));
             renderAdminData();
             showToast("Withdrawal Delivered!", "Payout marked as delivered.");
         }
 
         async function resolveComplaint(reqId) {
-            const db = window.db;
-            const { deleteDoc, doc } = window.FB_SDK;
             await deleteDoc(doc(db, "complaints", reqId));
             renderAdminData();
             showToast("Ticket Resolved", "Complaint cleared.");
@@ -1259,6 +1205,36 @@
                 `).join('');
             }
         }
+
+        // Attach functions to global window context so inline onclick attributes work correctly inside ES modules
+        window.showToast = showToast;
+        window.hideToast = hideToast;
+        window.toggleAuthMode = toggleAuthMode;
+        window.handleRegister = handleRegister;
+        window.handleLogin = handleLogin;
+        window.handleLogout = handleLogout;
+        window.switchTab = switchTab;
+        window.handleTapAsset = handleTapAsset;
+        window.openUpgradeModal = openUpgradeModal;
+        window.closeUpgradeModal = closeUpgradeModal;
+        window.confirmUpgradeSubmission = confirmUpgradeSubmission;
+        window.switchToLevel = switchToLevel;
+        window.openDepositModal = openDepositModal;
+        window.closeDepositModal = closeDepositModal;
+        window.submitDeposit = submitDeposit;
+        window.openWithdrawModal = openWithdrawModal;
+        window.closeWithdrawModal = closeWithdrawModal;
+        window.submitWithdrawal = submitWithdrawal;
+        window.submitComplaint = submitComplaint;
+        window.openAdminModal = openAdminModal;
+        window.closeAdminModal = closeAdminModal;
+        window.verifyAdminLogin = verifyAdminLogin;
+        window.lockAdminSession = lockAdminSession;
+        window.switchAdminTab = switchAdminTab;
+        window.approveLevelRequest = approveLevelRequest;
+        window.approveDeposit = approveDeposit;
+        window.approveWithdrawal = approveWithdrawal;
+        window.resolveComplaint = resolveComplaint;
     </script>
 </body>
 </html>
