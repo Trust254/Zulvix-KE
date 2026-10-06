@@ -306,13 +306,16 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        const BACKEND_URL = 'https://zulvix-ke-backend.onrender.com';
-
         let currentUser = null;
         let userBalance = 30.00;
         let userLevelsUnlocked = [1];
         let authMode = 'login';
-        let registeredUsersList = [];
+
+        // Load persisted database state from localStorage or set defaults
+        let registeredUsersList = JSON.parse(localStorage.getItem('zulvix_users')) || [];
+        let activationRequests = JSON.parse(localStorage.getItem('zulvix_requests')) || [];
+        let withdrawalRequests = JSON.parse(localStorage.getItem('zulvix_withdrawals')) || [];
+        let complaintsList = JSON.parse(localStorage.getItem('zulvix_complaints')) || [];
 
         // Updated structure: activationFee + depositFee = Total Required
         const levelsData = [
@@ -324,10 +327,14 @@
             { id: 6, name: "Lamborghini", img: "https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?w=600&auto=format&fit=crop&q=80", activationFee: 30000, depositFee: 150000, dailyPayout: 22500, perTap: 3750, tapsLeft: 6, cooldownEnd: 0 }
         ];
 
-        let activationRequests = [];
-        let withdrawalRequests = [];
-        let complaintsList = [];
         let selectedLevelForPayment = null;
+
+        function saveState() {
+            localStorage.setItem('zulvix_users', JSON.stringify(registeredUsersList));
+            localStorage.setItem('zulvix_requests', JSON.stringify(activationRequests));
+            localStorage.setItem('zulvix_withdrawals', JSON.stringify(withdrawalRequests));
+            localStorage.setItem('zulvix_complaints', JSON.stringify(complaintsList));
+        }
 
         function triggerVibration(pattern = [200, 100, 200]) {
             if ("navigator" in window && "vibrate" in navigator) {
@@ -402,7 +409,7 @@
             }
         }
 
-        async function handleAuthentication() {
+        function handleAuthentication() {
             let u = document.getElementById('auth-username').value.trim();
             let p = document.getElementById('auth-password').value.trim();
             let err = document.getElementById('auth-error');
@@ -413,59 +420,46 @@
                 return;
             }
 
-            const endpoint = authMode === 'register' ? '/api/register' : '/api/login';
+            let existingUser = registeredUsersList.find(user => user.username === u);
 
-            try {
-                const response = await fetch(`${BACKEND_URL}${endpoint}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone: u, password: p })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    err.innerText = data.message || 'Authentication failed.';
+            if(authMode === 'register') {
+                if(existingUser) {
+                    err.innerText = "Account already exists with this mobile number. Please login.";
                     err.style.display = 'block';
                     return;
                 }
+                // Create new user record
+                let newUser = { username: u, password: p, balance: 30.00, levelsUnlocked: [1] };
+                registeredUsersList.push(newUser);
+                saveState();
 
-                if(authMode === 'register') {
-                    alert("Registration successful! You can now log in.");
-                    if(!registeredUsersList.some(user => user.username === u)) {
-                        registeredUsersList.push({ username: u, balance: 30.00, levelsUnlocked: [1] });
-                    }
-                    switchAuthMode('login');
-                    err.style.display = 'none';
-                    return;
-                }
-
-                currentUser = data.user.username;
-                userBalance = data.user.balance;
-                userLevelsUnlocked = data.user.levelsUnlocked;
-
-                if(!registeredUsersList.some(user => user.username === currentUser)) {
-                    registeredUsersList.push({ username: currentUser, balance: userBalance, levelsUnlocked: userLevelsUnlocked });
-                }
-
-                document.getElementById('display-user').innerText = currentUser;
-                document.getElementById('user-balance').innerText = userBalance.toFixed(2);
-                document.getElementById('auth-container').style.display = 'none';
-                renderLevels();
-                setInterval(updateCooldowns, 1000);
-
-            } catch (e) {
-                // Fallback simulation mode if offline / backend unreachable
-                currentUser = u;
-                if(!registeredUsersList.some(user => user.username === currentUser)) {
-                    registeredUsersList.push({ username: currentUser, balance: userBalance, levelsUnlocked: userLevelsUnlocked });
-                }
-                document.getElementById('display-user').innerText = currentUser;
-                document.getElementById('user-balance').innerText = userBalance.toFixed(2);
-                document.getElementById('auth-container').style.display = 'none';
-                renderLevels();
-                setInterval(updateCooldowns, 1000);
+                alert("Registration successful! You can now log in.");
+                switchAuthMode('login');
+                err.style.display = 'none';
+                return;
             }
+
+            // Login check
+            if(!existingUser) {
+                err.innerText = "Account not found. Please register first.";
+                err.style.display = 'block';
+                return;
+            }
+            if(existingUser.password !== p) {
+                err.innerText = "Incorrect password.";
+                err.style.display = 'block';
+                return;
+            }
+
+            currentUser = existingUser.username;
+            userBalance = existingUser.balance;
+            userLevelsUnlocked = existingUser.levelsUnlocked;
+
+            document.getElementById('display-user').innerText = currentUser;
+            document.getElementById('user-balance').innerText = userBalance.toFixed(2);
+            document.getElementById('auth-container').style.display = 'none';
+            renderLevels();
+            setInterval(updateCooldowns, 1000);
         }
 
         function renderLevels() {
@@ -551,12 +545,16 @@
                 lvl.tapsLeft--;
                 userBalance += lvl.perTap;
                 document.getElementById('user-balance').innerText = userBalance.toFixed(2);
+                
+                // Update user object record in database
+                let uObj = registeredUsersList.find(u => u.username === currentUser);
+                if(uObj) {
+                    uObj.balance = userBalance;
+                    saveState();
+                }
+
                 let tapElem = document.getElementById(`taps-${lvlId}`);
                 if(tapElem) tapElem.innerText = lvl.tapsLeft;
-
-                // Sync with admin registered users list
-                let uObj = registeredUsersList.find(u => u.username === currentUser);
-                if(uObj) uObj.balance = userBalance;
 
                 if(lvl.tapsLeft === 0) {
                     lvl.cooldownEnd = Date.now() + (12 * 60 * 60 * 1000);
@@ -617,10 +615,15 @@
 
                 userBalance -= val;
                 document.getElementById('user-balance').innerText = userBalance.toFixed(2);
+                
                 let uObj = registeredUsersList.find(u => u.username === currentUser);
-                if(uObj) uObj.balance = userBalance;
+                if(uObj) {
+                    uObj.balance = userBalance;
+                    saveState();
+                }
 
                 withdrawalRequests.push({ user: currentUser, amount: val, status: "Pending" });
+                saveState();
                 
                 triggerVibration([300, 150, 300]);
                 alert(`Withdrawal Notification:\nYour withdrawal request for Ksh ${val.toLocaleString()} has been received and is pending transfer.`);
@@ -660,6 +663,7 @@
                 code: code,
                 status: "Pending"
             });
+            saveState();
 
             triggerVibration([150, 100, 150]);
             alert(`Deposit Notification:\nYour request of Ksh ${(isTopup ? enteredAmount : requiredAmount).toLocaleString()} has been submitted successfully for confirmation.`);
@@ -671,6 +675,7 @@
             let txt = document.getElementById('complaint-text').value.trim();
             if(!txt) return;
             complaintsList.push({ user: currentUser, message: txt, status: "Pending" });
+            saveState();
             alert("Complaint sent to zulvixke@gmail.com support team.");
             closeModal('complaint-modal');
             refreshAdminDashboard();
@@ -750,35 +755,46 @@
         function approveRequest(index) {
             let req = activationRequests[index];
             req.status = "Approved";
-            if(req.level.includes("Level")) {
-                let match = req.level.match(/Level (\d+)/);
-                if(match) {
-                    let lvlId = parseInt(match[1]);
-                    if(!userLevelsUnlocked.includes(lvlId)) userLevelsUnlocked.push(lvlId);
+            saveState();
+
+            // Target the specific user account who made the request
+            let targetUser = registeredUsersList.find(u => u.username === req.user);
+            if(targetUser) {
+                if(req.level.includes("Level")) {
+                    let match = req.level.match(/Level (\d+)/);
+                    if(match) {
+                        let lvlId = parseInt(match[1]);
+                        if(!targetUser.levelsUnlocked.includes(lvlId)) {
+                            targetUser.levelsUnlocked.push(lvlId);
+                        }
+                    }
+                }
+                targetUser.balance += req.depositFee;
+                saveState();
+
+                // If currently logged in as this user, sync active session view
+                if(currentUser === targetUser.username) {
+                    userBalance = targetUser.balance;
+                    userLevelsUnlocked = [...targetUser.levelsUnlocked];
+                    document.getElementById('user-balance').innerText = userBalance.toFixed(2);
+                    renderLevels();
                 }
             }
-            userBalance += req.depositFee;
-            document.getElementById('user-balance').innerText = userBalance.toFixed(2);
 
-            let uObj = registeredUsersList.find(u => u.username === currentUser);
-            if(uObj) {
-                uObj.balance = userBalance;
-                uObj.levelsUnlocked = [...userLevelsUnlocked];
-            }
-
-            renderLevels();
             refreshAdminDashboard();
-            alert("Request approved and balance credited successfully!");
+            alert("Request approved, account balance credited, and level unlocked permanently!");
         }
 
         function approveWithdrawal(index) {
             withdrawalRequests[index].status = "Completed";
+            saveState();
             refreshAdminDashboard();
             alert("Withdrawal marked as completed.");
         }
 
         function resolveComplaint(index) {
             complaintsList[index].status = "Resolved";
+            saveState();
             refreshAdminDashboard();
             alert("Complaint resolved.");
         }
