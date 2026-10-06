@@ -102,8 +102,17 @@
                 <label>Access Password</label>
                 <input type="password" id="auth-password" class="form-control" placeholder="Enter password">
             </div>
+            
+            <!-- MANDATORY TERMS CHECKBOX (Only shown in Register mode) -->
+            <div id="terms-group" class="form-group hidden" style="display: flex; align-items: flex-start; gap: 10px; margin-top: 10px;">
+                <input type="checkbox" id="terms-checkbox" style="margin-top: 4px; accent-color: var(--neon-green); cursor: pointer;">
+                <label for="terms-checkbox" style="font-size: 0.8rem; color: var(--text-muted); cursor: pointer; line-height: 1.4;">
+                    I agree to the <a href="javascript:void(0)" onclick="openRulesModal()" style="color: var(--neon-green); text-decoration: underline;">Rules, Withdrawal Limits, & Account Reserve Policies</a> of Zulvix-KE.
+                </label>
+            </div>
+
             <div id="auth-error" class="error-text"></div>
-            <button id="auth-submit-btn" class="btn btn-green" style="margin-top: 10px;" onclick="handleAuthentication()">Login to Account</button>
+            <button id="auth-submit-btn" class="btn btn-green" style="margin-top: 15px;" onclick="handleAuthentication()">Login to Account</button>
         </div>
     </div>
 
@@ -393,6 +402,7 @@
             document.getElementById('auth-container').style.display = 'flex';
             document.getElementById('auth-username').value = '';
             document.getElementById('auth-password').value = '';
+            document.getElementById('terms-checkbox').checked = false;
         };
 
         window.switchAuthMode = function(mode) {
@@ -400,6 +410,7 @@
             let subBtn = document.getElementById('auth-submit-btn');
             let loginTab = document.getElementById('tab-login-btn');
             let regTab = document.getElementById('tab-register-btn');
+            let termsGroup = document.getElementById('terms-group');
             let err = document.getElementById('auth-error');
             err.style.display = 'none';
 
@@ -407,10 +418,12 @@
                 loginTab.classList.add('active');
                 regTab.classList.remove('active');
                 subBtn.innerText = "Login to Account";
+                termsGroup.classList.add('hidden');
             } else {
                 regTab.classList.add('active');
                 loginTab.classList.remove('active');
                 subBtn.innerText = "Register New Account";
+                termsGroup.classList.remove('hidden');
             }
         };
 
@@ -423,6 +436,15 @@
                 err.innerText = "Please enter both mobile number and password.";
                 err.style.display = 'block';
                 return;
+            }
+
+            if(window.authMode === 'register') {
+                let termsChecked = document.getElementById('terms-checkbox').checked;
+                if(!termsChecked) {
+                    err.innerText = "You must agree to the Rules & Regulations to register.";
+                    err.style.display = 'block';
+                    return;
+                }
             }
 
             try {
@@ -683,9 +705,9 @@
             }
         };
 
-        window.openComplaintModal = function() { toggleMenu(); document.getElementById('complaint-modal').style.display = 'flex'; };
+        window.openComplaintModal = function() { if(document.getElementById('side-menu').classList.contains('open')) toggleMenu(); document.getElementById('complaint-modal').style.display = 'flex'; };
         window.openAboutModal = function() { toggleMenu(); document.getElementById('about-modal').style.display = 'flex'; };
-        window.openRulesModal = function() { toggleMenu(); document.getElementById('rules-modal').style.display = 'flex'; };
+        window.openRulesModal = function() { if(document.getElementById('side-menu').classList.contains('open')) toggleMenu(); document.getElementById('rules-modal').style.display = 'flex'; };
         window.closeModal = function(modalId) { document.getElementById(modalId).style.display = 'none'; };
 
         window.submitActivationRequest = async function() {
@@ -756,7 +778,6 @@
         window.refreshAdminDashboard = async function() {
             try {
                 let reqSnap = await getDocs(collection(db, "zulvix_requests"));
-                let reqList = [];
                 let reqDocs = [];
                 reqSnap.forEach(docSnap => {
                     reqDocs.push({ id: docSnap.id, ...docSnap.data() });
