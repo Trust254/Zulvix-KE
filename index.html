@@ -29,7 +29,7 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-brandGreen selection:text-black">
 
-    <!-- AUTHENTICATION WRAPPER (Shows if not logged in) -->
+    <!-- AUTHENTICATION WRAPPER -->
     <div id="authWrapper" class="fixed inset-0 bg-brandDark z-50 flex items-center justify-center p-4">
         <div class="bg-brandCard border border-brandGreen/40 rounded-2xl max-w-sm w-full p-6 space-y-6 shadow-2xl">
             <div class="text-center space-y-2">
@@ -119,7 +119,7 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <span class="text-xs uppercase tracking-wider text-zinc-400">Account Tier</span>
-                        <h2 id="currentTierName" class="text-lg font-bold text-brandGreen">Iron Box (Level 1)</h2>
+                        <h2 id="currentTierName" class="text-lg font-bold text-brandGreen">Level 1: Iron Box</h2>
                     </div>
                     <span id="tierStatusBadge" class="bg-brandGreen/20 text-brandGreen border border-brandGreen/40 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase">Active</span>
                 </div>
@@ -130,7 +130,7 @@
                         <p id="dashBalance" class="text-xl font-black text-brandGold">Ksh 0.00</p>
                     </div>
                     <div>
-                        <span class="text-[11px] text-zinc-400">Taps Remaining</span>
+                        <span class="text-[11px] text-zinc-400">Taps Remaining (Daily: 6)</span>
                         <p id="tapsRemaining" class="text-xl font-black text-white">6 / 6</p>
                     </div>
                 </div>
@@ -139,14 +139,13 @@
             <!-- Tapping Interface Controller -->
             <div class="bg-brandCard border border-zinc-800 rounded-2xl p-6 text-center space-y-4 shadow-xl">
                 <div class="relative w-40 h-40 mx-auto flex items-center justify-center">
-                    <!-- Pulsing Glow Ring -->
                     <div class="absolute inset-0 rounded-full bg-brandGreen/10 animate-pulse"></div>
                     <button onclick="handleTapAsset()" id="tapButton" class="w-32 h-32 rounded-full bg-gradient-to-tr from-brandGreen to-brandGold text-black font-black text-xl shadow-lg glow-green transform active:scale-95 transition flex flex-col items-center justify-center cursor-pointer">
-                        <i class="fa-solid fa-fingerprint text-3xl mb-1"></i>
+                        <i id="tapAssetIcon" class="fa-solid fa-box-archive text-3xl mb-1"></i>
                         <span>TAP ASSET</span>
                     </button>
                 </div>
-                <p id="tapFeedbackMessage" class="text-xs text-zinc-400">Tap the asset above to collect your cycle reward payout.</p>
+                <p id="tapFeedbackMessage" class="text-xs text-zinc-400">Tap your active asset 6 times daily to collect your standard payout.</p>
             </div>
 
             <!-- Quick Actions Panel -->
@@ -175,62 +174,12 @@
         <!-- TAB 2: LEVELS & UPGRADES -->
         <section id="tab-levels" class="space-y-4 hidden">
             <div class="mb-2">
-                <h2 class="text-lg font-bold text-white">Asset Upgrade Tiers</h2>
-                <p class="text-xs text-zinc-400">Unlock higher-ranking assets to increase your per-tap multiplier.</p>
+                <h2 class="text-lg font-bold text-white">Standard Upgrade Tiers</h2>
+                <p class="text-xs text-zinc-400">Unlock higher-ranking tiers with standard deposit requirements and daily earnings.</p>
             </div>
 
-            <div class="space-y-3">
-                <!-- Level 1 -->
-                <div class="bg-brandCard border border-brandGreen/40 rounded-xl p-4 flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-xl bg-zinc-900 border border-brandGreen/30 flex items-center justify-center text-brandGreen text-2xl flex-shrink-0 overflow-hidden">
-                        <i class="fa-solid fa-box-archive"></i>
-                    </div>
-                    <div class="flex-grow">
-                        <span class="text-[10px] text-brandGreen font-bold uppercase tracking-wider">Current Level</span>
-                        <h3 class="font-bold text-white text-sm">Level 1: Iron Box</h3>
-                        <p class="text-xs text-zinc-400">Reward: Ksh 50 / Tap</p>
-                    </div>
-                    <button disabled class="bg-zinc-800 text-zinc-500 text-xs px-3 py-1.5 rounded-lg font-bold cursor-not-allowed">Active</button>
-                </div>
-
-                <!-- Level 2 -->
-                <div class="bg-brandCard border border-zinc-800 rounded-xl p-4 flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-brandGold text-2xl flex-shrink-0 overflow-hidden">
-                        <i class="fa-solid fa-tv"></i>
-                    </div>
-                    <div class="flex-grow">
-                        <span class="text-[10px] text-brandGold font-bold uppercase tracking-wider">Cost: Ksh 1,000</span>
-                        <h3 class="font-bold text-white text-sm">Level 2: Smart TV</h3>
-                        <p class="text-xs text-zinc-400">Reward: Ksh 180 / Tap</p>
-                    </div>
-                    <button onclick="upgradeTier(2, 1000, 'Smart TV', 180)" class="bg-brandGold hover:bg-yellow-400 text-black text-xs px-3 py-1.5 rounded-lg font-bold transition">Unlock</button>
-                </div>
-
-                <!-- Level 3 -->
-                <div class="bg-brandCard border border-zinc-800 rounded-xl p-4 flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-brandGold text-2xl flex-shrink-0 overflow-hidden">
-                        <i class="fa-solid fa-motorcycle"></i>
-                    </div>
-                    <div class="flex-grow">
-                        <span class="text-[10px] text-brandGold font-bold uppercase tracking-wider">Cost: Ksh 3,500</span>
-                        <h3 class="font-bold text-white text-sm">Level 3: Motorbike</h3>
-                        <p class="text-xs text-zinc-400">Reward: Ksh 450 / Tap</p>
-                    </div>
-                    <button onclick="upgradeTier(3, 3500, 'Motorbike', 450)" class="bg-brandGold hover:bg-yellow-400 text-black text-xs px-3 py-1.5 rounded-lg font-bold transition">Unlock</button>
-                </div>
-
-                <!-- Level 4 -->
-                <div class="bg-brandCard border border-zinc-800 rounded-xl p-4 flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-brandGold text-2xl flex-shrink-0 overflow-hidden">
-                        <i class="fa-solid fa-car"></i>
-                    </div>
-                    <div class="flex-grow">
-                        <span class="text-[10px] text-brandGold font-bold uppercase tracking-wider">Cost: Ksh 8,000</span>
-                        <h3 class="font-bold text-white text-sm">Level 4: Economy Car</h3>
-                        <p class="text-xs text-zinc-400">Reward: Ksh 1,100 / Tap</p>
-                    </div>
-                    <button onclick="upgradeTier(4, 8000, 'Economy Car', 1100)" class="bg-brandGold hover:bg-yellow-400 text-black text-xs px-3 py-1.5 rounded-lg font-bold transition">Unlock</button>
-                </div>
+            <div class="space-y-3" id="levelsListContainer">
+                <!-- Levels will be dynamically rendered or structured cleanly -->
             </div>
         </section>
 
@@ -279,9 +228,9 @@
             <div class="bg-brandCard border border-zinc-800 rounded-2xl p-4 space-y-3">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400">Platform Guidelines</h4>
                 <ul class="text-xs text-zinc-300 space-y-2 list-disc list-inside">
+                    <li>Level 1 is completely free, earning Ksh 5 per tap (Ksh 30 total daily).</li>
+                    <li>Higher levels require a standard unlock fee and deposit requirement.</li>
                     <li>Withdrawals process daily between 8:00 AM – 6:00 PM EAT.</li>
-                    <li>Minimum withdrawal threshold is Ksh 2,000.</li>
-                    <li>Mandatory account balance reserve rule of Ksh 2,000 applies.</li>
                 </ul>
             </div>
 
@@ -314,7 +263,6 @@
     </nav>
 
     <!-- MODALS SECTION -->
-
     <!-- Deposit Modal -->
     <div id="depositModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-brandCard border border-brandGreen/40 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
@@ -325,7 +273,7 @@
             <div class="space-y-3">
                 <div>
                     <label class="text-xs text-zinc-400 block mb-1">Amount (Ksh)</label>
-                    <input type="number" id="depositAmountInput" placeholder="e.g. 1000" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brandGreen">
+                    <input type="number" id="depositAmountInput" placeholder="e.g. 2000" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brandGreen">
                 </div>
                 <div>
                     <label class="text-xs text-zinc-400 block mb-1">M-Pesa Phone Number</label>
@@ -347,8 +295,8 @@
             </div>
             <div class="space-y-3">
                 <div>
-                    <label class="text-xs text-zinc-400 block mb-1">Withdrawal Amount (Min: Ksh 2,000)</label>
-                    <input type="number" id="withdrawAmountInput" placeholder="e.g. 2500" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brandGold">
+                    <label class="text-xs text-zinc-400 block mb-1">Withdrawal Amount (Ksh)</label>
+                    <input type="number" id="withdrawAmountInput" placeholder="e.g. 500" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brandGold">
                 </div>
                 <div>
                     <label class="text-xs text-zinc-400 block mb-1">Destination Phone Number</label>
@@ -392,22 +340,27 @@
         </div>
     </div>
 
-    <!-- CORE APPLICATION LOGIC & EVENT CONTROLLERS -->
+    <!-- CORE APPLICATION LOGIC -->
     <script>
-        // App State Store
+        // Standard Level Configurations
+        const LEVELS_CONFIG = [
+            { id: 1, name: 'Iron Box', icon: 'fa-box-archive', cost: 0, depositReq: 0, perTap: 5, dailyTotal: 30 },
+            { id: 2, name: 'Smart TV', icon: 'fa-tv', cost: 800, depositReq: 2000, perTap: 20, dailyTotal: 120 },
+            { id: 3, name: 'Motorbike', icon: 'fa-motorcycle', cost: 2500, depositReq: 2000, perTap: 55, dailyTotal: 330 },
+            { id: 4, name: 'Economy Car', icon: 'fa-car', cost: 6000, depositReq: 2000, perTap: 140, dailyTotal: 840 }
+        ];
+
         let appState = {
             isLoggedIn: false,
             currentUser: { name: 'Zulvix User', phone: '0712345678' },
-            balance: 150.00,
+            balance: 0.00,
+            currentLevelId: 1,
             tapsLeft: 6,
-            tierName: 'Iron Box (Level 1)',
-            rewardPerTap: 50.00,
             transactions: []
         };
 
-        // Load state from localStorage if available
         function loadAppState() {
-            const saved = localStorage.getItem('zulvix_full_state');
+            const saved = localStorage.getItem('zulvix_standard_state');
             if (saved) {
                 try {
                     appState = JSON.parse(saved);
@@ -420,10 +373,9 @@
         }
 
         function saveAppState() {
-            localStorage.setItem('zulvix_full_state', JSON.stringify(appState));
+            localStorage.setItem('zulvix_standard_state', JSON.stringify(appState));
         }
 
-        // Authentication State Controllers
         function checkAuthUI() {
             const authWrapper = document.getElementById('authWrapper');
             if (appState.isLoggedIn) {
@@ -440,7 +392,7 @@
             if (mode === 'register') {
                 loginCont.classList.add('hidden');
                 regCont.classList.remove('hidden');
-                subtitle.innerText = "Create a new account to begin earning";
+                subtitle.innerText = "Create a new account to start earning Free Tier";
             } else {
                 regCont.classList.add('hidden');
                 loginCont.classList.remove('hidden');
@@ -471,16 +423,15 @@
             appState.isLoggedIn = true;
             appState.currentUser.name = name;
             appState.currentUser.phone = phone;
-            appState.balance = 100.00; // Welcome bonus
             appState.transactions.unshift({
-                type: 'Welcome Bonus',
-                amount: '+Ksh 100.00',
+                type: 'Account Created',
+                amount: 'Level 1 Active',
                 date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             });
             saveAppState();
             checkAuthUI();
             updateUI();
-            alert("Account created successfully! Welcome bonus of Ksh 100 added.");
+            alert("Account created successfully! Level 1 is active (Free).");
         }
 
         function handleLogout() {
@@ -491,7 +442,6 @@
             }
         }
 
-        // Tab Navigation Switcher
         function switchTab(tabId) {
             const tabs = ['dashboard', 'levels', 'wallet', 'profile'];
             tabs.forEach(t => {
@@ -513,65 +463,64 @@
             }
         }
 
-        // Tap Asset Engine Action
         function handleTapAsset() {
             if (appState.tapsLeft <= 0) {
-                alert("You have exhausted your taps for this cycle. Please wait for the cooldown timer.");
+                alert("You have exhausted your 6 daily taps for this cycle. Come back tomorrow!");
                 return;
             }
 
+            const currentLevel = LEVELS_CONFIG.find(l => l.id === appState.currentLevelId) || LEVELS_CONFIG[0];
             appState.tapsLeft -= 1;
-            appState.balance += appState.rewardPerTap;
+            appState.balance += currentLevel.perTap;
 
-            // Log Transaction
             appState.transactions.unshift({
-                type: 'Tap Reward',
-                amount: `+Ksh ${appState.rewardPerTap}`,
+                type: `Tap Reward (${currentLevel.name})`,
+                amount: `+Ksh ${currentLevel.perTap}`,
                 date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             });
 
             saveAppState();
             updateUI();
 
-            // Feedback Animation effect
             const btn = document.getElementById('tapButton');
             btn.classList.add('scale-95');
             setTimeout(() => btn.classList.remove('scale-95'), 150);
         }
 
-        // Tier Upgrade Handler
-        function upgradeTier(levelNum, cost, name, reward) {
-            if (appState.balance < cost) {
-                alert(`Insufficient balance! You need Ksh ${cost.toLocaleString()} to unlock Level ${levelNum}. Please top up your wallet.`);
+        function upgradeTier(levelId) {
+            const level = LEVELS_CONFIG.find(l => l.id === levelId);
+            if (!level) return;
+
+            if (appState.balance < level.cost) {
+                alert(`Insufficient balance! You need Ksh ${level.cost.toLocaleString()} to unlock Level ${level.id} (${level.name}). Please deposit funds.`);
                 switchTab('wallet');
                 return;
             }
 
-            if (confirm(`Confirm upgrade to Level ${levelNum}: ${name} for Ksh ${cost.toLocaleString()}?`)) {
-                appState.balance -= cost;
-                appState.tierName = `${name} (Level ${levelNum})`;
-                appState.rewardPerTap = reward;
+            if (level.depositReq > 0) {
+                alert(`Standard Security Rule: Unlocking Level ${level.id} requires a verified wallet deposit reference of Ksh${level.depositReq.toLocaleString()}.`);
+            }
+
+            if (confirm(`Confirm unlocking Level ${level.id}: ${level.name} for Ksh${level.cost.toLocaleString()}?`)) {
+                appState.balance -= level.cost;
+                appState.currentLevelId = level.id;
+                appState.tapsLeft = 6; // Reset or maintain taps for new level
 
                 appState.transactions.unshift({
-                    type: `Upgrade to ${name}`,
-                    amount: `-Ksh ${cost.toLocaleString()}`,
+                    type: `Unlocked ${level.name}`,
+                    amount: `-Ksh ${level.cost.toLocaleString()}`,
                     date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 });
 
                 saveAppState();
                 updateUI();
                 switchTab('dashboard');
-                alert(`Successfully unlocked ${name}! Your reward per tap is now Ksh ${reward}.`);
+                alert(`Successfully upgraded to Level ${level.id} (${level.name})! Earn Ksh ${level.perTap} per tap.`);
             }
         }
 
-        // Deposit Handlers
-        function openDepositModal() {
-            document.getElementById('depositModal').classList.remove('hidden');
-        }
-        function closeDepositModal() {
-            document.getElementById('depositModal').classList.add('hidden');
-        }
+        function openDepositModal() { document.getElementById('depositModal').classList.remove('hidden'); }
+        function closeDepositModal() { document.getElementById('depositModal').classList.add('hidden'); }
         function submitDeposit() {
             const amountInput = document.getElementById('depositAmountInput');
             const phoneInput = document.getElementById('depositPhoneInput');
@@ -594,34 +543,29 @@
             closeDepositModal();
             amountInput.value = '';
             phoneInput.value = '';
-            alert(`Deposit request simulated successfully! Ksh ${amt.toLocaleString()} added to wallet.`);
+            alert(`Deposit of Ksh ${amt.toLocaleString()} processed successfully.`);
         }
 
-        // Withdrawal Handlers
-        function openWithdrawModal() {
-            document.getElementById('withdrawModal').classList.remove('hidden');
-        }
-        function closeWithdrawModal() {
-            document.getElementById('withdrawModal').classList.add('hidden');
-        }
+        function openWithdrawModal() { document.getElementById('withdrawModal').classList.remove('hidden'); }
+        function closeWithdrawModal() { document.getElementById('withdrawModal').classList.add('hidden'); }
         function submitWithdrawal() {
             const amountInput = document.getElementById('withdrawAmountInput');
             const phoneInput = document.getElementById('withdrawPhoneInput');
             const amt = parseFloat(amountInput.value);
 
-            if (isNaN(amt) || amt < 2000) {
-                alert("Minimum withdrawal threshold is Ksh 2,000.");
+            if (isNaN(amt) || amt <= 0) {
+                alert("Please enter a valid withdrawal amount.");
                 return;
             }
 
-            if (appState.balance - amt < 2000) {
-                alert("Withdrawal denied: You must maintain a mandatory account balance reserve of Ksh 2,000.");
+            if (appState.balance < amt) {
+                alert("Insufficient balance for this withdrawal request.");
                 return;
             }
 
             appState.balance -= amt;
             appState.transactions.unshift({
-                type: 'Withdrawal Request',
+                type: 'Withdrawal Payout',
                 amount: `-Ksh ${amt.toLocaleString()}`,
                 date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             });
@@ -631,16 +575,11 @@
             closeWithdrawModal();
             amountInput.value = '';
             phoneInput.value = '';
-            alert("Withdrawal request submitted successfully and logged for payout processing.");
+            alert("Withdrawal request submitted successfully.");
         }
 
-        // Admin Portal Handlers
-        function openAdminModal() {
-            document.getElementById('adminModal').classList.remove('hidden');
-        }
-        function closeAdminModal() {
-            document.getElementById('adminModal').classList.add('hidden');
-        }
+        function openAdminModal() { document.getElementById('adminModal').classList.remove('hidden'); }
+        function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); }
         function verifyAdminLogin() {
             const pin = document.getElementById('adminPasscodeInput').value;
             if (pin === '3879') {
@@ -648,7 +587,7 @@
                 document.getElementById('adminPanelContent').classList.remove('hidden');
                 document.getElementById('adminPasscodeInput').value = '';
             } else {
-                alert("Invalid admin PIN passcode.");
+                alert("Invalid passcode.");
             }
         }
         function lockAdminSession() {
@@ -657,39 +596,59 @@
             closeAdminModal();
         }
 
-        // UI Refresh Renderer
         function updateUI() {
             const formattedBal = `Ksh ${appState.balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            const currentLevel = LEVELS_CONFIG.find(l => l.id === appState.currentLevelId) || LEVELS_CONFIG[0];
             
             document.getElementById('navBalance').innerText = formattedBal;
             document.getElementById('dashBalance').innerText = formattedBal;
             document.getElementById('walletTotalBalance').innerText = formattedBal;
             document.getElementById('tapsRemaining').innerText = `${appState.tapsLeft} / 6`;
-            document.getElementById('currentTierName').innerText = appState.tierName;
+            document.getElementById('currentTierName').innerText = `Level ${currentLevel.id}:${currentLevel.name}`;
+            document.getElementById('tapAssetIcon').className = `fa-solid ${currentLevel.icon} text-3xl mb-1`;
             document.getElementById('profileNameDisplay').innerText = appState.currentUser.name;
             document.getElementById('profilePhoneDisplay').innerText = `Active Member • ${appState.currentUser.phone}`;
 
-            // Render Transaction History
+            // Render Levels List with standard schema
+            const levelsContainer = document.getElementById('levelsListContainer');
+            levelsContainer.innerHTML = LEVELS_CONFIG.map(lvl => {
+                const isActive = lvl.id === appState.currentLevelId;
+                const isFree = lvl.cost === 0;
+                
+                return `
+                    <div class="bg-brandCard border ${isActive ? 'border-brandGreen/60' : 'border-zinc-800'} rounded-xl p-4 flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-xl bg-zinc-900 border ${isActive ? 'border-brandGreen/40 text-brandGreen' : 'border-zinc-700 text-brandGold'} flex items-center justify-center text-xl flex-shrink-0">
+                            <i class="fa-solid ${lvl.icon}"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-bold uppercase tracking-wider ${isFree ? 'text-brandGreen' : 'text-brandGold'}">
+                                    ${isFree ? 'Free Tier' : `Unlock: Ksh ${lvl.cost.toLocaleString()}`}
+                                </span>
+                                ${lvl.depositReq > 0 ? `<span class="text-[9px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded">Dep Req: Ksh ${lvl.depositReq.toLocaleString()}</span>` : ''}
+                            </div>
+                            <h3 class="font-bold text-white text-sm">Level ${lvl.id}:${lvl.name}</h3>
+                            <p class="text-xs text-zinc-400">Earn Ksh ${lvl.perTap}/tap • Total Ksh ${lvl.dailyTotal}/day</p>
+                        </div>
+                        <div>
+                            ${isActive ? 
+                                '<span class="bg-brandGreen/20 text-brandGreen border border-brandGreen/40 text-[10px] px-2.5 py-1 rounded-lg font-bold">Active</span>' :
+                                `<button onclick="upgradeTier(${lvl.id})" class="bg-brandGold hover:bg-yellow-400 text-black text-xs px-3 py-1.5 rounded-lg font-bold transition">Unlock</button>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Render Transactions
             const historyList = document.getElementById('transactionHistoryList');
             if (appState.transactions.length === 0) {
                 historyList.innerHTML = `<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 text-center text-xs text-zinc-500">No transactions recorded yet.</div>`;
             } else {
-                historyList.innerHTML = appState.transactions.upToDate || appState.transactions.map(tx => `
+                historyList.innerHTML = appState.transactions.map(tx => `
                     <div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 flex justify-between items-center text-xs">
                         <div>
                             <p class="font-bold text-white">${tx.type}</p>
                             <span class="text-[10px] text-zinc-500">${tx.date}</span>
                         </div>
-                        <span class="font-black ${tx.amount.startsWith('+') ? 'text-brandGreen' : 'text-brandGold'}">${tx.amount}</span>
-                    </div>
-                `).join('');
-            }
-        }
-
-        // Initialize App on load
-        window.addEventListener('DOMContentLoaded', () => {
-            loadAppState();
-        });
-    </script>
-</body>
-</html>
+                        <
