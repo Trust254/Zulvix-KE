@@ -18,7 +18,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
         body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
 
-        /* Utility */
         .hidden { display: none !important; }
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
@@ -27,10 +26,8 @@
         .gap-2 { gap: 8px; }
         .gap-4 { gap: 16px; }
 
-        /* Notification Toast Bar */
         #notification-banner { background: linear-gradient(90deg, #00ff88, #f3c614); color: var(--bg-dark); padding: 12px 20px; font-weight: 700; text-align: center; font-size: 0.9rem; position: sticky; top: 0; z-index: 100; display: none; box-shadow: 0 4px 15px rgba(0,255,136,0.3); }
 
-        /* Auth Screen */
         #auth-container { position: fixed; inset: 0; background: var(--bg-dark); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .auth-card { background: var(--card-bg); border: 2px solid var(--neon-green); width: 100%; max-width: 420px; padding: 30px; border-radius: 16px; box-shadow: 0 0 30px rgba(0,255,136,0.1); }
         .auth-logo-box { width: 70px; height: 70px; background: linear-gradient(135deg, #00ff88, #113322); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; box-shadow: 0 0 15px rgba(0,255,136,0.3); font-size: 2rem; }
@@ -47,7 +44,6 @@
         .auth-tab { flex: 1; padding: 10px; text-align: center; background: #050a08; color: var(--text-muted); cursor: pointer; font-weight: 600; font-size: 0.9rem; border: none; }
         .auth-tab.active { background: var(--neon-green); color: var(--bg-dark); }
 
-        /* Main Dashboard Header */
         header { background: linear-gradient(180deg, #0d1a13 0%, var(--bg-dark) 100%); border-bottom: 1px solid var(--card-border); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); }
         .brand-wrapper { display: flex; align-items: center; gap: 12px; }
         .brand-info h1 { font-size: 1.25rem; font-weight: 800; color: var(--neon-green); letter-spacing: 0.5px; }
@@ -57,10 +53,8 @@
         .user-pill { background: var(--card-bg); border: 1px solid var(--card-border); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; }
         .user-pill span { color: var(--gold); font-weight: 700; }
 
-        /* Main Content Layout */
         .main-container { max-width: 1200px; margin: 0 auto; width: 100%; padding: 25px; flex: 1; }
 
-        /* Explainer Banner & Deposit Tracker Box */
         .banner { background: linear-gradient(135deg, #102219, #0d1a13); border: 1px solid #1f3b2d; border-left: 5px solid var(--gold); padding: 20px; border-radius: 12px; margin-bottom: 25px; }
         .banner h3 { color: var(--gold); font-size: 1.05rem; margin-bottom: 8px; }
         .banner p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
@@ -69,7 +63,6 @@
         .deposit-tracker-box div h4 { color: var(--gold); font-size: 0.95rem; margin-bottom: 3px; }
         .deposit-tracker-box div p { font-size: 0.85rem; color: var(--text-muted); }
 
-        /* Action Buttons Bar */
         .action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 30px; }
         .btn { padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; transition: 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
         .btn-green { background: var(--neon-green); color: var(--bg-dark); box-shadow: 0 0 15px rgba(0,255,136,0.2); }
@@ -78,10 +71,8 @@
         .btn-gold:hover { background: #d4af37; transform: translateY(-2px); }
         .btn-outline { background: transparent; border: 1px solid var(--card-border); color: var(--text-main); }
         .btn-outline:hover { border-color: var(--neon-green); background: rgba(0,255,136,0.05); }
-        .btn-danger { background: #ff4d4d; color: white; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 
-        /* Levels Grid */
         .section-heading { font-size: 1.3rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
         .levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
 
@@ -103,7 +94,6 @@
         .stat-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 8px 0; border-top: 1px solid #162a1e; margin-bottom: 15px; }
         .stat-row span:last-child { font-weight: 700; color: var(--neon-green); }
 
-        /* Modals */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: var(--card-bg); border: 1px solid var(--card-border); width: 100%; max-width: 540px; border-radius: 16px; padding: 30px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -114,7 +104,6 @@
         .mpesa-instruction { background: #050a08; border: 1px solid var(--gold); border-radius: 10px; padding: 15px; text-align: center; margin: 15px 0; }
         .mpesa-brand { background: #4CAF50; color: white; padding: 4px 10px; font-size: 0.75rem; font-weight: 900; border-radius: 4px; display: inline-block; margin-bottom: 8px; letter-spacing: 1px; }
 
-        /* Admin / Support Dashboard */
         .admin-section { margin-top: 15px; }
         .admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
         .admin-table th, .admin-table td { border: 1px solid var(--card-border); padding: 10px; text-align: left; }
@@ -123,20 +112,17 @@
         .tab-btn { background: none; border: none; color: var(--text-muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
         .tab-btn.active { background: var(--neon-green); color: var(--bg-dark); }
 
-        /* Floating Widgets (Support & AI Assistant) */
         .floating-support { position: fixed; bottom: 25px; right: 25px; background: var(--neon-green); color: var(--bg-dark); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; box-shadow: 0 4px 20px rgba(0,255,136,0.4); cursor: pointer; z-index: 100; transition: transform 0.2s; }
         .floating-support:hover { transform: scale(1.1); }
 
         .floating-ai { position: fixed; bottom: 95px; right: 25px; background: var(--gold); color: var(--bg-dark); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; box-shadow: 0 4px 20px rgba(243,198,20,0.4); cursor: pointer; z-index: 100; transition: transform 0.2s; }
         .floating-ai:hover { transform: scale(1.1); }
 
-        /* AI Chat Modal */
         .ai-chat-box { display: flex; flex-direction: column; height: 350px; background: #050a08; border: 1px solid var(--card-border); border-radius: 10px; padding: 12px; overflow-y: auto; margin-bottom: 15px; gap: 10px; font-size: 0.9rem; }
         .ai-msg { padding: 10px 14px; border-radius: 8px; max-width: 85%; line-height: 1.4; }
         .ai-msg.bot { background: #15291e; color: var(--text-main); align-self: flex-start; border-left: 3px solid var(--gold); }
         .ai-msg.user { background: rgba(0,255,136,0.15); color: var(--neon-green); align-self: flex-end; border-right: 3px solid var(--neon-green); }
 
-        /* Footer */
         footer { background: #050a08; border-top: 1px solid var(--card-border); text-align: center; padding: 20px; font-size: 0.85rem; color: var(--text-muted); margin-top: auto; }
         footer a { color: var(--neon-green); text-decoration: none; }
         footer a:hover { text-decoration: underline; }
@@ -144,7 +130,6 @@
 </head>
 <body>
 
-    <!-- Notification Toast Bar -->
     <div id="notification-banner">🔔 <span id="notification-text">Welcome to Zulvix-KE!</span></div>
 
     <!-- Registration / Login Screen -->
@@ -194,8 +179,6 @@
 
     <!-- Main Dashboard -->
     <div class="main-container">
-
-        <!-- Live Required Deposit Tracker (Deposit Now Button Removed per instructions) -->
         <div class="deposit-tracker-box">
             <div>
                 <h4>Required Deposit Status</h4>
@@ -203,13 +186,11 @@
             </div>
         </div>
 
-        <!-- Explainer Banner -->
         <div class="banner">
             <h3>How to Activate Levels & Start Earning</h3>
             <p><strong>Level 1 (Iron Box)</strong> is completely <strong>FREE</strong> upon registration! Open Level 1, tap your 6 daily taps to collect 5 Ksh per tap (total 30 Ksh/day). After finishing your 6 daily taps, a 12-hour countdown begins before you can tap again. For higher levels, pay via Lipa na M-Pesa (Activation Fee + User Deposit Fee). Once approved by Customer Support, your deposit fee is instantly credited to your dashboard balance available for withdrawal, and your level unlocks!</p>
         </div>
 
-        <!-- Quick Action Bar -->
         <div class="action-grid">
             <button class="btn btn-green" onclick="openDepositModal()">Deposit / Top Up</button>
             <button class="btn btn-gold" onclick="openWithdrawModal()">Withdraw Funds</button>
@@ -217,19 +198,15 @@
             <button class="btn btn-outline" onclick="openComplaintModal()">💬 Send Complaint / Ticket</button>
         </div>
 
-        <!-- Levels Catalog -->
         <div class="section-heading">
             <span>Earning Asset Levels</span>
             <span style="font-size: 0.85rem; color: var(--text-muted);">6 Taps Daily per Unlocked Level</span>
         </div>
 
-        <div class="levels-grid" id="levels-container">
-            <!-- Dynamically rendered via JS -->
-        </div>
-
+        <div class="levels-grid" id="levels-container"></div>
     </div>
 
-    <!-- Payment / Activation Modal with Strict Amount Verification -->
+    <!-- Payment / Activation Modal -->
     <div id="payment-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -305,11 +282,10 @@
             <div class="tab-nav">
                 <button class="tab-btn active" onclick="switchAdminTab('requests', this)">Activation Requests (<span id="req-count">0</span>)</button>
                 <button class="tab-btn" onclick="switchAdminTab('withdrawals', this)">Withdrawal Requests (<span id="withdraw-count">0</span>)</button>
-                <button class="tab-btn" onclick="switchAdminTab('users', this)">Registered Users (<span id="user-count">0</span>)</button>
+                <button class="tab-btn" onclick="switchAdminTab('users', this)">Registered Users</button>
                 <button class="tab-btn" onclick="switchAdminTab('complaints', this)">Complaints (<span id="comp-count">0</span>)</button>
             </div>
 
-            <!-- Tab 1: Requests -->
             <div id="admin-tab-requests" class="admin-section">
                 <table class="admin-table">
                     <thead>
@@ -317,7 +293,7 @@
                             <th>User</th>
                             <th>Level Requested</th>
                             <th>Activation Fee</th>
-                            <th>Deposit Fee (User Bal)</th>
+                            <th>Deposit Fee</th>
                             <th>M-Pesa Code</th>
                             <th>Action</th>
                         </tr>
@@ -328,7 +304,6 @@
                 </table>
             </div>
 
-            <!-- Tab 2: Withdrawals -->
             <div id="admin-tab-withdrawals" class="admin-section hidden">
                 <table class="admin-table">
                     <thead>
@@ -345,31 +320,17 @@
                 </table>
             </div>
 
-            <!-- Tab 3: Users -->
             <div id="admin-tab-users" class="admin-section hidden">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Username</th>
-                            <th>Active Levels</th>
-                            <th>Dashboard Balance (Ksh)</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-users-tbody">
-                        <!-- Populated dynamically -->
-                    </tbody>
-                </table>
+                <p style="font-size:0.85rem; color:var(--text-muted);">Users are stored securely inside the live backend SQLite database.</p>
             </div>
 
-            <!-- Tab 4: Complaints -->
             <div id="admin-tab-complaints" class="admin-section hidden">
                 <table class="admin-table">
                     <thead>
                         <tr>
                             <th>User</th>
                             <th>Complaint Message</th>
-                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="admin-complaints-tbody">
@@ -377,30 +338,29 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
 
-    <!-- Floating Assistant & Support Buttons -->
     <div class="floating-ai" onclick="openAiModal()" title="Zulvix AI Assistant">🤖</div>
     <div class="floating-support" onclick="openAdminPortal()" title="Management Support Login">💬</div>
 
-    <!-- Footer with 2015 Publishing Year, Terms & Support Email -->
     <footer>
         <p>&copy; 2015 – 2026 Zulvix-KE. All rights reserved.</p>
         <p style="margin-top: 6px;">
-            <a href="javascript:alert('Terms & Conditions: Users must be 18+ to operate digital asset tap levels. All M-Pesa transactions are verified securely.')">Terms & Conditions Applied</a> | 
+            <a href="javascript:alert('Terms & Conditions: Users must be 18+ to operate digital asset tap levels.')">Terms & Conditions Applied</a> | 
             Management Support: <a href="mailto:Zulvixsupport@gmail.com">Zulvixsupport@gmail.com</a>
         </p>
     </footer>
 
     <script>
-        // Data Structures & State
+        // Change to your deployed Render backend URL when ready (e.g. 'https://zulvix-ke.onrender.com')
+        const BACKEND_URL = 'http://localhost:3000';
+
         let currentUser = null;
         let userBalance = 30.00;
-        let authMode = 'login'; // 'login' or 'register'
+        let userLevelsUnlocked = [1];
+        let authMode = 'login';
 
-        // Levels Data with Activation Fee & Deposit Fee split
         const levelsData = [
             { id: 1, name: "Iron Box", img: "https://images.unsplash.com/photo-1585435557343-3b092031a831?w=600&auto=format&fit=crop&q=80", activationFee: 0, depositFee: 0, dailyPayout: 30, perTap: 5, tapsLeft: 6, cooldownEnd: 0 },
             { id: 2, name: "Microwave", img: "https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?w=600&auto=format&fit=crop&q=80", activationFee: 800, depositFee: 2000, dailyPayout: 150, perTap: 25, tapsLeft: 6, cooldownEnd: 0 },
@@ -410,17 +370,11 @@
             { id: 6, name: "Lamborghini", img: "https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?w=600&auto=format&fit=crop&q=80", activationFee: 80000, depositFee: 150000, dailyPayout: 22500, perTap: 3750, tapsLeft: 6, cooldownEnd: 0 }
         ];
 
-        // Shared Simulated Backend State
-        let allRegisteredUsers = [
-            { username: "0712345678", password: "Password123!", balance: 30, levelsUnlocked: [1], status: "Active" },
-            { username: "0798765432", password: "Password123!", balance: 2030, levelsUnlocked: [1, 2], status: "Active" }
-        ];
         let activationRequests = [];
         let withdrawalRequests = [];
         let complaintsList = [];
         let selectedLevelForPayment = null;
 
-        // Switch Auth Mode (Login vs Register)
         function switchAuthMode(mode) {
             authMode = mode;
             let subBtn = document.getElementById('auth-submit-btn');
@@ -440,53 +394,56 @@
             }
         }
 
-        // Authentication Handler with Strong Password Validation
-        function handleAuthentication() {
+        async function handleAuthentication() {
             let u = document.getElementById('auth-username').value.trim();
             let p = document.getElementById('auth-password').value.trim();
             let err = document.getElementById('auth-error');
 
             if(!u || !p) {
-                err.innerText = "Please enter both username/phone and password.";
+                err.innerText = "Please enter both mobile number and password.";
                 err.style.display = 'block';
                 return;
             }
 
-            if(authMode === 'register') {
-                const strongRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/;
-                if(!strongRegex.test(p)) {
-                    err.innerText = "Password must be at least 8 characters long and include letters and numbers.";
+            const endpoint = authMode === 'register' ? '/api/register' : '/api/login';
+
+            try {
+                const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: u, password: p })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    err.innerText = data.message || 'Authentication failed.';
                     err.style.display = 'block';
                     return;
                 }
 
-                let existing = allRegisteredUsers.find(x => x.username === u);
-                if(existing) {
-                    err.innerText = "Username or mobile number already registered. Please login.";
-                    err.style.display = 'block';
+                if(authMode === 'register') {
+                    alert("Registration successful! You can now log in.");
+                    switchAuthMode('login');
+                    err.style.display = 'none';
                     return;
                 }
 
-                allRegisteredUsers.push({ username: u, password: p, balance: 30, levelsUnlocked: [1], status: "Active" });
-                userBalance = 30;
-                alert("Registration successful! Welcome to Zulvix-KE with Level 1 unlocked for free.");
-            } else {
-                let existing = allRegisteredUsers.find(x => x.username === u && x.password === p);
-                if(!existing) {
-                    err.innerText = "Invalid mobile number or password.";
-                    err.style.display = 'block';
-                    return;
-                }
-                userBalance = existing.balance;
+                // Successful Login
+                currentUser = data.user.username;
+                userBalance = data.user.balance;
+                userLevelsUnlocked = data.user.levelsUnlocked;
+
+                document.getElementById('display-user').innerText = currentUser;
+                document.getElementById('user-balance').innerText = userBalance.toFixed(2);
+                document.getElementById('auth-container').style.display = 'none';
+                renderLevels();
+                setInterval(updateCooldowns, 1000);
+
+            } catch (e) {
+                err.innerText = "Unable to connect to backend server.";
+                err.style.display = 'block';
             }
-
-            currentUser = u;
-            document.getElementById('display-user').innerText = u;
-            document.getElementById('user-balance').innerText = userBalance.toFixed(2);
-            document.getElementById('auth-container').style.display = 'none';
-            renderLevels();
-            updateDepositTracker();
-            setInterval(updateCooldowns, 1000);
         }
 
         function logoutUser() {
@@ -496,16 +453,13 @@
             document.getElementById('auth-password').value = "";
         }
 
-        // Render Levels Catalog
         function renderLevels() {
             let container = document.getElementById('levels-container');
             container.innerHTML = "";
-
-            let userObj = allRegisteredUsers.find(x => x.username === currentUser) || { levelsUnlocked: [1] };
             let now = Date.now();
 
             levelsData.forEach(lvl => {
-                let isUnlocked = userObj.levelsUnlocked.includes(lvl.id);
+                let isUnlocked = userLevelsUnlocked.includes(lvl.id);
                 let badgeClass = lvl.id === 1 ? "badge-free" : (isUnlocked ? "badge-active" : "badge-locked");
                 let badgeText = lvl.id === 1 ? "Level 1 (Free)" : (isUnlocked ? "Unlocked & Active" : "Locked");
 
@@ -529,7 +483,7 @@
                         <div class="level-body">
                             <div>
                                 <div class="level-title">Level ${lvl.id}: ${lvl.name}</div>
-                                <div class="level-meta">${lvl.id === 1 ? 'Free welcome asset for new joiners.' : `Total: ${totalFee.toLocaleString()} Ksh (Activation: ${lvl.activationFee.toLocaleString()} + Deposit:${lvl.depositFee.toLocaleString()})`}</div>
+                                <div class="level-meta">${lvl.id === 1 ? 'Free welcome asset.' : `Total: ${totalFee.toLocaleString()} Ksh`}</div>
                                 <div class="stat-row">
                                     <span>Daily Payout</span>
                                     <span>${lvl.dailyPayout.toLocaleString()} Ksh (${lvl.perTap} Ksh/tap)</span>
@@ -538,9 +492,9 @@
                             <div>
                                 ${isUnlocked ? `
                                     <div style="font-size: 0.85rem; color: var(--neon-green); margin-bottom: 8px; font-weight: 700;">
-                                        ${inCooldown ? `⏳ Cooldown: <span id="cd-${lvl.id}" style="color: var(--gold);">${timeLeftStr}</span>` : `Taps Remaining: <span id="taps-${lvl.id}">${lvl.tapsLeft}</span>/6`}
+                                        ${inCooldown ? `⏳ Cooldown: <span id="cd-${lvl.id}" style="color: var(--gold);">${timeLeftStr}</span>` : `Taps Left: <span id="taps-${lvl.id}">${lvl.tapsLeft}</span>/6`}
                                     </div>
-                                    <button id="tap-btn-${lvl.id}" class="btn btn-green" style="width: 100%;" ${inCooldown ? 'disabled' : ''} onclick="tapAsset(${lvl.id})">
+                                    <button class="btn btn-green" style="width: 100%;" ${inCooldown ? 'disabled' : ''} onclick="tapAsset(${lvl.id})">
                                         ${inCooldown ? 'Waiting for Cooldown...' : `Tap & Earn (${lvl.perTap} Ksh)`}
                                     </button>
                                 ` : `
@@ -554,20 +508,18 @@
             });
         }
 
-        // Live Cooldown Updater
         function updateCooldowns() {
             let now = Date.now();
             levelsData.forEach(lvl => {
                 if(lvl.cooldownEnd > 0) {
                     let diff = Math.floor((lvl.cooldownEnd - now) / 1000);
                     let cdElem = document.getElementById(`cd-${lvl.id}`);
-
                     if(diff > 0) {
                         let hrs = Math.floor(diff / 3600);
                         let mins = Math.floor((diff % 3600) / 60);
                         let secs = diff % 60;
                         if(cdElem) cdElem.innerText = `${hrs}h ${mins}m ${secs}s`;
-                    } else if(lvl.cooldownEnd !== 0) {
+                    } else {
                         lvl.cooldownEnd = 0;
                         lvl.tapsLeft = 6;
                         renderLevels();
@@ -576,193 +528,100 @@
             });
         }
 
-        // Tap Action Logic & 12hr Cooldown Trigger
         function tapAsset(lvlId) {
             let lvl = levelsData.find(x => x.id === lvlId);
             if(lvl.tapsLeft > 0) {
                 lvl.tapsLeft--;
                 userBalance += lvl.perTap;
                 document.getElementById('user-balance').innerText = userBalance.toFixed(2);
-
-                let uObj = allRegisteredUsers.find(x => x.username === currentUser);
-                if(uObj) uObj.balance = userBalance;
-
                 let tapElem = document.getElementById(`taps-${lvlId}`);
                 if(tapElem) tapElem.innerText = lvl.tapsLeft;
 
                 if(lvl.tapsLeft === 0) {
                     lvl.cooldownEnd = Date.now() + (12 * 60 * 60 * 1000);
-                    alert(`Fantastic! You have finished all 6 taps for Level ${lvlId}. A 12-hour countdown has now started before your next earning cycle.`);
+                    alert(`Finished 6 taps for Level ${lvlId}. 12-hour cooldown started.`);
                     renderLevels();
                 } else {
-                    alert(`Success! Earned ${lvl.perTap} Ksh from Level ${lvlId} (${lvl.name}).`);
+                    alert(`Earned ${lvl.perTap} Ksh!`);
                 }
             }
         }
 
-        // Update Deposit Tracker Display on Dashboard
-        function updateDepositTracker() {
-            let userReqs = activationRequests.filter(r => r.user === currentUser && r.status === "Pending");
-            let trackerText = document.getElementById('deposit-tracker-text');
-            if(userReqs.length > 0) {
-                let latest = userReqs[userReqs.length - 1];
-                trackerText.innerHTML = `Pending verification for <strong>${latest.level}</strong> (Code: <code>${latest.code}</code>). Awaiting Management Support approval.`;
-            } else {
-                trackerText.innerHTML = `No active deposit requests pending. Choose any level above to view required activation & deposit totals.`;
-            }
-        }
-
-        // Audio & Vibration Notification Trigger
-        function triggerNotification(message) {
-            let banner = document.getElementById('notification-banner');
-            let text = document.getElementById('notification-text');
-            text.innerText = message;
-            banner.style.display = 'block';
-
-            if("vibrate" in navigator) {
-                navigator.vibrate([200, 100, 200]);
-            }
-
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.3);
-            } catch(e) {
-                console.log("Audio context prevented");
-            }
-
-            setTimeout(() => {
-                banner.style.display = 'none';
-            }, 8000);
-        }
-
-        // Modals Control & Strict Calculation Verification
         function openPaymentModal(lvlId) {
             selectedLevelForPayment = levelsData.find(x => x.id === lvlId);
             let total = selectedLevelForPayment.activationFee + selectedLevelForPayment.depositFee;
             document.getElementById('payment-modal-title').innerText = `Unlock Level ${lvlId}: ${selectedLevelForPayment.name}`;
-            document.getElementById('payment-amount-display').innerText = `Exact Total Amount Required: ${total.toLocaleString()} Ksh\n(Activation Fee: ${selectedLevelForPayment.activationFee.toLocaleString()} | Deposit Fee: ${selectedLevelForPayment.depositFee.toLocaleString()})`;
+            document.getElementById('payment-amount-display').innerText = `Exact Total Amount: ${total.toLocaleString()} Ksh`;
             document.getElementById('deposit-amount-input').value = "";
             document.getElementById('mpesa-code-input').value = "";
-            document.getElementById('deposit-error-msg').style.display = 'none';
             document.getElementById('payment-modal').style.display = 'flex';
         }
 
         function openDepositModal() {
-            selectedLevelForPayment = { id: 'topup', name: 'Account Deposit', activationFee: 0, depositFee: 1000 };
+            selectedLevelForPayment = { id: 'topup', name: 'Account Deposit' };
             document.getElementById('payment-modal-title').innerText = "Account Deposit Top-Up";
-            document.getElementById('payment-amount-display').innerText = "Paybill: 522533 | Account: 8012296\nRequired Minimum Deposit: 1,000 Ksh";
-            document.getElementById('deposit-amount-input').value = "";
-            document.getElementById('mpesa-code-input').value = "";
-            document.getElementById('deposit-error-msg').style.display = 'none';
+            document.getElementById('payment-amount-display').innerText = "Paybill: 522533 | Account: 8012296\nMinimum: 1,000 Ksh";
             document.getElementById('payment-modal').style.display = 'flex';
         }
 
         function openWithdrawModal() {
             let amt = prompt("Enter amount to withdraw (Ksh):", userBalance);
             if(amt && !isNaN(amt) && parseFloat(amt) > 0) {
-                let amountVal = parseFloat(amt);
-                if(amountVal <= userBalance) {
-                    userBalance -= amountVal;
+                let val = parseFloat(amt);
+                if(val <= userBalance) {
+                    userBalance -= val;
                     document.getElementById('user-balance').innerText = userBalance.toFixed(2);
-                    let uObj = allRegisteredUsers.find(x => x.username === currentUser);
-                    if(uObj) uObj.balance = userBalance;
-
-                    withdrawalRequests.push({
-                        user: currentUser,
-                        amount: amountVal,
-                        status: "Pending"
-                    });
-
-                    alert(`Withdrawal request for ${amountVal} Ksh submitted to Management Support successfully. Pending payout verification.`);
+                    withdrawalRequests.push({ user: currentUser, amount: val, status: "Pending" });
+                    alert("Withdrawal request sent to support.");
                     refreshAdminDashboard();
                 } else {
-                    alert("Insufficient balance for this withdrawal.");
+                    alert("Insufficient balance.");
                 }
-            } else if(amt !== null) {
-                alert("Please enter a valid withdrawal amount.");
             }
         }
 
-        function openComplaintModal() {
-            document.getElementById('complaint-modal').style.display = 'flex';
-        }
+        function openComplaintModal() { document.getElementById('complaint-modal').style.display = 'flex'; }
+        function openAiModal() { document.getElementById('ai-modal').style.display = 'flex'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
 
-        function openAiModal() {
-            document.getElementById('ai-modal').style.display = 'flex';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Strict Deposit Validation Check (Must match calculation and include code)
         function submitActivationRequest() {
             let enteredAmount = parseFloat(document.getElementById('deposit-amount-input').value);
             let code = document.getElementById('mpesa-code-input').value.trim();
             let errBox = document.getElementById('deposit-error-msg');
-
             let isTopup = selectedLevelForPayment.id === 'topup';
             let requiredAmount = isTopup ? 1000 : (selectedLevelForPayment.activationFee + selectedLevelForPayment.depositFee);
 
             if(isNaN(enteredAmount) || enteredAmount !== requiredAmount) {
-                errBox.innerText = `Incorrect amount entered! You must input the exact required deposit total of Ksh ${requiredAmount.toLocaleString()} for this selection.`;
+                errBox.innerText = `Incorrect amount. Must match exact total of Ksh ${requiredAmount.toLocaleString()}.`;
                 errBox.style.display = 'block';
                 return;
             }
-
-            if(!code || code.length < 5) {
-                errBox.innerText = "Please enter a valid M-Pesa transaction confirmation code.";
+            if(!code) {
+                errBox.innerText = "Enter M-Pesa transaction code.";
                 errBox.style.display = 'block';
                 return;
             }
-
-            errBox.style.display = 'none';
-
-            let requestName = isTopup ? 'General Deposit Top-Up' : `Level ${selectedLevelForPayment.id} (${selectedLevelForPayment.name})`;
-            let actFee = isTopup ? 0 : selectedLevelForPayment.activationFee;
-            let depFee = isTopup ? enteredAmount : selectedLevelForPayment.depositFee;
 
             activationRequests.push({
                 user: currentUser,
-                level: requestName,
-                activationFee: actFee,
-                depositFee: depFee,
+                level: isTopup ? 'General Deposit Top-Up' : `Level ${selectedLevelForPayment.id} (${selectedLevelForPayment.name})`,
+                activationFee: isTopup ? 0 : selectedLevelForPayment.activationFee,
+                depositFee: isTopup ? enteredAmount : selectedLevelForPayment.depositFee,
                 code: code,
                 status: "Pending"
             });
 
-            alert("Activation & Payment request submitted to Management Support successfully! Awaiting verification.");
+            alert("Request submitted successfully!");
             closeModal('payment-modal');
-            document.getElementById('deposit-amount-input').value = "";
-            document.getElementById('mpesa-code-input').value = "";
-            updateDepositTracker();
             refreshAdminDashboard();
         }
 
         function submitComplaint() {
             let txt = document.getElementById('complaint-text').value.trim();
-            if(!txt) {
-                alert("Please type your complaint.");
-                return;
-            }
-
-            complaintsList.push({
-                user: currentUser,
-                message: txt,
-                status: "Pending"
-            });
-
-            alert("Support ticket sent to Management Support successfully. You can also reach us via Zulvixsupport@gmail.com.");
+            if(!txt) return;
+            complaintsList.push({ user: currentUser, message: txt, status: "Pending" });
+            alert("Complaint sent.");
             closeModal('complaint-modal');
-            document.getElementById('complaint-text').value = "";
             refreshAdminDashboard();
         }
 
@@ -770,168 +629,63 @@
             let input = document.getElementById('ai-input');
             let q = input.value.trim();
             if(!q) return;
-
             let chatBox = document.getElementById('ai-chat-messages');
             chatBox.innerHTML += `<div class="ai-msg user">${q}</div>`;
             input.value = "";
-
             setTimeout(() => {
-                let reply = "I can help with that! To unlock levels, check the exact total required, pay via Lipa na M-Pesa (Paybill 522533, Account 8012296), enter the exact calculated amount and M-Pesa code. Management support will credit your deposit balance immediately upon verification!";
-                let lower = q.toLowerCase();
-                if(lower.includes('withdraw')) {
-                    reply = "You can withdraw your dashboard balance anytime by clicking the 'Withdraw Funds' button.";
-                } else if(lower.includes('email') || lower.includes('support')) {
-                    reply = "For any management support issues or complaints, please email us directly at Zulvixsupport@gmail.com.";
-                } else if(lower.includes('countdown') || lower.includes('tap')) {
-                    reply = "Each level grants 6 daily taps. Once completed, a 12-hour countdown begins before your next cycle.";
-                }
-                chatBox.innerHTML += `<div class="ai-msg bot">${reply}</div>`;
+                chatBox.innerHTML += `<div class="ai-msg bot">To unlock levels, pay via Lipa na M-Pesa (Paybill 522533, Account 8012296) and submit your code.</div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
             }, 500);
         }
 
         function copyInviteLink() {
             navigator.clipboard.writeText(`https://trust254.github.io/Zulvix-KE/?ref=${currentUser}`);
-            alert("Referral link copied! Each successful invite automatically grants a +3% bonus boost to your daily earnings.");
+            alert("Referral link copied!");
         }
 
-        // Management Support Portal Flow
         function openAdminPortal() {
             let username = prompt("Enter Management Support ID:");
             let pass = prompt("Enter Support Password:");
-
             if(username === "3879" && pass === "Scott@254") {
                 refreshAdminDashboard();
                 document.getElementById('admin-modal').style.display = 'flex';
             } else if(username !== null) {
-                alert("Invalid Management Support Credentials.");
+                alert("Invalid Credentials.");
             }
         }
 
         function refreshAdminDashboard() {
             document.getElementById('req-count').innerText = activationRequests.filter(r => r.status === "Pending").length;
             document.getElementById('withdraw-count').innerText = withdrawalRequests.filter(w => w.status === "Pending").length;
-            document.getElementById('user-count').innerText = allRegisteredUsers.length;
             document.getElementById('comp-count').innerText = complaintsList.filter(c => c.status === "Pending").length;
 
             let reqTbody = document.getElementById('admin-requests-tbody');
-            if(activationRequests.length === 0) {
-                reqTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No requests yet</td></tr>`;
-            } else {
-                reqTbody.innerHTML = "";
-                activationRequests.forEach((req, idx) => {
-                    reqTbody.innerHTML += `
-                        <tr>
-                            <td>${req.user}</td>
-                            <td>${req.level}</td>
-                            <td>${req.activationFee.toLocaleString()} Ksh (System)</td>
-                            <td>${req.depositFee.toLocaleString()} Ksh (User Bal)</td>
-                            <td><code>${req.code}</code></td>
-                            <td>${req.status === 'Pending' ? `<button class="btn btn-green" style="padding: 4px 10px; font-size: 0.75rem;" onclick="approveRequest(${idx})">Approve & Credit</button>` : '<span style="color:var(--neon-green)">Approved</span>'}</td>
-                        </tr>
-                    `;
-                });
-            }
-
-            let withdrawTbody = document.getElementById('admin-withdrawals-tbody');
-            if(withdrawalRequests.length === 0) {
-                withdrawTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No pending withdrawals</td></tr>`;
-            } else {
-                withdrawTbody.innerHTML = "";
-                withdrawalRequests.forEach((w, idx) => {
-                    withdrawTbody.innerHTML += `
-                        <tr>
-                            <td>${w.user}</td>
-                            <td>${w.amount.toLocaleString()} Ksh</td>
-                            <td><span style="color: ${w.status === 'Success' ? 'var(--neon-green)' : 'var(--gold)'}">${w.status}</span></td>
-                            <td>${w.status === 'Pending' ? `<button class="btn btn-gold" style="padding: 4px 10px; font-size: 0.75rem;" onclick="processPayout(${idx})">Payout Successfully</button>` : 'Completed'}</td>
-                        </tr>
-                    `;
-                });
-            }
-
-            let usersTbody = document.getElementById('admin-users-tbody');
-            usersTbody.innerHTML = "";
-            allRegisteredUsers.forEach(usr => {
-                usersTbody.innerHTML += `
-                    <tr>
-                        <td>${usr.username}</td>
-                        <td>Level(s): ${usr.levelsUnlocked.join(', ')}</td>
-                        <td>${usr.balance.toLocaleString()} Ksh</td>
-                        <td style="color: var(--neon-green);">${usr.status}</td>
-                    </tr>
-                `;
+            reqTbody.innerHTML = activationRequests.length === 0 ? `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No requests</td></tr>` : '';
+            activationRequests.forEach((req, idx) => {
+                reqTbody.innerHTML += `<tr><td>${req.user}</td><td>${req.level}</td><td>${req.activationFee}</td><td>${req.depositFee}</td><td><code>${req.code}</code></td><td>${req.status === 'Pending' ? `<button class="btn btn-green" style="padding: 4px;" onclick="approveRequest(${idx})">Approve</button>` : 'Approved'}</td></tr>`;
             });
-
-            let compTbody = document.getElementById('admin-complaints-tbody');
-            if(complaintsList.length === 0) {
-                compTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No active complaints</td></tr>`;
-            } else {
-                compTbody.innerHTML = "";
-                complaintsList.forEach((comp, idx) => {
-                    compTbody.innerHTML += `
-                        <tr>
-                            <td>${comp.user}</td>
-                            <td>${comp.message}</td>
-                            <td><button class="btn btn-outline" style="padding: 3px 8px; font-size: 0.75rem;" onclick="resolveComplaint(${idx})">Resolve</button></td>
-                        </tr>
-                    `;
-                });
-            }
         }
 
         function approveRequest(index) {
             let req = activationRequests[index];
             req.status = "Approved";
-
-            let targetUser = allRegisteredUsers.find(x => x.username === req.user);
-            if(targetUser) {
-                targetUser.balance += req.depositFee;
-
-                if(req.level.includes("Level")) {
-                    let match = req.level.match(/Level (\d+)/);
-                    if(match) {
-                        let lvlId = parseInt(match[1]);
-                        if(!targetUser.levelsUnlocked.includes(lvlId)) {
-                            targetUser.levelsUnlocked.push(lvlId);
-                        }
-                    }
+            if(req.level.includes("Level")) {
+                let match = req.level.match(/Level (\d+)/);
+                if(match) {
+                    let lvlId = parseInt(match[1]);
+                    if(!userLevelsUnlocked.includes(lvlId)) userLevelsUnlocked.push(lvlId);
                 }
             }
-
-            alert(`Request approved! ${req.depositFee} Ksh credited to ${req.user}'s dashboard balance.`);
+            userBalance += req.depositFee;
+            document.getElementById('user-balance').innerText = userBalance.toFixed(2);
+            renderLevels();
             refreshAdminDashboard();
-            updateDepositTracker();
-
-            if(currentUser === req.user) {
-                userBalance = targetUser.balance;
-                document.getElementById('user-balance').innerText = userBalance.toFixed(2);
-                renderLevels();
-                triggerNotification(`🎉 Deposit Approved! ${req.depositFee.toLocaleString()} Ksh credited to your balance.`);
-            }
-        }
-
-        function processPayout(index) {
-            let w = withdrawalRequests[index];
-            w.status = "Success";
-            alert(`Payout of ${w.amount.toLocaleString()} Ksh to ${w.user} marked as Successful!`);
-            refreshAdminDashboard();
-
-            if(currentUser === w.user) {
-                triggerNotification(`✅ Withdrawal Approved! Payout of ${w.amount.toLocaleString()} Ksh sent via M-Pesa.`);
-            }
-        }
-
-        function resolveComplaint(index) {
-            complaintsList.splice(index, 1);
-            alert("Complaint marked resolved and cleared.");
-            refreshAdminDashboard();
+            alert("Approved successfully!");
         }
 
         function switchAdminTab(tabName, btnElem) {
             document.querySelectorAll('.admin-section').forEach(sec => sec.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-
             document.getElementById(`admin-tab-${tabName}`).classList.remove('hidden');
             btnElem.classList.add('active');
         }
