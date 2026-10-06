@@ -54,17 +54,6 @@
                 <p id="authSubtitle" class="text-xs text-zinc-400">Secure Cloud Tap & Earn Portal</p>
             </div>
 
-            <!-- AI Robot Assistant Helper Box -->
-            <div class="bg-zinc-900 border border-brandGreen/30 rounded-xl p-3 flex items-start gap-3">
-                <div class="w-8 h-8 rounded-lg bg-brandGreen/20 text-brandGreen flex items-center justify-center flex-shrink-0 text-sm">
-                    <i class="fa-solid fa-robot"></i>
-                </div>
-                <div class="text-[11px] text-zinc-300 space-y-1">
-                    <p class="font-bold text-brandGreen">Zulvix AI Assistant:</p>
-                    <p id="robotTipText">Cloud database connected! Register your account or sign in from any phone.</p>
-                </div>
-            </div>
-
             <!-- Login Form Container -->
             <div id="loginFormContainer" class="space-y-4">
                 <div class="space-y-3">
@@ -138,19 +127,6 @@
         
         <!-- TAB 1: DASHBOARD / TAP ENGINE -->
         <section id="tab-dashboard" class="space-y-4">
-            <div class="bg-brandCard border border-brandGreen/30 rounded-2xl p-4 shadow-lg flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-xl bg-brandGreen/20 text-brandGreen flex items-center justify-center text-xl flex-shrink-0 glow-green animate-pulse">
-                    <i class="fa-solid fa-robot"></i>
-                </div>
-                <div class="space-y-0.5 flex-grow">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-brandGreen">Zulvix Robot Assistant</span>
-                        <span class="text-[9px] bg-zinc-800 text-brandGold px-2 py-0.5 rounded-full font-bold">Cloud Live</span>
-                    </div>
-                    <p id="dashboardRobotTip" class="text-xs text-zinc-300">Complete your 6 daily taps to trigger the 12-hour countdown timer!</p>
-                </div>
-            </div>
-
             <!-- Status Banner -->
             <div class="bg-brandCard border border-brandGreen/30 rounded-2xl p-4 shadow-lg relative overflow-hidden">
                 <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-brandGreen/10 rounded-full blur-xl pointer-events-none"></div>
@@ -487,11 +463,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Expose Firebase tools to global window scope safely
-        window.db = db;
-        window.FB_SDK = { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot };
-        window.isFirebaseReady = true;
-
         const LEVELS_CONFIG = [
             { id: 1, name: 'Iron Box', icon: 'fa-box-archive', unlockFee: 0, userDeposit: 0, perTap: 5, dailyTotal: 30 },
             { id: 2, name: 'Smart TV', icon: 'fa-tv', unlockFee: 800, userDeposit: 2000, perTap: 20, dailyTotal: 120 },
@@ -538,6 +509,36 @@
         function hideToast() {
             document.getElementById('notificationToast').classList.add('translate-x-full');
         }
+
+        // Expose functions globally immediately so inline onclick handlers can find them
+        window.showToast = showToast;
+        window.hideToast = hideToast;
+        window.toggleAuthMode = toggleAuthMode;
+        window.handleRegister = handleRegister;
+        window.handleLogin = handleLogin;
+        window.handleLogout = handleLogout;
+        window.switchTab = switchTab;
+        window.handleTapAsset = handleTapAsset;
+        window.openUpgradeModal = openUpgradeModal;
+        window.closeUpgradeModal = closeUpgradeModal;
+        window.confirmUpgradeSubmission = confirmUpgradeSubmission;
+        window.switchToLevel = switchToLevel;
+        window.openDepositModal = openDepositModal;
+        window.closeDepositModal = closeDepositModal;
+        window.submitDeposit = submitDeposit;
+        window.openWithdrawModal = openWithdrawModal;
+        window.closeWithdrawModal = closeWithdrawModal;
+        window.submitWithdrawal = submitWithdrawal;
+        window.submitComplaint = submitComplaint;
+        window.openAdminModal = openAdminModal;
+        window.closeAdminModal = closeAdminModal;
+        window.verifyAdminLogin = verifyAdminLogin;
+        window.lockAdminSession = lockAdminSession;
+        window.switchAdminTab = switchAdminTab;
+        window.approveLevelRequest = approveLevelRequest;
+        window.approveDeposit = approveDeposit;
+        window.approveWithdrawal = approveWithdrawal;
+        window.resolveComplaint = resolveComplaint;
 
         // Cloud Database Sync Listeners
         onSnapshot(collection(db, "users"), (snapshot) => {
@@ -620,18 +621,15 @@
             const loginCont = document.getElementById('loginFormContainer');
             const regCont = document.getElementById('registerFormContainer');
             const subtitle = document.getElementById('authSubtitle');
-            const robotTip = document.getElementById('robotTipText');
 
             if (mode === 'register') {
                 loginCont.classList.add('hidden');
                 regCont.classList.remove('hidden');
                 subtitle.innerText = "Register Your New Account";
-                robotTip.innerText = "Fill in your details to create your cloud account. Level 1 is instantly free!";
             } else {
                 regCont.classList.add('hidden');
                 loginCont.classList.remove('hidden');
                 subtitle.innerText = "Secure Cloud Sign In Portal";
-                robotTip.innerText = "Enter your correct registered mobile number and password to access your dashboard from any phone.";
             }
         }
 
@@ -1205,36 +1203,6 @@
                 `).join('');
             }
         }
-
-        // Attach functions to global window context so inline onclick attributes work correctly inside ES modules
-        window.showToast = showToast;
-        window.hideToast = hideToast;
-        window.toggleAuthMode = toggleAuthMode;
-        window.handleRegister = handleRegister;
-        window.handleLogin = handleLogin;
-        window.handleLogout = handleLogout;
-        window.switchTab = switchTab;
-        window.handleTapAsset = handleTapAsset;
-        window.openUpgradeModal = openUpgradeModal;
-        window.closeUpgradeModal = closeUpgradeModal;
-        window.confirmUpgradeSubmission = confirmUpgradeSubmission;
-        window.switchToLevel = switchToLevel;
-        window.openDepositModal = openDepositModal;
-        window.closeDepositModal = closeDepositModal;
-        window.submitDeposit = submitDeposit;
-        window.openWithdrawModal = openWithdrawModal;
-        window.closeWithdrawModal = closeWithdrawModal;
-        window.submitWithdrawal = submitWithdrawal;
-        window.submitComplaint = submitComplaint;
-        window.openAdminModal = openAdminModal;
-        window.closeAdminModal = closeAdminModal;
-        window.verifyAdminLogin = verifyAdminLogin;
-        window.lockAdminSession = lockAdminSession;
-        window.switchAdminTab = switchAdminTab;
-        window.approveLevelRequest = approveLevelRequest;
-        window.approveDeposit = approveDeposit;
-        window.approveWithdrawal = approveWithdrawal;
-        window.resolveComplaint = resolveComplaint;
     </script>
 </body>
 </html>
