@@ -1,1125 +1,1344 @@
-<!DOCTYPE html>  <html lang="en">  
-<head>  
-    <meta charset="UTF-8">  
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-    <title>Zulvix-KE | Digital Asset Tap & Earn</title>  
-    <!-- Tailwind CSS CDN -->  
-    <script src="https://cdn.tailwindcss.com"></script>  
-    <script>  
-        tailwind.config = {  
-            theme: {  
-                extend: {  
-                    colors: {  
-                        brandDark: '#070d0a',  
-                        brandCard: '#0d1712',  
-                        brandGreen: '#00ff88',  
-                        brandGold: '#f3c614',  
-                    }  
-                }  
-            }  
-        }  
-    </script>  
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">  
-    <style>  
-        body { background-color: #070d0a; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }  
-        .glow-green { box-shadow: 0 0 15px rgba(0, 255, 136, 0.3); }  
-        .glow-gold { box-shadow: 0 0 15px rgba(243, 198, 20, 0.3); }  
-    </style>  
-</head>  
-<body class="min-h-screen flex flex-col justify-between selection:bg-brandGreen selection:text-black">  <!-- NOTIFICATION TOAST BANNER -->  
-<div id="notificationToast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-transform duration-300 max-w-sm w-full bg-brandCard border border-brandGreen p-4 rounded-2xl shadow-2xl flex items-center gap-3">  
-    <div id="toastIcon" class="w-10 h-10 rounded-xl bg-brandGreen/20 text-brandGreen flex items-center justify-center text-lg flex-shrink-0">  
-        <i class="fa-solid fa-bell"></i>  
-    </div>  
-    <div class="flex-grow">  
-        <h5 id="toastTitle" class="font-bold text-white text-xs">Notification</h5>  
-        <p id="toastMessage" class="text-[11px] text-zinc-300">Action completed successfully.</p>  
-    </div>  
-    <button onclick="hideToast()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>  
-</div>  
-
-<!-- AUTHENTICATION WRAPPER -->  
-<div id="authWrapper" class="fixed inset-0 bg-brandDark z-50 flex items-center justify-center p-4">  
-    <div class="bg-brandCard border border-brandGreen/40 rounded-2xl max-w-sm w-full p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">  
-        <div class="text-center space-y-2">  
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brandGreen to-brandGold flex items-center justify-center text-black font-black text-2xl mx-auto glow-green">  
-                Z  
-            </div>  
-            <h1 class="font-extrabold text-brandGreen tracking-wide text-xl">ZULVIX-KE</h1>  
-            <p id="authSubtitle" class="text-xs text-zinc-400">Secure Tap & Earn Portal</p>  
-        </div>  
-
-        <!-- AI Robot Assistant Helper Box -->  
-        <div class="bg-zinc-900 border border-brandGreen/30 rounded-xl p-3 flex items-start gap-3">  
-            <div class="w-8 h-8 rounded-lg bg-brandGreen/20 text-brandGreen flex items-center justify-center flex-shrink-0 text-sm">  
-                <i class="fa-solid fa-robot"></i>  
-            </div>  
-            <div class="text-[11px] text-zinc-300 space-y-1">  
-                <p class="font-bold text-brandGreen">Zulvix AI Assistant:</p>  
-                <p id="robotTipText">Register first, or enter correct credentials to sign in. Level 1 is free!</p>  
-            </div>  
-        </div>  
-
-        <!-- Login Form Container -->  
-        <div id="loginFormContainer" class="space-y-4">  
-            <div class="space-y-3">  
-                <div>  
-                    <label class="text-xs text-zinc-400 block mb-1">Mobile Number (M-Pesa)</label>  
-                    <input type="text" id="loginPhone" placeholder="07XXXXXXXX" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGreen">  
-                </div>  
-                <div>  
-                    <label class="text-xs text-zinc-400 block mb-1">Password</label>  
-                    <input type="password" id="loginPassword" placeholder="••••••••" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGreen">  
-                </div>  
-            </div>  
-            <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-brandGreen to-emerald-400 text-black font-extrabold py-3 rounded-xl text-sm transition shadow-lg glow-green">  
-                Sign In to Dashboard  
-            </button>  
-            <div class="text-center pt-2">  
-                <p class="text-xs text-zinc-400">Don't have an account? <button onclick="toggleAuthMode('register')" class="text-brandGold font-bold hover:underline">Register Account</button></p>  
-            </div>  
-        </div>  
-
-        <!-- Register Form Container -->  
-        <div id="registerFormContainer" class="space-y-4 hidden">  
-            <div class="space-y-3">  
-                <div>  
-                    <label class="text-xs text-zinc-400 block mb-1">Full Name</label>  
-                    <input type="text" id="regFullName" placeholder="John Doe" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGold">  
-                </div>  
-                <div>  
-                    <label class="text-xs text-zinc-400 block mb-1">Mobile Number (M-Pesa)</label>  
-                    <input type="text" id="regPhone" placeholder="07XXXXXXXX" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGold">  
-                </div>  
-                <div>  
-                    <label class="text-xs text-zinc-400 block mb-1">Create Password</label>  
-                    <input type="password" id="regPassword" placeholder="••••••••" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGold">  
-                </div>  
-            </div>  
-            <button onclick="handleRegister()" class="w-full bg-gradient-to-r from-brandGold to-yellow-400 text-black font-extrabold py-3 rounded-xl text-sm transition shadow-lg glow-gold">  
-                Register & Start Free Level 1  
-            </button>  
-            <div class="text-center pt-2">  
-                <p class="text-xs text-zinc-400">Already registered? <button onclick="toggleAuthMode('login')" class="text-brandGreen font-bold hover:underline">Sign In</button></p>  
-            </div>  
-        </div>  
-    </div>  
-</div>  
-
-<!-- Top Navigation Header -->  
-<header class="bg-brandCard border-b border-brandGreen/20 px-4 py-3 sticky top-0 z-40 flex justify-between items-center">  
-    <div class="flex items-center space-x-2">  
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brandGreen to-brandGold flex items-center justify-center text-black font-black text-lg glow-green">  
-            Z  
-        </div>  
-        <div>  
-            <h1 class="font-bold text-brandGreen tracking-wide text-sm sm:text-base">ZULVIX-KE</h1>  
-            <p class="text-[10px] text-brandGold uppercase font-semibold tracking-widest">Tap & Earn Engine</p>  
-        </div>  
-    </div>  
-      
-    <div class="flex items-center space-x-2">  
-        <button onclick="switchTab('wallet')" class="bg-brandCard border border-brandGold/40 hover:border-brandGold text-brandGold px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">  
-            <i class="fa-solid fa-wallet"></i> <span id="navBalance">Ksh 0</span>  
-        </button>  
-        <button onclick="openAdminModal()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2.5 py-1.5 rounded-lg text-xs transition" title="Admin Control Center">  
-            <i class="fa-solid fa-shield-halved"></i>  
-        </button>  
-    </div>  
-</header>  
-
-<!-- Main Content Container -->  
-<main class="flex-grow max-w-lg w-full mx-auto p-4 pb-24">  
-      
-    <!-- TAB 1: DASHBOARD / TAP ENGINE -->  
-    <section id="tab-dashboard" class="space-y-4">  
-          
-        <!-- Dashboard AI Robot Assistant Box -->  
-        <div class="bg-brandCard border border-brandGreen/30 rounded-2xl p-4 shadow-lg flex items-center gap-3.5">  
-            <div class="w-12 h-12 rounded-xl bg-brandGreen/20 text-brandGreen flex items-center justify-center text-xl flex-shrink-0 glow-green animate-pulse">  
-                <i class="fa-solid fa-robot"></i>  
-            </div>  
-            <div class="space-y-0.5 flex-grow">  
-                <div class="flex justify-between items-center">  
-                    <span class="text-xs font-bold text-brandGreen">Zulvix Robot Assistant</span>  
-                    <span class="text-[9px] bg-zinc-800 text-brandGold px-2 py-0.5 rounded-full font-bold">Online</span>  
-                </div>  
-                <p id="dashboardRobotTip" class="text-xs text-zinc-300">Complete your 6 daily taps to trigger the 12-hour countdown timer!</p>  
-            </div>  
-        </div>  
-
-        <!-- Status Banner -->  
-        <div class="bg-brandCard border border-brandGreen/30 rounded-2xl p-4 shadow-lg relative overflow-hidden">  
-            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-brandGreen/10 rounded-full blur-xl pointer-events-none"></div>  
-            <div class="flex justify-between items-start">  
-                <div>  
-                    <span class="text-xs uppercase tracking-wider text-zinc-400">Account Tier</span>  
-                    <h2 id="currentTierName" class="text-lg font-bold text-brandGreen">Level 1: Iron Box</h2>  
-                </div>  
-                <span id="tierStatusBadge" class="bg-brandGreen/20 text-brandGreen border border-brandGreen/40 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase">Active</span>  
-            </div>  
-              
-            <div class="mt-4 grid grid-cols-2 gap-3 pt-3 border-t border-zinc-800">  
-                <div>  
-                    <span class="text-[11px] text-zinc-400">Dashboard Balance</span>  
-                    <p id="dashBalance" class="text-xl font-black text-brandGold">Ksh 0.00</p>  
-                </div>  
-                <div>  
-                    <span class="text-[11px] text-zinc-400">Taps Status</span>  
-                    <p id="tapsRemaining" class="text-xl font-black text-white">6 / 6</p>  
-                </div>  
-            </div>  
-        </div>  
-
-        <!-- Tapping Controller & Countdown -->  
-        <div class="bg-brandCard border border-zinc-800 rounded-2xl p-6 text-center space-y-4 shadow-xl">  
-            <div class="relative w-40 h-40 mx-auto flex items-center justify-center">  
-                <div id="tapPulseRing" class="absolute inset-0 rounded-full bg-brandGreen/10 animate-pulse"></div>  
-                <button onclick="handleTapAsset()" id="tapButton" class="w-32 h-32 rounded-full bg-gradient-to-tr from-brandGreen to-brandGold text-black font-black text-xl shadow-lg glow-green transform active:scale-95 transition flex flex-col items-center justify-center cursor-pointer">  
-                    <i id="tapAssetIcon" class="fa-solid fa-box-archive text-3xl mb-1"></i>  
-                    <span>TAP ASSET</span>  
-                </button>  
-            </div>  
-              
-            <!-- Countdown Overlay Box (Hidden until daily limit hit) -->  
-            <div id="countdownBox" class="hidden bg-zinc-900 border border-brandGold/30 rounded-xl p-3 text-center space-y-1">  
-                <p class="text-[11px] text-brandGold font-bold uppercase"><i class="fa-solid fa-clock mr-1"></i> Daily Taps Exhausted</p>  
-                <p class="text-xs text-zinc-400">Next tapping session unlocks in:</p>  
-                <p id="countdownTimerDisplay" class="text-lg font-black text-white">12:00:00</p>  
-            </div>  
-
-            <p id="tapFeedbackMessage" class="text-xs text-zinc-400">Tap to earn daily profits. Limit: 6 taps every 12 hours.</p>  
-        </div>  
-
-        <!-- Quick Navigation Actions -->  
-        <div class="grid grid-cols-3 gap-3">  
-            <button onclick="switchTab('wallet')" class="bg-brandCard border border-zinc-800 hover:border-brandGreen/50 p-3 rounded-xl text-center transition group">  
-                <div class="w-10 h-10 mx-auto rounded-lg bg-brandGreen/10 text-brandGreen flex items-center justify-center mb-1.5 group-hover:scale-110 transition">  
-                    <i class="fa-solid fa-plus"></i>  
-                </div>  
-                <span class="text-xs font-semibold text-zinc-300">Deposit</span>  
-            </button>  
-            <button onclick="switchTab('wallet'); openWithdrawModal();" class="bg-brandCard border border-zinc-800 hover:border-brandGold/50 p-3 rounded-xl text-center transition group">  
-                <div class="w-10 h-10 mx-auto rounded-lg bg-brandGold/10 text-brandGold flex items-center justify-center mb-1.5 group-hover:scale-110 transition">  
-                    <i class="fa-solid fa-arrow-up-from-bracket"></i>  
-                </div>  
-                <span class="text-xs font-semibold text-zinc-300">Withdraw</span>  
-            </button>  
-            <button onclick="switchTab('levels')" class="bg-brandCard border border-zinc-800 hover:border-brandGreen/50 p-3 rounded-xl text-center transition group">  
-                <div class="w-10 h-10 mx-auto rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-1.5 group-hover:scale-110 transition">  
-                    <i class="fa-solid fa-rocket"></i>  
-                </div>  
-                <span class="text-xs font-semibold text-zinc-300">Tiers (8)</span>  
-            </button>  
-        </div>  
-    </section>  
-
-    <!-- TAB 2: 8 TIERS & UPGRADES -->  
-    <section id="tab-levels" class="space-y-4 hidden">  
-        <div class="mb-2">  
-            <h2 class="text-lg font-bold text-white">All 8 Asset Tiers</h2>  
-            <p class="text-xs text-zinc-400">Upgrading to a higher tier automatically closes lower active tiers so you can focus solely on your highest active asset.</p>  
-        </div>  
-
-        <div class="space-y-3 pb-6" id="levelsListContainer">  
-            <!-- Populated dynamically with 8 tiers -->  
-        </div>  
-    </section>  
-
-    <!-- TAB 3: WALLET & TRANSACTIONS -->  
-    <section id="tab-wallet" class="space-y-4 hidden">  
-        <div class="bg-brandCard border border-brandGold/30 rounded-2xl p-5 space-y-4">  
-            <div class="flex justify-between items-center">  
-                <div>  
-                    <span class="text-xs text-zinc-400">Dashboard Balance</span>  
-                    <h3 id="walletTotalBalance" class="text-2xl font-black text-brandGold">Ksh 0.00</h3>  
-                </div>  
-                <div class="space-x-1">  
-                    <button onclick="openDepositModal()" class="bg-brandGreen hover:bg-emerald-400 text-black font-bold text-xs px-3 py-2 rounded-xl transition">  
-                        <i class="fa-solid fa-plus mr-1"></i> Deposit  
-                    </button>  
-                    <button onclick="openWithdrawModal()" class="bg-brandGold hover:bg-yellow-400 text-black font-bold text-xs px-3 py-2 rounded-xl transition">  
-                        <i class="fa-solid fa-arrow-up mr-1"></i> Withdraw  
-                    </button>  
-                </div>  
-            </div>  
-            <div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-800 text-[11px] text-zinc-400 space-y-1">  
-                <p><i class="fa-solid fa-triangle-exclamation text-brandGold mr-1"></i> Min withdrawal: <strong class="text-white">Ksh 2,000</strong></p>  
-                <p><i class="fa-solid fa-shield text-brandGreen mr-1"></i> Active Balance Reserve: <strong class="text-white">Ksh 2,000</strong> must remain in account.</p>  
-                <p><i class="fa-solid fa-bolt text-cyan-400 mr-1"></i> Max daily payout: <strong class="text-white">Ksh 150,000</strong></p>  
-            </div>  
-        </div>  
-
-        <!-- Transaction History Log -->  
-        <div class="space-y-2">  
-            <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400 px-1">Recent Ledger Activity</h4>  
-            <div id="transactionHistoryList" class="space-y-2">  
-                <div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 text-center text-xs text-zinc-500">  
-                    No transactions recorded yet.  
-                </div>  
-            </div>  
-        </div>  
-    </section>  
-
-    <!-- TAB 4: SUPPORT & PROFILE -->  
-    <section id="tab-profile" class="space-y-4 hidden">  
-        <div class="bg-brandCard border border-zinc-800 rounded-2xl p-5 text-center space-y-3">  
-            <div class="w-16 h-16 rounded-full bg-brandGreen/20 text-brandGreen font-black text-2xl flex items-center justify-center mx-auto border border-brandGreen/40">  
-                ZK  
-            </div>  
-            <div>  
-                <h3 id="profileNameDisplay" class="font-bold text-white text-base">Zulvix User</h3>  
-                <p id="profilePhoneDisplay" class="text-xs text-zinc-400">Active Member • (+254)</p>  
-            </div>  
-        </div>  
-
-        <!-- Complaint Form -->  
-        <div class="bg-brandCard border border-zinc-800 rounded-2xl p-4 space-y-3">  
-            <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400">Submit Support Ticket</h4>  
-            <div class="space-y-2">  
-                <textarea id="complaintTextInput" placeholder="Describe your issue or inquiry here..." rows="3" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brandGreen"></textarea>  
-                <button onclick="submitComplaint()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2 rounded-xl text-xs transition">  
-                    Send Complaint Request  
-                </button>  
-            </div>  
-        </div>  
-
-        <!-- Logout Button -->  
-        <button onclick="handleLogout()" class="w-full bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2">  
-            <i class="fa-solid fa-right-from-bracket"></i> Sign Out / Logout  
-        </button>  
-    </section>  
-
-</main>  
-
-<!-- Bottom Navigation Bar -->  
-<nav class="fixed bottom-0 left-0 right-0 bg-brandCard border-t border-zinc-800 py-2.5 px-6 flex justify-between items-center z-30 max-w-lg mx-auto">  
-    <button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center text-brandGreen transition">  
-        <i class="fa-solid fa-house text-lg"></i>  
-        <span class="text-[10px] mt-0.5 font-bold">Home</span>  
-    </button>  
-    <button onclick="switchTab('levels')" id="nav-btn-levels" class="flex flex-col items-center text-zinc-400 hover:text-white transition">  
-        <i class="fa-solid fa-layer-group text-lg"></i>  
-        <span class="text-[10px] mt-0.5 font-medium">Tiers</span>  
-    </button>  
-    <button onclick="switchTab('wallet')" id="nav-btn-wallet" class="flex flex-col items-center text-zinc-400 hover:text-white transition">  
-        <i class="fa-solid fa-wallet text-lg"></i>  
-        <span class="text-[10px] mt-0.5 font-medium">Wallet</span>  
-    </button>  
-    <button onclick="switchTab('profile')" id="nav-btn-profile" class="flex flex-col items-center text-zinc-400 hover:text-white transition">  
-        <i class="fa-solid fa-user text-lg"></i>  
-        <span class="text-[10px] mt-0.5 font-medium">Support</span>  
-    </button>  
-</nav>  
-
-<!-- MODALS SECTION -->  
-<!-- Deposit Modal -->  
-<div id="depositModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">  
-    <div class="bg-brandCard border border-brandGreen/40 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">  
-        <div class="flex justify-between items-center">  
-            <h3 class="font-bold text-white text-base">Top Up Dashboard (M-Pesa)</h3>  
-            <button onclick="closeDepositModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>  
-        </div>  
-        <div class="space-y-3">  
-            <div>  
-                <label class="text-xs text-zinc-400 block mb-1">Amount (Ksh)</label>  
-                <input type="number" id="depositAmountInput" placeholder="e.g. 2000" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brandGreen">  
-            </div>  
-            <div>  
-                <label class="text-xs text-zinc-400 block mb-1">M-Pesa Phone Number</label>  
-                <input type="text" id="depositPhoneInput" placeholder="07XXXXXXXX" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brandGreen">  
-            </div>  
-            <button onclick="submitDeposit()" class="w-full bg-brandGreen hover:bg-emerald-400 text-black font-bold py-2.5 rounded-xl text-sm transition">  
-                Submit Deposit Request  
-            </button>  
-        </div>  
-    </div>  
-</div>  
-
-<!-- Upgrade / Tier Modal with Lipa na M-Pesa Details -->  
-<div id="upgradeModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">  
-    <div class="bg-brandCard border border-brandGold/40 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">  
-        <div class="flex justify-between items-center">  
-            <h3 id="upgradeModalTitle" class="font-bold text-white text-base">Tier Activation & Upgrade</h3>  
-            <button onclick="closeUpgradeModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>  
-        </div>  
-        <div class="bg-zinc-900 border border-brandGold/30 p-3 rounded-xl space-y-2 text-xs">  
-            <p class="font-bold text-brandGold"><i class="fa-solid fa-mobile-screen-button mr-1"></i> Lipa na M-Pesa Till/Paybill:</p>  
-            <div class="grid grid-cols-2 gap-2 text-zinc-300">  
-                <div>Paybill: <strong class="text-white">522533</strong></div>  
-                <div>Acc No: <strong class="text-white">8012296</strong></div>  
-            </div>  
-            <p class="text-[10px] text-zinc-400 pt-1 border-t border-zinc-800">Send exact total required. Amount is automatically split between activation fee & user account deposit.</p>  
-        </div>  
-        <div class="space-y-3">  
-            <div>  
-                <label class="text-xs text-zinc-400 block mb-1">M-Pesa Confirmation Code (Transaction ID)</label>  
-                <input type="text" id="upgradeMpesaCodeInput" placeholder="e.g. QHX8923XYZ" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brandGold uppercase">  
-            </div>  
-            <button onclick="confirmUpgradeSubmission()" class="w-full bg-brandGold hover:bg-yellow-400 text-black font-bold py-2.5 rounded-xl text-sm transition">  
-                Submit Activation Request  
-            </button>  
-        </div>  
-    </div>  
-</div>  
-
-<!-- Withdraw Modal -->  
-<div id="withdrawModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">  
-    <div class="bg-brandCard border border-brandGold/40 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">  
-        <div class="flex justify-between items-center">  
-            <h3 class="font-bold text-white text-base">Request Withdrawal</h3>  
-            <button onclick="closeWithdrawModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>  
-        </div>  
-        <div class="space-y-3">  
-            <div>  
-                <label class="text-xs text-zinc-400 block mb-1">Withdrawal Amount (Min 2,000 Ksh)</label>  
-                <input type="number" id="withdrawAmountInput" placeholder="e.g. 3000" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brandGold">  
-            </div>  
-            <div>  
-                <label class="text-xs text-zinc-400 block mb-1">Destination Phone Number</label>  
-                <input type="text" id="withdrawPhoneInput" placeholder="07XXXXXXXX" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brandGold">  
-            </div>  
-            <button onclick="submitWithdrawal()" class="w-full bg-brandGold hover:bg-yellow-400 text-black font-bold py-2.5 rounded-xl text-sm transition">  
-                Submit Withdrawal Request  
-            </button>  
-        </div>  
-    </div>  
-</div>  
-
-<!-- ADMIN CONTROL CENTER -->  
-<div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">  
-    <div class="bg-brandCard border border-zinc-700 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">  
-        <div class="flex justify-between items-center border-b border-zinc-800 pb-3">  
-            <div>  
-                <h3 class="font-bold text-white text-base">Admin Management Control Center</h3>  
-                <p class="text-[10px] text-brandGreen">Portal Ledger & Approvals Management</p>  
-            </div>  
-            <button onclick="closeAdminModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>  
-        </div>  
-
-        <!-- Admin PIN Gate -->  
-        <div id="adminLoginForm" class="space-y-3 py-4">  
-            <div>  
-                <label class="text-xs text-zinc-400 block mb-1">Admin Security PIN</label>  
-                <input type="password" id="adminPasscodeInput" placeholder="Enter security PIN" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brandGreen">  
-            </div>  
-            <button onclick="verifyAdminLogin()" class="w-full bg-zinc-700 hover:bg-zinc-600 text-white font-bold py-2.5 rounded-xl text-sm transition">  
-                Access Admin Portal  
-            </button>  
-        </div>  
-
-        <!-- Full Admin Panel Content -->  
-        <div id="adminPanelContent" class="space-y-4 hidden">  
-            <div class="grid grid-cols-5 gap-1 bg-zinc-900 p-1 rounded-xl text-[10px] font-bold text-center">  
-                <button onclick="switchAdminTab('users')" id="adm-tab-users" class="py-2 rounded-lg bg-zinc-800 text-brandGreen">Users</button>  
-                <button onclick="switchAdminTab('levels')" id="adm-tab-levels" class="py-2 rounded-lg text-zinc-400">Tiers</button>  
-                <button onclick="switchAdminTab('deposits')" id="adm-tab-deposits" class="py-2 rounded-lg text-zinc-400">Deposits</button>  
-                <button onclick="switchAdminTab('withdrawals')" id="adm-tab-withdrawals" class="py-2 rounded-lg text-zinc-400">Payouts</button>  
-                <button onclick="switchAdminTab('complaints')" id="adm-tab-complaints" class="py-2 rounded-lg text-zinc-400">Support</button>  
-            </div>  
-
-            <!-- 1. Users Section -->  
-            <div id="adm-section-users" class="space-y-2">  
-                <h4 class="text-xs font-bold text-zinc-300 uppercase">Registered Users Database</h4>  
-                <div id="adminUsersList" class="space-y-2 max-h-60 overflow-y-auto"></div>  
-            </div>  
-
-            <!-- 2. Tier Requests Section -->  
-            <div id="adm-section-levels" class="space-y-2 hidden">  
-                <h4 class="text-xs font-bold text-zinc-300 uppercase">Pending Tier Upgrades</h4>  
-                <div id="adminLevelRequestsList" class="space-y-2 max-h-60 overflow-y-auto"></div>  
-            </div>  
-
-            <!-- 3. Deposits Section -->  
-            <div id="adm-section-deposits" class="space-y-2 hidden">  
-                <h4 class="text-xs font-bold text-zinc-300 uppercase">Pending Deposit Requests</h4>  
-                <div id="adminDepositRequestsList" class="space-y-2 max-h-60 overflow-y-auto"></div>  
-            </div>  
-
-            <!-- 4. Withdrawals Section -->  
-            <div id="adm-section-withdrawals" class="space-y-2 hidden">  
-                <h4 class="text-xs font-bold text-zinc-300 uppercase">Pending Withdrawal Requests</h4>  
-                <div id="adminWithdrawRequestsList" class="space-y-2 max-h-60 overflow-y-auto"></div>  
-            </div>  
-
-            <!-- 5. Complaints Section -->  
-            <div id="adm-section-complaints" class="space-y-2 hidden">  
-                <h4 class="text-xs font-bold text-zinc-300 uppercase">Customer Support Complaints</h4>  
-                <div id="adminComplaintsList" class="space-y-2 max-h-60 overflow-y-auto"></div>  
-            </div>  
-
-            <!-- Portal Ledger Summary -->  
-            <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800 flex justify-between items-center text-xs">  
-                <div>  
-                    <span class="text-zinc-400 block text-[10px]">Portal Retained Fees</span>  
-                    <span id="portalRetentionBalance" class="text-brandGreen font-black text-sm">Ksh 0.00</span>  
-                </div>  
-                <button onclick="lockAdminSession()" class="bg-red-500/20 text-red-400 border border-red-500/40 px-3 py-1.5 rounded-lg text-xs font-bold">  
-                    Lock Session  
-                </button>  
-            </div>  
-        </div>  
-    </div>  
-</div>  
-
-<!-- APPLICATION SCRIPT -->  
-<script>  
-    // 8 Expanded Asset Tiers Config with Value-Based Images / Icons  
-    const LEVELS_CONFIG = [  
-        { id: 1, name: 'Iron Box', icon: 'fa-box-archive', unlockFee: 0, userDeposit: 0, perTap: 5, dailyTotal: 30 },  
-        { id: 2, name: 'Smart TV', icon: 'fa-tv', unlockFee: 800, userDeposit: 2000, perTap: 20, dailyTotal: 120 },  
-        { id: 3, name: 'Motorbike', icon: 'fa-motorcycle', unlockFee: 2500, userDeposit: 2000, perTap: 55, dailyTotal: 330 },  
-        { id: 4, name: 'Economy Car', icon: 'fa-car', unlockFee: 6000, userDeposit: 2000, perTap: 140, dailyTotal: 840 },  
-        { id: 5, name: 'Rental House', icon: 'fa-house', unlockFee: 15000, userDeposit: 3000, perTap: 350, dailyTotal: 2100 },  
-        { id: 6, name: 'Commercial Plot', icon: 'fa-building', unlockFee: 35000, userDeposit: 5000, perTap: 850, dailyTotal: 5100 },  
-        { id: 7, name: 'Luxury Supercar', icon: 'fa-car-burst', unlockFee: 80000, userDeposit: 10000, perTap: 2100, dailyTotal: 12600 },  
-        { id: 8, name: 'Private Jet', icon: 'fa-plane', unlockFee: 180000, userDeposit: 20000, perTap: 5000, dailyTotal: 30000 }  
-    ];  
-
-    let appState = {  
-        isLoggedIn: false,  
-        currentUser: { name: '', phone: '' },  
-        balance: 0.00,  
-        currentLevelId: 1,  
-        unlockedLevels: [1],  
-        tapsLeft: 6,  
-        nextTapResetTime: null,  
-        transactions: [],  
-        portalRetention: 0.00,  
-        usersDb: [],  
-        levelRequests: [],  
-        depositRequests: [],  
-        withdrawRequests: [],  
-        complaints: []  
-    };  
-
-    let selectedUpgradeLevelId = null;  
-
-    function showToast(title, message, isSuccess = true) {  
-        const toast = document.getElementById('notificationToast');  
-        const icon = document.getElementById('toastIcon');  
-        document.getElementById('toastTitle').innerText = title;  
-        document.getElementById('toastMessage').innerText = message;  
-          
-        icon.className = `w-10 h-10 rounded-xl ${isSuccess ? 'bg-brandGreen/20 text-brandGreen' : 'bg-red-500/20 text-red-400'} flex items-center justify-center text-lg flex-shrink-0`;  
-        icon.innerHTML = isSuccess ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-solid fa-triangle-exclamation"></i>';  
-
-        toast.classList.remove('translate-x-full');  
-        setTimeout(() => { hideToast(); }, 4000);  
-    }  
-
-    function hideToast() {  
-        document.getElementById('notificationToast').classList.add('translate-x-full');  
-    }  
-
-    function loadAppState() {  
-        const saved = localStorage.getItem('zulvix_ke_state_v9');  
-        if (saved) {  
-            try {  
-                appState = JSON.parse(saved);  
-                if (!appState.unlockedLevels) appState.unlockedLevels = [1];  
-            } catch (e) {  
-                console.error(e);  
-            }  
-        }  
-        checkAuthUI();  
-        updateUI();  
-        checkCountdownTimer();  
-    }  
-
-    function saveAppState() {  
-        localStorage.setItem('zulvix_ke_state_v9', JSON.stringify(appState));  
-    }  
-
-    function checkAuthUI() {  
-        const authWrapper = document.getElementById('authWrapper');  
-        if (appState.isLoggedIn) {  
-            authWrapper.classList.add('hidden');  
-        } else {  
-            authWrapper.classList.remove('hidden');  
-        }  
-    }  
-
-    function toggleAuthMode(mode) {  
-        const loginCont = document.getElementById('loginFormContainer');  
-        const regCont = document.getElementById('registerFormContainer');  
-        const subtitle = document.getElementById('authSubtitle');  
-        const robotTip = document.getElementById('robotTipText');  
-
-        if (mode === 'register') {  
-            loginCont.classList.add('hidden');  
-            regCont.classList.remove('hidden');  
-            subtitle.innerText = "Register Your New Account";  
-            robotTip.innerText = "Fill in your details to create your account. Level 1 is instantly free!";  
-        } else {  
-            regCont.classList.add('hidden');  
-            loginCont.classList.remove('hidden');  
-            subtitle.innerText = "Secure Sign In Portal";  
-            robotTip.innerText = "Enter your correct registered mobile number and password to access your dashboard.";  
-        }  
-    }  
-
-    function handleRegister() {  
-        const name = document.getElementById('regFullName').value.trim();  
-        const phone = document.getElementById('regPhone').value.trim();  
-        const pass = document.getElementById('regPassword').value.trim();  
-
-        if (!name || !phone || !pass) {  
-            showToast("Registration Error", "Please fill in all required fields.", false);  
-            return;  
-        }  
-
-        const existing = appState.usersDb.find(u => u.phone === phone);  
-        if (existing) {  
-            showToast("Account Exists", "This phone number is already registered. Please sign in.", false);  
-            toggleAuthMode('login');  
-            return;  
-        }  
-
-        appState.isLoggedIn = true;  
-        appState.currentUser = { name, phone };  
-        appState.balance = 0;  
-        appState.currentLevelId = 1;  
-        appState.unlockedLevels = [1];  
-        appState.tapsLeft = 6;  
-
-        appState.usersDb.push({ name, phone, level: 1, balance: 0, password: pass });  
-        appState.transactions.unshift({  
-            type: 'Account Created',  
-            amount: 'Level 1 Active (Free)',  
-            date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })  
-        });  
-
-        saveAppState();  
-        checkAuthUI();  
-        updateUI();  
-        showToast("Welcome!", "Registration successful! Level 1 activated.");  
-    }  
-
-    function handleLogin() {  
-        const phone = document.getElementById('loginPhone').value.trim();  
-        const pass = document.getElementById('loginPassword').value.trim();  
-
-        if (!phone || !pass) {  
-            showToast("Login Error", "Please enter both mobile number and password.", false);  
-            return;  
-        }  
-
-        const userRecord = appState.usersDb.find(u => u.phone === phone);  
-        if (!userRecord) {  
-            showToast("Account Not Found", "No account found with this number. Please register first.", false);  
-            toggleAuthMode('register');  
-            return;  
-        }  
-
-        if (userRecord.password && userRecord.password !== pass) {  
-            showToast("Invalid Credentials", "Incorrect password entered. Please try again.", false);  
-            return;  
-        }  
-
-        appState.isLoggedIn = true;  
-        appState.currentUser = { name: userRecord.name, phone: userRecord.phone };  
-        saveAppState();  
-        checkAuthUI();  
-        updateUI();  
-        showToast("Signed In", `Welcome back, ${userRecord.name}!`);  
-    }  
-
-    function handleLogout() {  
-        if (confirm("Are you sure you want to sign out?")) {  
-            appState.isLoggedIn = false;  
-            saveAppState();  
-            checkAuthUI();  
-        }  
-    }  
-
-    function switchTab(tabId) {  
-        const tabs = ['dashboard', 'levels', 'wallet', 'profile'];  
-        tabs.forEach(t => {  
-            const el = document.getElementById(`tab-${t}`);  
-            const btn = document.getElementById(`nav-btn-${t}`);  
-            if (el) el.classList.add('hidden');  
-            if (btn) {  
-                btn.classList.remove('text-brandGreen');  
-                btn.classList.add('text-zinc-400');  
-            }  
-        });  
-
-        document.getElementById(`tab-${tabId}`).classList.remove('hidden');  
-        const activeBtn = document.getElementById(`nav-btn-${tabId}`);  
-        activeBtn.classList.remove('text-zinc-400');  
-        activeBtn.classList.add('text-brandGreen');  
-    }  
-
-    // Tapping Engine & 12-Hour Countdown Logic  
-    function handleTapAsset() {  
-        const now = Date.now();  
-        if (appState.nextTapResetTime && now < appState.nextTapResetTime) {  
-            showToast("Countdown Active", "Please wait for the 12-hour timer to reset your taps.", false);  
-            return;  
-        }  
-
-        if (appState.tapsLeft <= 0) {  
-            triggerCountdown();  
-            return;  
-        }  
-
-        const currentLevel = LEVELS_CONFIG.find(l => l.id === appState.currentLevelId) || LEVELS_CONFIG[0];  
-        appState.tapsLeft -= 1;  
-        appState.balance += currentLevel.perTap;  
-
-        appState.transactions.unshift({  
-            type: `Tap Payout (${currentLevel.name})`,  
-            amount: `+Ksh ${currentLevel.perTap}`,  
-            date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })  
-        });  
-
-        if (appState.tapsLeft === 0) {  
-            triggerCountdown();  
-            showToast("Taps Completed", "Daily taps exhausted! 12-hour countdown has started immediately.");  
-        }  
-
-        saveAppState();  
-        updateUI();  
-    }  
-
-    function triggerCountdown() {  
-        appState.nextTapResetTime = Date.now() + (12 * 60 * 60 * 1000);  
-        saveAppState();  
-        checkCountdownTimer();  
-    }  
-
-    function checkCountdownTimer() {  
-        const now = Date.now();  
-        const box = document.getElementById('countdownBox');  
-        const tapBtn = document.getElementById('tapButton');  
-
-        if (appState.nextTapResetTime && now < appState.nextTapResetTime) {  
-            box.classList.remove('hidden');  
-            tapBtn.classList.add('opacity-50', 'pointer-events-none');  
-              
-            const distance = appState.nextTapResetTime - now;  
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));  
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));  
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);  
-
-            document.getElementById('countdownTimerDisplay').innerText =   
-                `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;  
-              
-            setTimeout(checkCountdownTimer, 1000);  
-        } else {  
-            if (appState.nextTapResetTime && now >= appState.nextTapResetTime) {  
-                appState.tapsLeft = 6;  
-                appState.nextTapResetTime = null;  
-                saveAppState();  
-                showToast("Taps Restored!", "Your 12-hour countdown is complete. You can continue tapping now!");  
-            }  
-            box.classList.add('hidden');  
-            tapBtn.classList.remove('opacity-50', 'pointer-events-none');  
-            updateUI();  
-        }  
-    }  
-
-    // Tier Upgrades Request with Lipa na M-Pesa Modal  
-    function openUpgradeModal(levelId) {  
-        const level = LEVELS_CONFIG.find(l => l.id === levelId);  
-        if (!level) return;  
-        selectedUpgradeLevelId = levelId;  
-        document.getElementById('upgradeModalTitle').innerText = `Activate Level ${level.id}: ${level.name} (Ksh ${level.unlockFee + level.userDeposit})`;  
-        document.getElementById('upgradeModal').classList.remove('hidden');  
-    }  
-
-    function closeUpgradeModal() {  
-        document.getElementById('upgradeModal').classList.add('hidden');  
-        selectedUpgradeLevelId = null;  
-        document.getElementById('upgradeMpesaCodeInput').value = '';  
-    }  
-
-    function confirmUpgradeSubmission() {  
-        const mpesaCode = document.getElementById('upgradeMpesaCodeInput').value.trim();  
-        if (!mpesaCode) {  
-            showToast("Missing M-Pesa Code", "Please enter your M-Pesa confirmation code.", false);  
-            return;  
-        }  
-
-        const level = LEVELS_CONFIG.find(l => l.id === selectedUpgradeLevelId);  
-        if (!level) return;  
-
-        appState.levelRequests.unshift({  
-            id: Date.now(),  
-            name: appState.currentUser.name,  
-            phone: appState.currentUser.phone,  
-            levelId: level.id,  
-            levelName: level.name,  
-            unlockFee: level.unlockFee,  
-            userDeposit: level.userDeposit,  
-            mpesaCode: mpesaCode,  
-            date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })  
-        });  
-
-        saveAppState();  
-        closeUpgradeModal();  
-        updateUI();  
-        showToast("Activation Submitted", `Lipa na M-Pesa payment for Level ${level.id} submitted for admin approval.`);  
-    }  
-
-    function switchToLevel(levelId) {  
-        // Check if level is unlocked  
-        if (levelId === 1 || (appState.unlockedLevels && appState.unlockedLevels.includes(levelId))) {  
-            appState.currentLevelId = levelId;  
-            saveAppState();  
-            updateUI();  
-            switchTab('dashboard');  
-            showToast("Tier Switched", `Now actively tapping on Level ${levelId}.`);  
-        }  
-    }  
-
-    // Deposit Modal Actions  
-    function openDepositModal() { document.getElementById('depositModal').classList.remove('hidden'); }  
-    function closeDepositModal() { document.getElementById('depositModal').classList.add('hidden'); }  
-    function submitDeposit() {  
-        const amountInput = document.getElementById('depositAmountInput');  
-        const phoneInput = document.getElementById('depositPhoneInput');  
-        const amt = parseFloat(amountInput.value);  
-
-        if (isNaN(amt) || amt <= 0) {  
-            showToast("Invalid Amount", "Please enter a valid deposit amount.", false);  
-            return;  
-        }  
-
-        appState.depositRequests.unshift({  
-            id: Date.now(),  
-            name: appState.currentUser.name,  
-            phone: phoneInput.value || appState.currentUser.phone,  
-            amount: amt,  
-            date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })  
-        });  
-
-        saveAppState();  
-        closeDepositModal();  
-        amountInput.value = '';  
-        phoneInput.value = '';  
-        showToast("Deposit Submitted", "Your deposit request has been submitted for approval.");  
-    }  
-
-    // Withdrawal Modal Actions (Min 2k, Leave 2k active reserve, Max 150k daily)  
-    function openWithdrawModal() { document.getElementById('withdrawModal').classList.remove('hidden'); }  
-    function closeWithdrawModal() { document.getElementById('withdrawModal').classList.add('hidden'); }  
-    function submitWithdrawal() {  
-        const amountInput = document.getElementById('withdrawAmountInput');  
-        const phoneInput = document.getElementById('withdrawPhoneInput');  
-        const amt = parseFloat(amountInput.value);  
-
-        if (isNaN(amt) || amt < 2000) {  
-            showToast("Minimum Withdrawal", "Minimum withdrawal amount is Ksh 2,000.", false);  
-            return;  
-        }  
-
-        if (amt > 150000) {  
-            showToast("Daily Limit Exceeded", "Maximum daily withdrawal limit is Ksh 150,000.", false);  
-            return;  
-        }  
-
-        // Must leave 2,000 Ksh active balance reserve in the account  
-        const requiredReserve = 2000;  
-        if (appState.balance - amt < requiredReserve) {  
-            showToast("Active Balance Required", `You must leave at least Ksh 2,000 in your account to maintain active status. Max withdrawable now: Ksh ${(appState.balance - requiredReserve).toLocaleString()}`, false);  
-            return;  
-        }  
-
-        appState.withdrawRequests.unshift({  
-            id: Date.now(),  
-            name: appState.currentUser.name,  
-            phone: phoneInput.value || appState.currentUser.phone,  
-            amount: amt,  
-            date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })  
-        });  
-
-        appState.balance -= amt;  
-        appState.transactions.unshift({  
-            type: 'Withdrawal Requested',  
-            amount: `-Ksh ${amt.toLocaleString()}`,  
-            date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })  
-        });  
-
-        saveAppState();  
-        updateUI();  
-        closeWithdrawModal();  
-        amountInput.value = '';  
-        phoneInput.value = '';  
-        showToast("Withdrawal Pending", `Withdrawal of Ksh ${amt.toLocaleString()} submitted successfully.`);  
-    }  
-
-    function submitComplaint() {  
-        const textInput = document.getElementById('complaintTextInput');  
-        const msg = textInput.value.trim();  
-        if (!msg) return;  
-
-        appState.complaints.unshift({  
-            id: Date.now(),  
-            name: appState.currentUser.name,  
-            phone: appState.currentUser.phone,  
-            message: msg,  
-            date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })  
-        });  
-
-        saveAppState();  
-        textInput.value = '';  
-        showToast("Ticket Sent", "Support complaint sent successfully.");  
-    }  
-
-    // Admin Management Control Center  
-    function openAdminModal() { document.getElementById('adminModal').classList.remove('hidden'); }  
-    function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); }  
-      
-    function verifyAdminLogin() {  
-        const pinInput = document.getElementById('adminPasscodeInput');  
-        if (pinInput.value.trim() === '3879') {  
-            document.getElementById('adminLoginForm').classList.add('hidden');  
-            document.getElementById('adminPanelContent').classList.remove('hidden');  
-            pinInput.value = '';  
-            renderAdminData();  
-        } else {  
-            showToast("Admin Error", "Incorrect Security PIN.", false);  
-            pinInput.value = '';  
-        }  
-    }  
-
-    function lockAdminSession() {  
-        document.getElementById('adminPanelContent').classList.add('hidden');  
-        document.getElementById('adminLoginForm').classList.remove('hidden');  
-        closeAdminModal();  
-    }  
-
-    function switchAdminTab(subTab) {  
-        const tabs = ['users', 'levels', 'deposits', 'withdrawals', 'complaints'];  
-        tabs.forEach(t => {  
-            document.getElementById(`adm-section-${t}`).classList.add('hidden');  
-            const btn = document.getElementById(`adm-tab-${t}`);  
-            btn.classList.remove('bg-zinc-800', 'text-brandGreen');  
-            btn.classList.add('text-zinc-400');  
-        });  
-        document.getElementById(`adm-section-${subTab}`).classList.remove('hidden');  
-        const activeBtn = document.getElementById(`adm-tab-${subTab}`);  
-        activeBtn.classList.add('bg-zinc-800', 'text-brandGreen');  
-        activeBtn.classList.remove('text-zinc-400');  
-    }  
-
-    function approveLevelRequest(reqId) {  
-        const idx = appState.levelRequests.findIndex(r => r.id === reqId);  
-        if (idx === -1) return;  
-        const req = appState.levelRequests[idx];  
-
-        appState.portalRetention += req.unlockFee;  
-        appState.balance += req.userDeposit;  
-          
-        // Activate higher level and automatically close/replace lower active levels  
-        appState.currentLevelId = req.levelId;  
-        if (!appState.unlockedLevels.includes(req.levelId)) {  
-            appState.unlockedLevels.push(req.levelId);  
-        }  
-        appState.tapsLeft = 6;  
-
-        appState.transactions.unshift({  
-            type: `Level ${req.levelId} Approved (${req.levelName})`,  
-            amount: `+Ksh ${req.userDeposit.toLocaleString()} Deposit`,  
-            date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })  
-        });  
-
-        appState.levelRequests.splice(idx, 1);  
-        saveAppState();  
-        updateUI();  
-        renderAdminData();  
-        showToast("Level Approved!", `Congratulations! Level ${req.levelId} is approved. Lower levels closed automatically.`);  
-    }  
-
-    function approveDeposit(reqId) {  
-        const idx = appState.depositRequests.findIndex(r => r.id === reqId);  
-        if (idx === -1) return;  
-        const req = appState.depositRequests[idx];  
-
-        appState.balance += req.amount;  
-        appState.transactions.unshift({  
-            type: 'Approved Deposit',  
-            amount: `+Ksh ${req.amount.toLocaleString()}`,  
-            date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })  
-        });  
-
-        appState.depositRequests.splice(idx, 1);  
-        saveAppState();  
-        updateUI();  
-        renderAdminData();  
-        showToast("Deposit Completed!", `Congratulations! Your deposit of Ksh ${req.amount.toLocaleString()} has been credited successfully.`);  
-    }  
-
-    function approveWithdrawal(reqId) {  
-        const idx = appState.withdrawRequests.findIndex(r => r.id === reqId);  
-        if (idx === -1) return;  
-        const req = appState.withdrawRequests[idx];  
-        appState.withdrawRequests.splice(idx, 1);  
-        saveAppState();  
-        renderAdminData();  
-        showToast("Withdrawal Delivered!", `Congratulations! Your withdrawal of Ksh ${req.amount.toLocaleString()} has been delivered successfully to your M-Pesa.`);  
-    }  
-
-    function resolveComplaint(reqId) {  
-        const idx = appState.complaints.findIndex(c => c.id === reqId);  
-        if (idx === -1) return;  
-        appState.complaints.splice(idx, 1);  
-        saveAppState();  
-        renderAdminData();  
-        showToast("Ticket Resolved", "Complaint cleared.");  
-    }  
-
-    function renderAdminData() {  
-        document.getElementById('portalRetentionBalance').innerText = `Ksh ${appState.portalRetention.toLocaleString()}`;  
-
-        document.getElementById('adminUsersList').innerHTML = appState.usersDb.length === 0 ? '<p class="text-xs text-zinc-500 text-center py-2">No registered users.</p>' :  
-            appState.usersDb.map(u => `  
-                <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 flex justify-between items-center text-xs">  
-                    <div>  
-                        <p class="font-bold text-white">${u.name}</p>  
-                        <span class="text-[10px] text-zinc-400">${u.phone} • Level ${u.level}</span>  
-                    </div>  
-                    <span class="text-brandGold font-bold">Ksh ${u.balance || 0}</span>  
-                </div>  
-            `).join('');  
-
-        document.getElementById('adminLevelRequestsList').innerHTML = appState.levelRequests.length === 0 ? '<p class="text-xs text-zinc-500 text-center py-2">No pending upgrades.</p>' :  
-            appState.levelRequests.map(r => `  
-                <div class="bg-zinc-900 border border-brandGreen/40 rounded-xl p-3 text-xs space-y-2">  
-                    <div class="flex justify-between items-center">  
-                        <span class="font-bold text-white">${r.name} (${r.phone})</span>  
-                        <span class="text-[10px] bg-brandGreen/20 text-brandGreen px-2 py-0.5 rounded">Level ${r.levelId}: ${r.levelName}</span>  
-                    </div>  
-                    <div class="text-[11px] text-zinc-300 grid grid-cols-2 gap-1">  
-                        <div>Fee: <b class="text-brandGreen">Ksh ${r.unlockFee}</b></div>  
-                        <div>Deposit: <b class="text-brandGold">Ksh ${r.userDeposit}</b></div>  
-                    </div>  
-                    <p class="text-[10px] text-zinc-400">M-Pesa Code: <strong class="text-white">${r.mpesaCode}</strong></p>  
-                    <button onclick="approveLevelRequest(${r.id})" class="w-full bg-brandGreen hover:bg-emerald-400 text-black font-bold py-1.5 rounded-lg text-xs transition">  
-                        Approve Level Activation  
-                    </button>  
-                </div>  
-            `).join('');  
-
-        document.getElementById('adminDepositRequestsList').innerHTML = appState.depositRequests.length === 0 ? '<p class="text-xs text-zinc-500 text-center py-2">No pending deposits.</p>' :  
-            appState.depositRequests.map(d => `  
-                <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 flex justify-between items-center text-xs">  
-                    <div>  
-                        <p class="font-bold text-white">${d.name} (${d.phone})</p>  
-                        <span class="text-[10px] text-zinc-400">Amount: Ksh ${d.amount}</span>  
-                    </div>  
-                    <button onclick="approveDeposit(${d.id})" class="bg-brandGreen text-black font-bold px-3 py-1 rounded-lg text-xs">Approve</button>  
-                </div>  
-            `).join('');  
-
-        document.getElementById('adminWithdrawRequestsList').innerHTML = appState.withdrawRequests.length === 0 ? '<p class="text-xs text-zinc-500 text-center py-2">No pending payouts.</p>' :  
-            appState.withdrawRequests.map(w => `  
-                <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 flex justify-between items-center text-xs">  
-                    <div>  
-                        <p class="font-bold text-white">${w.name} (${w.phone})</p>  
-                        <span class="text-[10px] text-brandGold">Payout: Ksh ${w.amount}</span>  
-                    </div>  
-                    <button onclick="approveWithdrawal(${w.id})" class="bg-brandGold text-black font-bold px-3 py-1 rounded-lg text-xs">Mark Delivered</button>  
-                </div>  
-            `).join('');  
-
-        document.getElementById('adminComplaintsList').innerHTML = appState.complaints.length === 0 ? '<p class="text-xs text-zinc-500 text-center py-2">No support tickets.</p>' :  
-            appState.complaints.map(c => `  
-                <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs space-y-1">  
-                    <div class="flex justify-between">  
-                        <span class="font-bold text-white">${c.name} (${c.phone})</span>  
-                        <span class="text-[10px] text-zinc-500">${c.date}</span>  
-                    </div>  
-                    <p class="text-zinc-300">${c.message}</p>  
-                    <button onclick="resolveComplaint(${c.id})" class="mt-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold px-2.5 py-1 rounded text-[10px]">Resolve</button>  
-                </div>  
-            `).join('');  
-    }  
-
-    function updateUI() {  
-        const formattedBal = `Ksh ${appState.balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;  
-        const currentLevel = LEVELS_CONFIG.find(l => l.id === appState.currentLevelId) || LEVELS_CONFIG[0];  
-          
-        document.getElementById('navBalance').innerText = formattedBal;  
-        document.getElementById('dashBalance').innerText = formattedBal;  
-        document.getElementById('walletTotalBalance').innerText = formattedBal;  
-        document.getElementById('tapsRemaining').innerText = `${appState.tapsLeft} / 6`;  
-        document.getElementById('currentTierName').innerText = `Level ${currentLevel.id}: ${currentLevel.name}`;  
-        document.getElementById('tapAssetIcon').className = `fa-solid ${currentLevel.icon} text-3xl mb-1`;  
-        document.getElementById('profileNameDisplay').innerText = appState.currentUser.name || 'Zulvix User';  
-        document.getElementById('profilePhoneDisplay').innerText = `Active Member • ${appState.currentUser.phone || '+254'}`;  
-
-        // Robot Dynamic Tip  
-        const robotTips = [  
-            `You are currently tapping on Level ${currentLevel.id} (${currentLevel.name}). Keep it up!`,  
-            `Remember: Min withdrawal is Ksh 2,000, and Ksh 2,000 must remain as active balance.`,  
-            `When you upgrade to a higher tier, your lower active levels close automatically!`  
-        ];  
-        document.getElementById('dashboardRobotTip').innerText = robotTips[Math.floor(Math.random() * robotTips.length)];  
-
-        // Render 8 Levels List with Auto-Closure of Lower Levels  
-        const levelsContainer = document.getElementById('levelsListContainer');  
-        levelsContainer.innerHTML = LEVELS_CONFIG.map(lvl => {  
-            const isActive = lvl.id === appState.currentLevelId;  
-            const isUnlocked = lvl.id === 1 || (appState.unlockedLevels && appState.unlockedLevels.includes(lvl.id));  
-            const isClosedByHigher = lvl.id < appState.currentLevelId;  
-            const isFree = lvl.unlockFee === 0;  
-              
-            let actionButton = '';  
-            if (isActive) {  
-                actionButton = '<span class="bg-brandGreen/20 text-brandGreen border border-brandGreen/40 text-[10px] px-2.5 py-1 rounded-lg font-bold">Active Tapping</span>';  
-            } else if (isClosedByHigher) {  
-                actionButton = '<span class="bg-zinc-800 text-zinc-500 text-[10px] px-2 py-1 rounded-lg font-semibold">Closed (Upgraded)</span>';  
-            } else if (isUnlocked) {  
-                actionButton = `<button onclick="switchToLevel(${lvl.id})" class="bg-zinc-800 hover:bg-zinc-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">Select</button>`;  
-            } else {  
-                actionButton = `<button onclick="openUpgradeModal(${lvl.id})" class="bg-brandGold hover:bg-yellow-400 text-black text-xs px-3 py-1.5 rounded-lg font-bold transition">Upgrade (Pay)</button>`;  
-            }  
-
-            return `  
-                <div class="bg-brandCard border ${isActive ? 'border-brandGreen/60 glow-green' : 'border-zinc-800'} rounded-xl p-4 flex items-center gap-4 ${isClosedByHigher ? 'opacity-60' : ''}">  
-                    <div class="w-14 h-14 rounded-xl bg-zinc-900 border ${isActive ? 'border-brandGreen/40 text-brandGreen' : 'border-zinc-700 text-brandGold'} flex items-center justify-center text-xl flex-shrink-0">  
-                        <i class="fa-solid ${lvl.icon}"></i>  
-                    </div>  
-                    <div class="flex-grow">  
-                        <div class="flex items-center gap-2">  
-                            <span class="text-[10px] font-bold uppercase tracking-wider ${isFree ? 'text-brandGreen' : 'text-brandGold'}">  
-                                ${isFree ? 'Free Tier' : `Total Cost: Ksh ${(lvl.unlockFee + lvl.userDeposit).toLocaleString()}`}  
-                            </span>  
-                        </div>  
-                        <h3 class="font-bold text-white text-sm">Level ${lvl.id}: ${lvl.name}</h3>  
-                        <p class="text-xs text-zinc-400">Earn Ksh ${lvl.perTap}/tap • Ksh ${lvl.dailyTotal}/day</p>  
-                    </div>  
-                    <div>  
-                        ${actionButton}  
-                    </div>  
-                </div>  
-            `;  
-        }).join('');  
-
-        // Render Transactions  
-        const historyList = document.getElementById('transactionHistoryList');  
-        if (appState.transactions.length === 0) {  
-            historyList.innerHTML = `<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 text-center text-xs text-zinc-500">No transactions recorded yet.</div>`;  
-        } else {  
-            historyList.innerHTML = appState.transactions.map(tx => `  
-                <div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 flex justify-between items-center text-xs">  
-                    <div>  
-                        <p class="font-bold text-white">${tx.type}</p>  
-                        <span class="text-[10px] text-zinc-500">${tx.date}</span>  
-                    </div>  
-                    <span class="font-black ${tx.amount.startsWith('+') ? 'text-brandGreen' : 'text-brandGold'}">${tx.amount}</span>  
-                </div>  
-            `).join('');  
-        }  
-    }  
-
-    window.addEventListener('DOMContentLoaded', () => {  
-        loadAppState();  
-    });  
-</script>
-
-</body>  
-</html>  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#070d0a">
+<meta name="description" content="Zulvix-KE | Digital Asset Tap & Earn Platform">
+<title>Zulvix-KE | Digital Asset Tap & Earn</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+:root{
+    --bg-dark:#070d0a;
+    --card:#0d1712;
+    --card2:#101e17;
+    --green:#00ff88;
+    --gold:#f3c614;
+    --text:#f4fff8;
+    --muted:#91a79a;
+    --danger:#ff4d67;
+    --border:rgba(0,255,136,.15);
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    background:var(--bg-dark);
+    color:var(--text);
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+button,
+input,
+select,
+textarea{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+.hidden{
+    display:none!important;
+}
+
+.glow{
+    box-shadow:0 0 25px rgba(0,255,136,.12);
+}
+
+.card{
+    background:linear-gradient(145deg,#0d1712,#09110d);
+    border:1px solid var(--border);
+    border-radius:18px;
+}
+
+.green{
+    color:var(--green);
+}
+
+.gold{
+    color:var(--gold);
+}
+
+.muted{
+    color:var(--muted);
+}
+
+.btn-green{
+    background:var(--green);
+    color:#00150b;
+    font-weight:800;
+    border-radius:12px;
+    padding:12px 16px;
+    transition:.2s;
+}
+
+.btn-green:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.08);
+}
+
+.btn-dark{
+    background:#122219;
+    color:#fff;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:12px;
+    padding:12px 16px;
+}
+
+.btn-gold{
+    background:var(--gold);
+    color:#171200;
+    font-weight:800;
+    border-radius:12px;
+    padding:12px 16px;
+}
+
+.btn-red{
+    background:#351019;
+    color:#ff9aaa;
+    border:1px solid rgba(255,77,103,.2);
+    border-radius:12px;
+    padding:12px 16px;
+}
+
+.input{
+    width:100%;
+    background:#08100c;
+    color:#fff;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:12px;
+    padding:13px 14px;
+    outline:none;
+}
+
+.input:focus{
+    border-color:var(--green);
+    box-shadow:0 0 0 2px rgba(0,255,136,.08);
+}
+
+.modal-bg{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background:rgba(0,0,0,.78);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+}
+
+.modal{
+    width:100%;
+    max-width:520px;
+    max-height:90vh;
+    overflow:auto;
+    background:#0b1510;
+    border:1px solid rgba(0,255,136,.18);
+    border-radius:20px;
+    padding:20px;
+}
+
+::-webkit-scrollbar{
+    width:5px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#193427;
+    border-radius:20px;
+}
+
+.tap-button{
+    width:145px;
+    height:145px;
+    border-radius:50%;
+    border:7px solid rgba(0,255,136,.16);
+    background:radial-gradient(circle,#123c27,#07130c 68%);
+    color:var(--green);
+    box-shadow:
+        0 0 0 8px rgba(0,255,136,.03),
+        0 0 45px rgba(0,255,136,.18);
+    font-weight:900;
+    transition:.15s;
+}
+
+.tap-button:active{
+    transform:scale(.94);
+}
+
+.tap-button.disabled{
+    opacity:.4;
+    filter:grayscale(1);
+}
+
+.nav-btn{
+    color:#769080;
+    font-size:11px;
+}
+
+.nav-btn.active{
+    color:var(--green);
+}
+
+.stat-box{
+    background:#0a140f;
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:14px;
+    padding:14px;
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:5px 9px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+}
+
+.badge-green{
+    background:rgba(0,255,136,.10);
+    color:var(--green);
+}
+
+.badge-gold{
+    background:rgba(243,198,20,.10);
+    color:var(--gold);
+}
+
+.badge-red{
+    background:rgba(255,77,103,.10);
+    color:#ff8093;
+}
+
+.level-card{
+    transition:.2s;
+}
+
+.level-card:hover{
+    border-color:rgba(0,255,136,.35);
+    transform:translateY(-2px);
+}
+
+.toast{
+    position:fixed;
+    right:16px;
+    bottom:85px;
+    z-index:300;
+    width:min(360px,calc(100% - 32px));
+    background:#101c15;
+    border:1px solid rgba(0,255,136,.20);
+    border-radius:15px;
+    padding:14px;
+    box-shadow:0 15px 50px rgba(0,0,0,.45);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    padding:10px;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    text-align:left;
+    font-size:12px;
+}
+
+th{
+    color:#9fb4a6;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= AUTH ================= -->
+
+<div id="authScreen" class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md">
+
+        <div class="text-center mb-7">
+            <div class="inline-flex w-20 h-20 rounded-3xl items-center justify-center
+                        bg-green-400/10 border border-green-400/20 mb-4">
+                <i class="fa-solid fa-bolt text-4xl green"></i>
+            </div>
+
+            <h1 class="text-3xl font-black">
+                Zulvix<span class="green">-KE</span>
+            </h1>
+
+            <p class="muted text-sm mt-2">
+                Kenya's Digital Asset Tap & Earn Platform
+            </p>
+        </div>
+
+        <div class="card p-5 glow">
+
+            <div class="text-center mb-5">
+                <h2 id="authSubtitle" class="text-xl font-bold">
+                    Secure Sign In Portal
+                </h2>
+                <p id="robotTipText" class="muted text-xs mt-2">
+                    Enter your registered mobile number and password.
+                </p>
+            </div>
+
+            <!-- LOGIN -->
+
+            <div id="loginFormContainer">
+
+                <label class="text-xs muted">Mobile Number</label>
+                <input
+                    id="loginPhone"
+                    class="input mt-2 mb-4"
+                    type="tel"
+                    placeholder="07XXXXXXXX"
+                >
+
+                <label class="text-xs muted">Access Password</label>
+
+                <div class="relative mt-2 mb-5">
+                    <input
+                        id="loginPassword"
+                        class="input pr-12"
+                        type="password"
+                        placeholder="Enter password"
+                    >
+
+                    <button
+                        type="button"
+                        onclick="togglePassword('loginPassword')"
+                        class="absolute right-3 top-3 muted">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+
+                <button
+                    id="loginBtn"
+                    onclick="handleLogin()"
+                    class="btn-green w-full">
+                    <i class="fa-solid fa-right-to-bracket mr-2"></i>
+                    Sign In
+                </button>
+
+                <button
+                    onclick="toggleAuthMode('register')"
+                    class="btn-dark w-full mt-3">
+                    Create New Account
+                </button>
+            </div>
+
+            <!-- REGISTER -->
+
+            <div id="registerFormContainer" class="hidden">
+
+                <label class="text-xs muted">Full Name</label>
+
+                <input
+                    id="regFullName"
+                    class="input mt-2 mb-4"
+                    type="text"
+                    placeholder="Your full name"
+                >
+
+                <label class="text-xs muted">Mobile Number</label>
+
+                <input
+                    id="regPhone"
+                    class="input mt-2 mb-4"
+                    type="tel"
+                    placeholder="07XXXXXXXX"
+                >
+
+                <label class="text-xs muted">Create Password</label>
+
+                <div class="relative mt-2 mb-5">
+
+                    <input
+                        id="regPassword"
+                        class="input pr-12"
+                        type="password"
+                        placeholder="Create password"
+                    >
+
+                    <button
+                        type="button"
+                        onclick="togglePassword('regPassword')"
+                        class="absolute right-3 top-3 muted">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+
+                </div>
+
+                <div class="p-3 rounded-xl bg-green-400/5 border border-green-400/10 mb-4">
+                    <div class="flex gap-3">
+                        <i class="fa-solid fa-robot green mt-1"></i>
+                        <div>
+                            <p class="text-sm font-bold">Zulvix Assistant</p>
+                            <p class="text-xs muted mt-1">
+                                Level 1 is available after registration.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <button
+                    id="registerBtn"
+                    onclick="handleRegister()"
+                    class="btn-green w-full">
+                    <i class="fa-solid fa-user-plus mr-2"></i>
+                    Register & Start
+                </button>
+
+                <button
+                    onclick="toggleAuthMode('login')"
+                    class="btn-dark w-full mt-3">
+                    Already Registered? Sign In
+                </button>
+
+            </div>
+
+        </div>
+
+        <p class="text-center text-xs muted mt-5">
+            Zulvix-KE • Secure Account Access
+        </p>
+
+    </div>
+</div>
+
+
+<!-- ================= MAIN APP ================= -->
+
+<div id="mainApp" class="hidden min-h-screen pb-24">
+
+    <!-- HEADER -->
+
+    <header class="sticky top-0 z-40 bg-[#070d0a]/95 backdrop-blur border-b border-white/5">
+
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+
+            <div class="flex items-center gap-3">
+
+                <div class="w-10 h-10 rounded-xl bg-green-400/10
+                            border border-green-400/20 flex items-center justify-center">
+                    <i class="fa-solid fa-bolt green"></i>
+                </div>
+
+                <div>
+                    <div class="font-black">
+                        Zulvix<span class="green">-KE</span>
+                    </div>
+                    <div id="headerUserName" class="text-[10px] muted">
+                        User
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="flex items-center gap-2">
+
+                <button
+                    onclick="openSupportModal()"
+                    class="w-10 h-10 rounded-xl bg-white/5">
+                    <i class="fa-solid fa-headset green"></i>
+                </button>
+
+                <button
+                    onclick="openAdminModal()"
+                    class="w-10 h-10 rounded-xl bg-white/5">
+                    <i class="fa-solid fa-shield-halved gold"></i>
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <main class="max-w-6xl mx-auto px-4 pt-5">
+
+        <!-- DASHBOARD -->
+
+        <section id="page-dashboard">
+
+            <div class="grid md:grid-cols-3 gap-4 mb-5">
+
+                <div class="card p-5 md:col-span-2 glow">
+
+                    <div class="flex justify-between items-start">
+
+                        <div>
+                            <p class="text-xs muted">Available Balance</p>
+
+                            <h2 class="text-3xl font-black mt-2">
+                                Ksh <span id="balanceDisplay">0.00</span>
+                            </h2>
+
+                            <p class="text-xs muted mt-2">
+                                Current Tier:
+                                <span id="currentLevelName" class="green font-bold">
+                                    Iron Box
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="badge badge-green">
+                            <i class="fa-solid fa-circle-check"></i>
+                            Active
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card p-5">
+
+                    <p class="text-xs muted">Today's Taps</p>
+
+                    <div class="flex items-end gap-2 mt-2">
+                        <span id="tapsLeftDisplay"
+                              class="text-3xl font-black green">
+                            6
+                        </span>
+
+                        <span class="muted text-sm mb-1">
+                            / 6
+                        </span>
+                    </div>
+
+                    <p id="countdownText" class="text-xs muted mt-2">
+                        Ready to tap
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- TAP -->
+
+            <div class="card p-6 text-center mb-5">
+
+                <p class="text-sm muted">
+                    Tap to collect from your active level
+                </p>
+
+                <div class="my-7 flex justify-center">
+
+                    <button
+                        id="tapButton"
+                        class="tap-button"
+                        onclick="handleTapAsset()">
+
+                        <i class="fa-solid fa-bolt text-3xl"></i>
+
+                        <div class="text-sm mt-2">
+                            TAP
+                        </div>
+
+                    </button>
+
+                </div>
+
+                <div class="text-xs muted">
+                    Each tap:
+                    <span id="tapValueDisplay" class="green font-bold">
+                        Ksh 5
+                    </span>
+                </div>
+
+            </div>
+
+
+            <!-- QUICK ACTIONS -->
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+
+                <button
+                    onclick="openDepositModal()"
+                    class="card p-4 text-left">
+                    <i class="fa-solid fa-money-bill-transfer green"></i>
+                    <p class="font-bold text-sm mt-2">Deposit</p>
+                    <p class="text-xs muted">Add funds</p>
+                </button>
+
+                <button
+                    onclick="openWithdrawModal()"
+                    class="card p-4 text-left">
+                    <i class="fa-solid fa-wallet gold"></i>
+                    <p class="font-bold text-sm mt-2">Withdraw</p>
+                    <p class="text-xs muted">Request payout</p>
+                </button>
+
+                <button
+                    onclick="copyInviteLink()"
+                    class="card p-4 text-left">
+                    <i class="fa-solid fa-share-nodes green"></i>
+                    <p class="font-bold text-sm mt-2">Invite</p>
+                    <p class="text-xs muted">Share & earn</p>
+                </button>
+
+                <button
+                    onclick="openComplaintModal()"
+                    class="card p-4 text-left">
+                    <i class="fa-solid fa-ticket gold"></i>
+                    <p class="font-bold text-sm mt-2">Support</p>
+                    <p class="text-xs muted">Send complaint</p>
+                </button>
+
+            </div>
+
+
+            <!-- TRANSACTIONS -->
+
+            <div class="card p-5">
+
+                <div class="flex justify-between items-center mb-4">
+
+                    <h3 class="font-bold">
+                        Recent Transactions
+                    </h3>
+
+                    <span class="text-xs muted">
+                        Account activity
+                    </span>
+
+                </div>
+
+                <div id="transactionHistory">
+                    <p class="text-xs muted text-center py-6">
+                        No transactions yet.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- LEVELS -->
+
+        <section id="page-levels" class="hidden">
+
+            <div class="mb-5">
+
+                <h2 class="text-2xl font-black">
+                    8 Tiers
+                </h2>
+
+                <p class="text-sm muted mt-1">
+                    Unlock higher earning levels.
+                </p>
+
+            </div>
+
+            <div id="levelsGrid"
+                 class="grid md:grid-cols-2 gap-4">
+            </div>
+
+        </section>
+
+
+        <!-- WALLET -->
+
+        <section id="page-wallet" class="hidden">
+
+            <h2 class="text-2xl font-black mb-5">
+                Wallet
+            </h2>
+
+            <div class="card p-5 mb-4">
+
+                <p class="text-xs muted">
+                    Current Balance
+                </p>
+
+                <div class="text-3xl font-black green mt-2">
+                    Ksh <span id="walletBalance">0.00</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mt-5">
+
+                    <button
+                        onclick="openDepositModal()"
+                        class="btn-green">
+                        Deposit
+                    </button>
+
+                    <button
+                        onclick="openWithdrawModal()"
+                        class="btn-dark">
+                        Withdraw
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="card p-5">
+
+                <h3 class="font-bold mb-4">
+                    Wallet Information
+                </h3>
+
+                <div class="space-y-3 text-sm">
+
+                    <div class="flex justify-between">
+                        <span class="muted">Account</span>
+                        <span id="walletPhone">-</span>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <span class="muted">Current Level</span>
+                        <span id="walletLevel" class="green">
+                            Iron Box
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <span class="muted">Portal Retention</span>
+                        <span>
+                            Ksh <span id="portalRetention">0.00</span>
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- PROFILE / SUPPORT -->
+
+        <section id="page-profile" class="hidden">
+
+            <h2 class="text-2xl font-black mb-5">
+                Profile & Support
+            </h2>
+
+            <div class="card p-5 mb-4">
+
+                <div class="flex items-center gap-4">
+
+                    <div class="w-14 h-14 rounded-full
+                                bg-green-400/10
+                                flex items-center justify-center">
+                        <i class="fa-solid fa-user text-xl green"></i>
+                    </div>
+
+                    <div>
+                        <h3 id="profileName" class="font-bold">
+                            User
+                        </h3>
+
+                        <p id="profilePhone"
+                           class="text-xs muted">
+                            -
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="grid gap-3">
+
+                <button
+                    onclick="openSupportModal()"
+                    class="card p-4 flex items-center gap-4 text-left">
+                    <i class="fa-solid fa-headset green text-xl"></i>
+                    <div>
+                        <p class="font-bold">Customer Support</p>
+                        <p class="text-xs muted">
+                            Contact customer care
+                        </p>
+                    </div>
+                </button>
+
+                <button
+                    onclick="openComplaintModal()"
+                    class="card p-4 flex items-center gap-4 text-left">
+                    <i class="fa-solid fa-ticket gold text-xl"></i>
+                    <div>
+                        <p class="font-bold">Complaint / Ticket</p>
+                        <p class="text-xs muted">
+                            Submit an issue
+                        </p>
+                    </div>
+                </button>
+
+                <button
+                    onclick="logout()"
+                    class="card p-4 flex items-center gap-4 text-left">
+                    <i class="fa-solid fa-right-from-bracket text-red-400 text-xl"></i>
+                    <div>
+                        <p class="font-bold">Sign Out</p>
+                        <p class="text-xs muted">
+                            Leave this account
+                        </p>
+                    </div>
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- BOTTOM NAV -->
+
+    <nav class="fixed bottom-0 left-0 right-0 z-50
+                bg-[#08100c]/95 backdrop-blur
+                border-t border-white/5">
+
+        <div class="max-w-2xl mx-auto grid grid-cols-4 py-2">
+
+            <button
+                onclick="showPage('dashboard',this)"
+                class="nav-btn active">
+                <i class="fa-solid fa-house block text-lg mb-1"></i>
+                Home
+            </button>
+
+            <button
+                onclick="showPage('levels',this)"
+                class="nav-btn">
+                <i class="fa-solid fa-layer-group block text-lg mb-1"></i>
+                Tiers
+            </button>
+
+            <button
+                onclick="showPage('wallet',this)"
+                class="nav-btn">
+                <i class="fa-solid fa-wallet block text-lg mb-1"></i>
+                Wallet
+            </button>
+
+            <button
+                onclick="showPage('profile',this)"
+                class="nav-btn">
+                <i class="fa-solid fa-user block text-lg mb-1"></i>
+                Profile
+            </button>
+
+        </div>
+
+    </nav>
+
+</div>
+
+
+<!-- ================= DEPOSIT MODAL ================= -->
+
+<div id="depositModal" class="modal-bg hidden">
+
+    <div class="modal">
+
+        <div class="flex justify-between items-center mb-5">
+
+            <h3 class="text-xl font-bold">
+                Deposit / Top Up
+            </h3>
+
+            <button onclick="closeModal('depositModal')">
+                <i class="fa-solid fa-xmark muted"></i>
+            </button>
+
+        </div>
+
+        <div class="p-4 rounded-xl bg-green-400/5 border border-green-400/10 mb-5">
+
+            <p class="text-xs muted">
+                Lipa na M-Pesa Paybill
+            </p>
+
+            <p class="text-2xl font-black green mt-1">
+                522533
+            </p>
+
+            <p class="text-xs muted mt-3">
+                Account Number
+            </p>
+
+            <p class="text-xl font-black gold">
+                8012296
+            </p>
+
+        </div>
+
+        <label class="text-xs muted">
+            Deposit Amount (KES)
+        </label>
+
+        <input
+            id="depositAmount"
+            type="number"
+            min="1"
+            class="input mt-2 mb-4"
+            placeholder="Enter amount">
+
+        <label class="text-xs muted">
+            M-Pesa Confirmation Code
+        </label>
+
+        <input
+            id="depositCode"
+            type="text"
+            class="input mt-2 mb-5"
+            placeholder="e.g. QWE123ABC">
+
+        <button
+            onclick="submitDeposit()"
+            class="btn-green w-full">
+            Submit Deposit Request
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ================= WITHDRAW MODAL ================= -->
+
+<div id="withdrawModal" class="modal-bg hidden">
+
+    <div class="modal">
+
+        <div class="flex justify-between items-center mb-5">
+
+            <h3 class="text-xl font-bold">
+                Withdraw Funds
+            </h3>
+
+            <button onclick="closeModal('withdrawModal')">
+                <i class="fa-solid fa-xmark muted"></i>
+            </button>
+
+        </div>
+
+        <div class="p-3 rounded-xl bg-yellow-400/5 border border-yellow-400/10 mb-4">
+            <p class="text-xs muted">
+                Minimum withdrawal:
+                <span class="gold font-bold">Ksh 2,000</span>
+            </p>
+        </div>
+
+        <label class="text-xs muted">
+            Withdrawal Amount
+        </label>
+
+        <input
+            id="withdrawAmount"
+            type="number"
+            min="2000"
+            class="input mt-2 mb-4"
+            placeholder="2000">
+
+        <label class="text-xs muted">
+            M-Pesa Phone Number
+        </label>
+
+        <input
+            id="withdrawPhone"
+            type="tel"
+            class="input mt-2 mb-5"
+            placeholder="07XXXXXXXX">
+
+        <button
+            onclick="submitWithdrawal()"
+            class="btn-green w-full">
+            Request Withdrawal
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ================= UPGRADE MODAL ================= -->
+
+<div id="upgradeModal" class="modal-bg hidden">
+
+    <div class="modal">
+
+        <div class="flex justify-between items-center mb-5">
+
+            <h3 class="text-xl font-bold">
+                Upgrade Tier
+            </h3>
+
+            <button onclick="closeModal('upgradeModal')">
+                <i class="fa-solid fa-xmark muted"></i>
+            </button>
+
+        </div>
+
+        <div id="upgradeContent"></div>
+
+    </div>
+
+</div>
+
+
+<!-- ================= SUPPORT MODAL ================= -->
+
+<div id="supportModal" class="modal-bg hidden">
+
+    <div class="modal">
+
+        <div class="flex justify-between items-center mb-5">
+
+            <h3 class="text-xl font-bold">
+                Customer Support
+            </h3>
+
+            <button onclick="closeModal('supportModal')">
+                <i class="fa-solid fa-xmark muted"></i>
+            </button>
+
+        </div>
+
+        <div class="p-4 card mb-4">
+
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-headset green text-xl"></i>
+
+                <div>
+                    <p class="font-bold">Zulvix Customer Care</p>
+                    <p class="text-xs muted">
+                        Support is available for account assistance.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <button
+            onclick="openComplaintModal();closeModal('supportModal')"
+            class="btn-green w-full">
+            Submit Support Ticket
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ================= COMPLAINT MODAL ================= -->
+
+<div id="complaintModal" class="modal-bg hidden">
+
+    <div class="modal">
+
+        <div class="flex justify-between items-center mb-5">
+
+            <h3 class="text-xl font-bold">
+                Complaint / Ticket
+            </h3>
+
+            <button onclick="closeModal('complaintModal')">
+                <i class="fa-solid fa-xmark muted"></i>
+            </button>
+
+        </div>
+
+        <label class="text-xs muted">
+            Message
+        </label>
+
+        <textarea
+            id="complaintMessage"
+            class="input mt-2 mb-5"
+            rows="5"
+            placeholder="Describe your issue..."></textarea>
+
+        <button
+            onclick="submitComplaint()"
+            class="btn-green w-full">
+            Send Complaint
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ================= ADMIN LOGIN ================= -->
+
+<div id="adminLoginModal" class="modal-bg hidden">
+
+    <div class="modal max-w-md">
+
+        <div class="flex justify-between items-center mb-5">
+
+            <h3 class="text-xl font-bold">
+                <i class="fa-solid fa-shield-halved gold mr-2"></i>
+                Admin Control
+            </h3>
+
+            <button onclick="closeModal('adminLoginModal')">
+                <i class="fa-solid fa-xmark muted"></i>
+            </button>
+
+        </div>
+
+        <p class="text-xs muted mb-4">
+            Enter the administrator PIN to access the control center.
+        </p>
+
+        <input
+            id="adminPin"
+            type="password"
+            class="input mb-4"
+            placeholder="Admin PIN">
+
+        <button
+            onclick="adminLogin()"
+            class="btn-gold w-full">
+            Access Control Center
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ================= ADMIN PANEL ================= -->
+
+<div id="adminPanelModal" class="modal-bg hidden">
+
+    <div class="modal max-w-5xl">
+
+        <div class="flex justify-between items-center mb-5">
+
+            <div>
+                <h3 class="text-xl font-black">
+                    Admin Control Center
+                </h3>
+
+                <p class="text-xs muted">
+                    Manage users, requests and support
+                </p>
+            </div>
+
+            <button onclick="closeModal('adminPanelModal')">
+                <i class="fa-solid fa-xmark muted"></i>
+            </button>
+
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-5">
+
+            <button onclick="adminTab('users')" class="btn-dark text-xs">
+                Users
+            </button>
+
+            <button onclick="adminTab('levels')" class="btn-dark text-xs">
+                Tiers
+            </button>
+
+            <button onclick="adminTab('deposits')" class="btn-dark text-xs">
+                Deposits
+            </button>
+
+            <button onclick="adminTab('withdrawals')" class="btn-dark text-xs">
+                Payouts
+            </button>
+
+            <button onclick="adminTab('complaints')" class="btn-dark text-xs">
+                Support
+            </button>
+
+        </div>
+
+        <div id="adminDataContainer">
+            <p class="text-center muted py-8">
+                Loading admin data...
+            </p>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================= TOAST ================= -->
+
+<div id="toast" class="toast hidden">
+
+    <div class="flex gap-3">
+
+        <div id="toastIcon"
+             class="w-9 h-9 rounded-full bg-green-400/10
+                    flex items-center justify-center">
+            <i class="fa-solid fa-check green"></i>
+        </div>
+
+        <div>
+            <p id="toastTitle" class="font-bold text-sm">
+                Success
+            </p>
+
+            <p id="toastMessage" class="text-xs muted mt-1">
+                Done
+            </p>
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   ZULVIX-KE BACKEND CONFIGURATION
+   ========================================================= */
+
+const API_BASE = 'https://zulvix-ke-backend.onrender.com';
+
+const USER_TOKEN_KEY = 'zulvix_ke_token_v1';
+const ADMIN_TOKEN_KEY = 'zulvix_ke_admin_token_v1';
+
+
+/* =========================================================
+   LEVEL CONFIG
+   ========================================================= */
+
+const LEVELS_CONFIG = [
+
+    {
+        id:1,
+        name:'Iron Box',
+        icon:'fa-box-archive',
+        unlockFee:0,
+        userDeposit:0,
+        perTap:5,
+        dailyTotal:30
+    },
+
+    {
+        id:2,
+        name:'Smart TV',
+        icon:'fa-tv',
+        unlockFee:800,
+        userDeposit:2000,
+        perTap:20,
+        dailyTotal:120
+    },
+
+    {
+        id:3,
+        name:'Motorbike',
+        icon:'fa-motorcycle',
+        unlockFee:2500,
+        userDeposit:2000,
+        perTap:55,
+        dailyTotal:330
+    },
+
+    {
+        id:4,
+        name:'Economy Car',
+        icon:'fa-car',
+        unlockFee:6000,
+        userDeposit:2000,
+        perTap:140,
+        dailyTotal:840
+    },
+
+    {
+        id:5,
+        name:'Rental House',
+        icon:'fa-house',
+        unlockFee:15000,
+        userDeposit:3000,
+        perTap:350,
+        dailyTotal:2100
+    },
+
+    {
+        id:6,
+        name:'Commercial Plot',
+        icon:'fa-building',
+        unlockFee:35000,
+        userDeposit:5000,
+        perTap:850,
+        dailyTotal:5100
+    },
+
+    {
+        id:7,
+        name:'Luxury Supercar',
+        icon:'fa-car-burst',
+        unlockFee:80000,
+        userDeposit:10000,
+        perTap:2100,
+        dailyTotal:12600
+    },
+
+    {
+        id:8,
+        name:'Private Jet',
+        icon:'fa-plane',
+        unlockFee:180000,
+        userDeposit:20000,
+        perTap:5000,
+        dailyTotal:30000
+    }
+
+];
+
+
+/* =========================================================
+   FRONTEND STATE
+   ========================================================= */
+
+let appState = {
+
+    isLoggedIn:false,
+
+    currentUser:{
+        name:'',
+        phone:''
+    },
+
+    balance:0,
+
+    currentLevelId:1,
+
+    unlockedLevels:[1],
+
+    tapsLeft:6,
+
+    nextTapResetTime:null,
+
+    transactions:[],
+
+    portalRetention:0
+
+};
+
+let selectedUpgradeLevel = null;
+let countdownInterval = null;
+
+
+/* =========================================================
+   GENERIC API
