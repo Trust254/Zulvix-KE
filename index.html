@@ -29,8 +29,65 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-brandGreen selection:text-black">
 
+    <!-- AUTHENTICATION WRAPPER (Shows if not logged in) -->
+    <div id="authWrapper" class="fixed inset-0 bg-brandDark z-50 flex items-center justify-center p-4">
+        <div class="bg-brandCard border border-brandGreen/40 rounded-2xl max-w-sm w-full p-6 space-y-6 shadow-2xl">
+            <div class="text-center space-y-2">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brandGreen to-brandGold flex items-center justify-center text-black font-black text-2xl mx-auto glow-green">
+                    Z
+                </div>
+                <h1 class="font-extrabold text-brandGreen tracking-wide text-xl">ZULVIX-KE</h1>
+                <p id="authSubtitle" class="text-xs text-zinc-400">Secure Tap & Earn Portal</p>
+            </div>
+
+            <!-- Login Form Container -->
+            <div id="loginFormContainer" class="space-y-4">
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs text-zinc-400 block mb-1">Phone Number or Email</label>
+                        <input type="text" id="loginIdentifier" placeholder="07XXXXXXXX or user@email.com" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGreen">
+                    </div>
+                    <div>
+                        <label class="text-xs text-zinc-400 block mb-1">Password</label>
+                        <input type="password" id="loginPassword" placeholder="••••••••" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGreen">
+                    </div>
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-brandGreen to-emerald-400 text-black font-extrabold py-3 rounded-xl text-sm transition shadow-lg glow-green">
+                    Sign In to Dashboard
+                </button>
+                <div class="text-center pt-2">
+                    <p class="text-xs text-zinc-400">Don't have an account? <button onclick="toggleAuthMode('register')" class="text-brandGold font-bold hover:underline">Register now</button></p>
+                </div>
+            </div>
+
+            <!-- Register Form Container -->
+            <div id="registerFormContainer" class="space-y-4 hidden">
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs text-zinc-400 block mb-1">Full Name</label>
+                        <input type="text" id="regFullName" placeholder="John Doe" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGold">
+                    </div>
+                    <div>
+                        <label class="text-xs text-zinc-400 block mb-1">Phone Number (M-Pesa)</label>
+                        <input type="text" id="regPhone" placeholder="07XXXXXXXX" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGold">
+                    </div>
+                    <div>
+                        <label class="text-xs text-zinc-400 block mb-1">Create Password</label>
+                        <input type="password" id="regPassword" placeholder="••••••••" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGold">
+                    </div>
+                </div>
+                <button onclick="handleRegister()" class="w-full bg-gradient-to-r from-brandGold to-yellow-400 text-black font-extrabold py-3 rounded-xl text-sm transition shadow-lg glow-gold">
+                    Create Account & Claim Bonus
+                </button>
+                <div class="text-center pt-2">
+                    <p class="text-xs text-zinc-400">Already registered? <button onclick="toggleAuthMode('login')" class="text-brandGreen font-bold hover:underline">Sign In</button></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Top Navigation Header -->
-    <header class="bg-brandCard border-b border-brandGreen/20 px-4 py-3 sticky top-0 z-50 flex justify-between items-center">
+    <header class="bg-brandCard border-b border-brandGreen/20 px-4 py-3 sticky top-0 z-40 flex justify-between items-center">
         <div class="flex items-center space-x-2">
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brandGreen to-brandGold flex items-center justify-center text-black font-black text-lg glow-green">
                 Z
@@ -100,7 +157,7 @@
                     </div>
                     <span class="text-xs font-semibold text-zinc-300">Deposit</span>
                 </button>
-                <button onclick="switchTab('wallet'); showWithdrawModal();" class="bg-brandCard border border-zinc-800 hover:border-brandGold/50 p-3 rounded-xl text-center transition group">
+                <button onclick="switchTab('wallet'); openWithdrawModal();" class="bg-brandCard border border-zinc-800 hover:border-brandGold/50 p-3 rounded-xl text-center transition group">
                     <div class="w-10 h-10 mx-auto rounded-lg bg-brandGold/10 text-brandGold flex items-center justify-center mb-1.5 group-hover:scale-110 transition">
                         <i class="fa-solid fa-arrow-up-from-bracket"></i>
                     </div>
@@ -124,8 +181,11 @@
 
             <div class="space-y-3">
                 <!-- Level 1 -->
-                <div class="bg-brandCard border border-brandGreen/40 rounded-xl p-4 flex justify-between items-center">
-                    <div>
+                <div class="bg-brandCard border border-brandGreen/40 rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-xl bg-zinc-900 border border-brandGreen/30 flex items-center justify-center text-brandGreen text-2xl flex-shrink-0 overflow-hidden">
+                        <i class="fa-solid fa-box-archive"></i>
+                    </div>
+                    <div class="flex-grow">
                         <span class="text-[10px] text-brandGreen font-bold uppercase tracking-wider">Current Level</span>
                         <h3 class="font-bold text-white text-sm">Level 1: Iron Box</h3>
                         <p class="text-xs text-zinc-400">Reward: Ksh 50 / Tap</p>
@@ -134,8 +194,11 @@
                 </div>
 
                 <!-- Level 2 -->
-                <div class="bg-brandCard border border-zinc-800 rounded-xl p-4 flex justify-between items-center">
-                    <div>
+                <div class="bg-brandCard border border-zinc-800 rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-brandGold text-2xl flex-shrink-0 overflow-hidden">
+                        <i class="fa-solid fa-tv"></i>
+                    </div>
+                    <div class="flex-grow">
                         <span class="text-[10px] text-brandGold font-bold uppercase tracking-wider">Cost: Ksh 1,000</span>
                         <h3 class="font-bold text-white text-sm">Level 2: Smart TV</h3>
                         <p class="text-xs text-zinc-400">Reward: Ksh 180 / Tap</p>
@@ -144,8 +207,11 @@
                 </div>
 
                 <!-- Level 3 -->
-                <div class="bg-brandCard border border-zinc-800 rounded-xl p-4 flex justify-between items-center">
-                    <div>
+                <div class="bg-brandCard border border-zinc-800 rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-brandGold text-2xl flex-shrink-0 overflow-hidden">
+                        <i class="fa-solid fa-motorcycle"></i>
+                    </div>
+                    <div class="flex-grow">
                         <span class="text-[10px] text-brandGold font-bold uppercase tracking-wider">Cost: Ksh 3,500</span>
                         <h3 class="font-bold text-white text-sm">Level 3: Motorbike</h3>
                         <p class="text-xs text-zinc-400">Reward: Ksh 450 / Tap</p>
@@ -154,8 +220,11 @@
                 </div>
 
                 <!-- Level 4 -->
-                <div class="bg-brandCard border border-zinc-800 rounded-xl p-4 flex justify-between items-center">
-                    <div>
+                <div class="bg-brandCard border border-zinc-800 rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-brandGold text-2xl flex-shrink-0 overflow-hidden">
+                        <i class="fa-solid fa-car"></i>
+                    </div>
+                    <div class="flex-grow">
                         <span class="text-[10px] text-brandGold font-bold uppercase tracking-wider">Cost: Ksh 8,000</span>
                         <h3 class="font-bold text-white text-sm">Level 4: Economy Car</h3>
                         <p class="text-xs text-zinc-400">Reward: Ksh 1,100 / Tap</p>
@@ -202,8 +271,8 @@
                     ZK
                 </div>
                 <div>
-                    <h3 class="font-bold text-white text-base">Zulvix User</h3>
-                    <p class="text-xs text-zinc-400">Active Member • Kenya (+254)</p>
+                    <h3 id="profileNameDisplay" class="font-bold text-white text-base">Zulvix User</h3>
+                    <p id="profilePhoneDisplay" class="text-xs text-zinc-400">Active Member • Kenya (+254)</p>
                 </div>
             </div>
 
@@ -215,12 +284,17 @@
                     <li>Mandatory account balance reserve rule of Ksh 2,000 applies.</li>
                 </ul>
             </div>
+
+            <!-- Logout Button -->
+            <button onclick="handleLogout()" class="w-full bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-right-from-bracket"></i> Sign Out / Logout
+            </button>
         </section>
 
     </main>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-brandCard border-t border-zinc-800 py-2.5 px-6 flex justify-between items-center z-40 max-w-lg mx-auto">
+    <nav class="fixed bottom-0 left-0 right-0 bg-brandCard border-t border-zinc-800 py-2.5 px-6 flex justify-between items-center z-30 max-w-lg mx-auto">
         <button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center text-brandGreen transition">
             <i class="fa-solid fa-house text-lg"></i>
             <span class="text-[10px] mt-0.5 font-bold">Home</span>
@@ -322,6 +396,8 @@
     <script>
         // App State Store
         let appState = {
+            isLoggedIn: false,
+            currentUser: { name: 'Zulvix User', phone: '0712345678' },
             balance: 150.00,
             tapsLeft: 6,
             tierName: 'Iron Box (Level 1)',
@@ -331,7 +407,7 @@
 
         // Load state from localStorage if available
         function loadAppState() {
-            const saved = localStorage.getItem('zulvix_state');
+            const saved = localStorage.getItem('zulvix_full_state');
             if (saved) {
                 try {
                     appState = JSON.parse(saved);
@@ -339,11 +415,80 @@
                     console.error("Failed to parse saved state", e);
                 }
             }
+            checkAuthUI();
             updateUI();
         }
 
         function saveAppState() {
-            localStorage.setItem('zulvix_state', JSON.stringify(appState));
+            localStorage.setItem('zulvix_full_state', JSON.stringify(appState));
+        }
+
+        // Authentication State Controllers
+        function checkAuthUI() {
+            const authWrapper = document.getElementById('authWrapper');
+            if (appState.isLoggedIn) {
+                authWrapper.classList.add('hidden');
+            } else {
+                authWrapper.classList.remove('hidden');
+            }
+        }
+
+        function toggleAuthMode(mode) {
+            const loginCont = document.getElementById('loginFormContainer');
+            const regCont = document.getElementById('registerFormContainer');
+            const subtitle = document.getElementById('authSubtitle');
+            if (mode === 'register') {
+                loginCont.classList.add('hidden');
+                regCont.classList.remove('hidden');
+                subtitle.innerText = "Create a new account to begin earning";
+            } else {
+                regCont.classList.add('hidden');
+                loginCont.classList.remove('hidden');
+                subtitle.innerText = "Secure Tap & Earn Portal";
+            }
+        }
+
+        function handleLogin() {
+            const identifier = document.getElementById('loginIdentifier').value.trim();
+            if (!identifier) {
+                alert("Please enter your phone number or email.");
+                return;
+            }
+            appState.isLoggedIn = true;
+            appState.currentUser.phone = identifier;
+            saveAppState();
+            checkAuthUI();
+            updateUI();
+        }
+
+        function handleRegister() {
+            const name = document.getElementById('regFullName').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            if (!name || !phone) {
+                alert("Please fill in all registration fields.");
+                return;
+            }
+            appState.isLoggedIn = true;
+            appState.currentUser.name = name;
+            appState.currentUser.phone = phone;
+            appState.balance = 100.00; // Welcome bonus
+            appState.transactions.unshift({
+                type: 'Welcome Bonus',
+                amount: '+Ksh 100.00',
+                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+            saveAppState();
+            checkAuthUI();
+            updateUI();
+            alert("Account created successfully! Welcome bonus of Ksh 100 added.");
+        }
+
+        function handleLogout() {
+            if (confirm("Are you sure you want to sign out?")) {
+                appState.isLoggedIn = false;
+                saveAppState();
+                checkAuthUI();
+            }
         }
 
         // Tab Navigation Switcher
@@ -521,13 +666,15 @@
             document.getElementById('walletTotalBalance').innerText = formattedBal;
             document.getElementById('tapsRemaining').innerText = `${appState.tapsLeft} / 6`;
             document.getElementById('currentTierName').innerText = appState.tierName;
+            document.getElementById('profileNameDisplay').innerText = appState.currentUser.name;
+            document.getElementById('profilePhoneDisplay').innerText = `Active Member • ${appState.currentUser.phone}`;
 
             // Render Transaction History
             const historyList = document.getElementById('transactionHistoryList');
             if (appState.transactions.length === 0) {
                 historyList.innerHTML = `<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 text-center text-xs text-zinc-500">No transactions recorded yet.</div>`;
             } else {
-                historyList.innerHTML = appState.transactions.map(tx => `
+                historyList.innerHTML = appState.transactions.upToDate || appState.transactions.map(tx => `
                     <div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 flex justify-between items-center text-xs">
                         <div>
                             <p class="font-bold text-white">${tx.type}</p>
