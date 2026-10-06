@@ -304,21 +304,34 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        let currentUser = null;
-        let userBalance = 30.00;
-        let userLevelsUnlocked = [1];
-        let authMode = 'login';
+    <!-- FIREBASE & APPLICATION JAVASCRIPT LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { 
+            getFirestore, collection, doc, getDoc, setDoc, updateData, getDocs, addDoc, query, where 
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // Load persisted database state from localStorage or set defaults
-        let registeredUsersList = JSON.parse(localStorage.getItem('zulvix_users')) || [];
-        let activationRequests = JSON.parse(localStorage.getItem('zulvix_requests')) || [];
-        let withdrawalRequests = JSON.parse(localStorage.getItem('zulvix_withdrawals')) || [];
-        let complaintsList = JSON.parse(localStorage.getItem('zulvix_complaints')) || [];
+        // Your Firebase Configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyDO31-0KLRmO-FXbAaFHaHTnk_F5DTNC4Q",
+          authDomain: "zulvix-ke.firebaseapp.com",
+          projectId: "zulvix-ke",
+          storageBucket: "zulvix-ke.firebasestorage.app",
+          messagingSenderId: "823595914074",
+          appId: "1:823595914074:web:4f4c0d95fd4fd8142fd963"
+        };
 
-        // Levels config with persistent cooldown tracking support
-        const levelsData = [
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Application State Variables
+        window.currentUser = null;
+        window.userBalance = 30.00;
+        window.userLevelsUnlocked = [1];
+        window.authMode = 'login';
+        window.selectedLevelForPayment = null;
+
+        window.levelsData = [
             { id: 1, name: "Iron Box", img: "https://images.unsplash.com/photo-1585435557343-3b092031a831?w=600&auto=format&fit=crop&q=80", activationFee: 0, depositFee: 0, dailyPayout: 30, perTap: 5, tapsLeft: 6, cooldownEnd: 0 },
             { id: 2, name: "Microwave", img: "https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?w=600&auto=format&fit=crop&q=80", activationFee: 800, depositFee: 2000, dailyPayout: 150, perTap: 25, tapsLeft: 6, cooldownEnd: 0 },
             { id: 3, name: "Fridge", img: "https://images.unsplash.com/photo-1584568694244-14fbdf83bd30?w=600&auto=format&fit=crop&q=80", activationFee: 1500, depositFee: 5000, dailyPayout: 500, perTap: 83, tapsLeft: 6, cooldownEnd: 0 },
@@ -327,31 +340,23 @@
             { id: 6, name: "Lamborghini", img: "https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?w=600&auto=format&fit=crop&q=80", activationFee: 30000, depositFee: 150000, dailyPayout: 22500, perTap: 3750, tapsLeft: 6, cooldownEnd: 0 }
         ];
 
-        let selectedLevelForPayment = null;
-
-        function saveState() {
-            localStorage.setItem('zulvix_users', JSON.stringify(registeredUsersList));
-            localStorage.setItem('zulvix_requests', JSON.stringify(activationRequests));
-            localStorage.setItem('zulvix_withdrawals', JSON.stringify(withdrawalRequests));
-            localStorage.setItem('zulvix_complaints', JSON.stringify(complaintsList));
-        }
-
-        function triggerVibration(pattern = [200, 100, 200]) {
+        // Expose functions globally to HTML events
+        window.triggerVibration = function(pattern = [200, 100, 200]) {
             if ("navigator" in window && "vibrate" in navigator) {
                 try { navigator.vibrate(pattern); } catch(e) {}
             }
-        }
+        };
 
-        function toggleMenu() {
+        window.toggleMenu = function() {
             document.getElementById('side-menu').classList.toggle('open');
-        }
+        };
 
-        function toggleAiModal() {
+        window.toggleAiModal = function() {
             let modal = document.getElementById('ai-chat-modal');
             modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
-        }
+        };
 
-        function sendAiMessage() {
+        window.sendAiMessage = function() {
             let input = document.getElementById('ai-input');
             let txt = input.value.trim();
             if(!txt) return;
@@ -366,7 +371,7 @@
                 chatBox.innerHTML += `<div class="ai-msg bot">${reply}</div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
             }, 600);
-        }
+        };
 
         function getAiResponse(query) {
             if(query.includes('withdraw') || query.includes('minimum') || query.includes('limit')) {
@@ -382,16 +387,16 @@
             }
         }
 
-        function logoutAccount() {
+        window.logoutAccount = function() {
             toggleMenu();
-            currentUser = null;
+            window.currentUser = null;
             document.getElementById('auth-container').style.display = 'flex';
             document.getElementById('auth-username').value = '';
             document.getElementById('auth-password').value = '';
-        }
+        };
 
-        function switchAuthMode(mode) {
-            authMode = mode;
+        window.switchAuthMode = function(mode) {
+            window.authMode = mode;
             let subBtn = document.getElementById('auth-submit-btn');
             let loginTab = document.getElementById('tab-login-btn');
             let regTab = document.getElementById('tab-register-btn');
@@ -407,9 +412,9 @@
                 loginTab.classList.remove('active');
                 subBtn.innerText = "Register New Account";
             }
-        }
+        };
 
-        function handleAuthentication() {
+        window.handleAuthentication = async function() {
             let u = document.getElementById('auth-username').value.trim();
             let p = document.getElementById('auth-password').value.trim();
             let err = document.getElementById('auth-error');
@@ -420,78 +425,82 @@
                 return;
             }
 
-            let existingUser = registeredUsersList.find(user => user.username === u);
+            try {
+                let userRef = doc(db, "zulvix_users", u);
+                let userSnap = await getDoc(userRef);
 
-            if(authMode === 'register') {
-                if(existingUser) {
-                    err.innerText = "Account already exists with this mobile number. Please login.";
+                if(window.authMode === 'register') {
+                    if(userSnap.exists()) {
+                        err.innerText = "Account already exists with this mobile number. Please login.";
+                        err.style.display = 'block';
+                        return;
+                    }
+                    let newUser = { 
+                        username: u, 
+                        password: p, 
+                        balance: 30.00, 
+                        levelsUnlocked: [1],
+                        cooldowns: {}
+                    };
+                    await setDoc(userRef, newUser);
+                    alert("Registration successful! You can now log in.");
+                    switchAuthMode('login');
+                    err.style.display = 'none';
+                    return;
+                }
+
+                // Login
+                if(!userSnap.exists()) {
+                    err.innerText = "Account not found. Please register first.";
                     err.style.display = 'block';
                     return;
                 }
-                // Create new user record with default cooldown tracking object
-                let newUser = { 
-                    username: u, 
-                    password: p, 
-                    balance: 30.00, 
-                    levelsUnlocked: [1],
-                    cooldowns: {} // Stores levelId -> cooldownEnd timestamp
-                };
-                registeredUsersList.push(newUser);
-                saveState();
+                let userData = userSnap.data();
+                if(userData.password !== p) {
+                    err.innerText = "Incorrect password.";
+                    err.style.display = 'block';
+                    return;
+                }
 
-                alert("Registration successful! You can now log in.");
-                switchAuthMode('login');
-                err.style.display = 'none';
-                return;
-            }
+                window.currentUser = userData.username;
+                window.userBalance = userData.balance;
+                window.userLevelsUnlocked = userData.levelsUnlocked || [1];
 
-            // Login check
-            if(!existingUser) {
-                err.innerText = "Account not found. Please register first.";
-                err.style.display = 'block';
-                return;
-            }
-            if(existingUser.password !== p) {
-                err.innerText = "Incorrect password.";
-                err.style.display = 'block';
-                return;
-            }
-
-            currentUser = existingUser.username;
-            userBalance = existingUser.balance;
-            userLevelsUnlocked = existingUser.levelsUnlocked;
-
-            // Load saved cooldowns into local level objects
-            let userCooldowns = existingUser.cooldowns || {};
-            levelsData.forEach(lvl => {
-                if(userCooldowns[lvl.id]) {
-                    lvl.cooldownEnd = userCooldowns[lvl.id];
-                    if(lvl.cooldownEnd > Date.now()) {
-                        lvl.tapsLeft = 0;
+                let userCooldowns = userData.cooldowns || {};
+                window.levelsData.forEach(lvl => {
+                    if(userCooldowns[lvl.id]) {
+                        lvl.cooldownEnd = userCooldowns[lvl.id];
+                        if(lvl.cooldownEnd > Date.now()) {
+                            lvl.tapsLeft = 0;
+                        } else {
+                            lvl.cooldownEnd = 0;
+                            lvl.tapsLeft = 6;
+                        }
                     } else {
                         lvl.cooldownEnd = 0;
                         lvl.tapsLeft = 6;
                     }
-                } else {
-                    lvl.cooldownEnd = 0;
-                    lvl.tapsLeft = 6;
-                }
-            });
+                });
 
-            document.getElementById('display-user').innerText = currentUser;
-            document.getElementById('user-balance').innerText = userBalance.toFixed(2);
-            document.getElementById('auth-container').style.display = 'none';
-            renderLevels();
-            setInterval(updateCooldowns, 1000);
-        }
+                document.getElementById('display-user').innerText = window.currentUser;
+                document.getElementById('user-balance').innerText = window.userBalance.toFixed(2);
+                document.getElementById('auth-container').style.display = 'none';
+                renderLevels();
+                setInterval(updateCooldowns, 1000);
+            } catch (error) {
+                console.error("Auth error:", error);
+                err.innerText = "Connection error. Please check your internet.";
+                err.style.display = 'block';
+            }
+        };
 
-        function renderLevels() {
+        window.renderLevels = function() {
             let container = document.getElementById('levels-container');
             container.innerHTML = "";
             let now = Date.now();
 
-            levelsData.forEach(lvl => {
-                let isUnlocked = userLevelsUnlocked.includes(lvl.id);
+            window.levelsData.forEach(lvl => {
+                let isUnlocked = window.userLevelsUnlocked.includes(lvl.id);
                 let badgeClass = lvl.id === 1 ? "badge-free" : (isUnlocked ? "badge-active" : "badge-locked");
                 let badgeText = lvl.id === 1 ? "Level 1 (Free)" : (isUnlocked ? "Unlocked & Active" : "Locked");
 
@@ -540,13 +549,11 @@
                 `;
                 container.innerHTML += cardHTML;
             });
-        }
+        };
 
         function updateCooldowns() {
             let now = Date.now();
-            let stateUpdated = false;
-
-            levelsData.forEach(lvl => {
+            window.levelsData.forEach(async lvl => {
                 if(lvl.cooldownEnd > 0) {
                     let diff = Math.floor((lvl.cooldownEnd - now) / 1000);
                     let cdElem = document.getElementById(`cd-${lvl.id}`);
@@ -558,40 +565,41 @@
                     } else {
                         lvl.cooldownEnd = 0;
                         lvl.tapsLeft = 6;
-                        
-                        // Clear cooldown from user record in database
-                        let uObj = registeredUsersList.find(u => u.username === currentUser);
-                        if(uObj) {
-                            if(!uObj.cooldowns) uObj.cooldowns = {};
-                            delete uObj.cooldowns[lvl.id];
-                            stateUpdated = true;
-                        }
+                        try {
+                            let userRef = doc(db, "zulvix_users", window.currentUser);
+                            let userSnap = await getDoc(userRef);
+                            if(userSnap.exists()) {
+                                let cdData = userSnap.data().cooldowns || {};
+                                delete cdData[lvl.id];
+                                await setDoc(userRef, { cooldowns: cdData }, { merge: true });
+                            }
+                        } catch(e) {}
                         renderLevels();
                     }
                 }
             });
-
-            if(stateUpdated) {
-                saveState();
-            }
         }
 
-        function tapAsset(lvlId) {
-            let lvl = levelsData.find(x => x.id === lvlId);
+        window.tapAsset = async function(lvlId) {
+            let lvl = window.levelsData.find(x => x.id === lvlId);
             if(lvl.tapsLeft > 0) {
                 lvl.tapsLeft--;
-                userBalance += lvl.perTap;
-                document.getElementById('user-balance').innerText = userBalance.toFixed(2);
+                window.userBalance += lvl.perTap;
+                document.getElementById('user-balance').innerText = window.userBalance.toFixed(2);
                 
-                let uObj = registeredUsersList.find(u => u.username === currentUser);
-                if(uObj) {
-                    uObj.balance = userBalance;
+                try {
+                    let userRef = doc(db, "zulvix_users", window.currentUser);
+                    let updatePayload = { balance: window.userBalance };
                     if(lvl.tapsLeft === 0) {
                         lvl.cooldownEnd = Date.now() + (12 * 60 * 60 * 1000);
-                        if(!uObj.cooldowns) uObj.cooldowns = {};
-                        uObj.cooldowns[lvlId] = lvl.cooldownEnd;
+                        let userSnap = await getDoc(userRef);
+                        let cdData = userSnap.exists() ? (userSnap.data().cooldowns || {}) : {};
+                        cdData[lvlId] = lvl.cooldownEnd;
+                        updatePayload.cooldowns = cdData;
                     }
-                    saveState();
+                    await setDoc(userRef, updatePayload, { merge: true });
+                } catch(e) {
+                    console.error("Error saving tap state:", e);
                 }
 
                 let tapElem = document.getElementById(`taps-${lvlId}`);
@@ -604,22 +612,22 @@
                     alert(`Earned ${lvl.perTap} Ksh!`);
                 }
             }
-        }
+        };
 
-        function openPaymentModal(lvlId) {
-            selectedLevelForPayment = levelsData.find(x => x.id === lvlId);
-            let total = selectedLevelForPayment.activationFee + selectedLevelForPayment.depositFee;
-            document.getElementById('payment-modal-title').innerText = `Unlock Level ${lvlId}: ${selectedLevelForPayment.name}`;
+        window.openPaymentModal = function(lvlId) {
+            window.selectedLevelForPayment = window.levelsData.find(x => x.id === lvlId);
+            let total = window.selectedLevelForPayment.activationFee + window.selectedLevelForPayment.depositFee;
+            document.getElementById('payment-modal-title').innerText = `Unlock Level ${lvlId}: ${window.selectedLevelForPayment.name}`;
             document.getElementById('payment-paybill-info').innerText = "Paybill: 522533 | Account: 8012296";
-            document.getElementById('payment-amount-display').innerText = `Exact Amount to Send: Ksh ${total.toLocaleString()} (Deposit: ${selectedLevelForPayment.depositFee.toLocaleString()} + Activation: ${selectedLevelForPayment.activationFee.toLocaleString()})`;
+            document.getElementById('payment-amount-display').innerText = `Exact Amount to Send: Ksh ${total.toLocaleString()} (Deposit: ${window.selectedLevelForPayment.depositFee.toLocaleString()} + Activation: ${window.selectedLevelForPayment.activationFee.toLocaleString()})`;
             document.getElementById('deposit-amount-input').value = "";
             document.getElementById('mpesa-code-input').value = "";
             document.getElementById('deposit-error-msg').style.display = 'none';
             document.getElementById('payment-modal').style.display = 'flex';
-        }
+        };
 
-        function openDepositModal() {
-            selectedLevelForPayment = { id: 'topup', name: 'Account Deposit Top-Up' };
+        window.openDepositModal = function() {
+            window.selectedLevelForPayment = { id: 'topup', name: 'Account Deposit Top-Up' };
             document.getElementById('payment-modal-title').innerText = "Account Deposit Top-Up";
             document.getElementById('payment-paybill-info').innerText = "Paybill: 522533 | Account: 8012296";
             document.getElementById('payment-amount-display').innerText = "Minimum Top-Up: Ksh 1,000";
@@ -627,16 +635,16 @@
             document.getElementById('mpesa-code-input').value = "";
             document.getElementById('deposit-error-msg').style.display = 'none';
             document.getElementById('payment-modal').style.display = 'flex';
-        }
+        };
 
-        function openWithdrawModal() {
+        window.openWithdrawModal = async function() {
             let nowHour = new Date().getHours();
             if(nowHour < 8 || nowHour >= 18) {
                 alert("Withdrawals are only open between 8:00 AM and 6:00 PM EAT.");
                 return;
             }
 
-            let amt = prompt(`Enter amount to withdraw (Ksh):\n(Min: 2,000 Ksh, Max: 100,000 Ksh. Must leave 2,000 Ksh reserve)`, userBalance);
+            let amt = prompt(`Enter amount to withdraw (Ksh):\n(Min: 2,000 Ksh, Max: 100,000 Ksh. Must leave 2,000 Ksh reserve)`, window.userBalance);
             if(amt && !isNaN(amt) && parseFloat(amt) > 0) {
                 let val = parseFloat(amt);
 
@@ -648,40 +656,44 @@
                     alert("Maximum daily withdrawal limit is Ksh 100,000.");
                     return;
                 }
-                if((userBalance - val) < 2000) {
+                if((window.userBalance - val) < 2000) {
                     alert("Withdrawal denied! You must maintain a minimum balance reserve of Ksh 2,000 to keep your account active.");
                     return;
                 }
 
-                userBalance -= val;
-                document.getElementById('user-balance').innerText = userBalance.toFixed(2);
+                window.userBalance -= val;
+                document.getElementById('user-balance').innerText = window.userBalance.toFixed(2);
                 
-                let uObj = registeredUsersList.find(u => u.username === currentUser);
-                if(uObj) {
-                    uObj.balance = userBalance;
-                    saveState();
-                }
+                try {
+                    let userRef = doc(db, "zulvix_users", window.currentUser);
+                    await setDoc(userRef, { balance: window.userBalance }, { merge: true });
 
-                withdrawalRequests.push({ user: currentUser, amount: val, status: "Pending" });
-                saveState();
+                    await addDoc(collection(db, "zulvix_withdrawals"), {
+                        user: window.currentUser,
+                        amount: val,
+                        status: "Pending",
+                        createdAt: new Date().toISOString()
+                    });
+                } catch(e) {
+                    console.error("Error posting withdrawal:", e);
+                }
                 
                 triggerVibration([300, 150, 300]);
                 alert(`Withdrawal Notification:\nYour withdrawal request for Ksh ${val.toLocaleString()} has been received and is pending transfer.`);
-                refreshAdminDashboard();
             }
-        }
+        };
 
-        function openComplaintModal() { toggleMenu(); document.getElementById('complaint-modal').style.display = 'flex'; }
-        function openAboutModal() { toggleMenu(); document.getElementById('about-modal').style.display = 'flex'; }
-        function openRulesModal() { toggleMenu(); document.getElementById('rules-modal').style.display = 'flex'; }
-        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        window.openComplaintModal = function() { toggleMenu(); document.getElementById('complaint-modal').style.display = 'flex'; };
+        window.openAboutModal = function() { toggleMenu(); document.getElementById('about-modal').style.display = 'flex'; };
+        window.openRulesModal = function() { toggleMenu(); document.getElementById('rules-modal').style.display = 'flex'; };
+        window.closeModal = function(modalId) { document.getElementById(modalId).style.display = 'none'; };
 
-        function submitActivationRequest() {
+        window.submitActivationRequest = async function() {
             let enteredAmount = parseFloat(document.getElementById('deposit-amount-input').value);
             let code = document.getElementById('mpesa-code-input').value.trim();
             let errBox = document.getElementById('deposit-error-msg');
-            let isTopup = selectedLevelForPayment.id === 'topup';
-            let requiredAmount = isTopup ? 1000 : (selectedLevelForPayment.activationFee + selectedLevelForPayment.depositFee);
+            let isTopup = window.selectedLevelForPayment.id === 'topup';
+            let requiredAmount = isTopup ? 1000 : (window.selectedLevelForPayment.activationFee + window.selectedLevelForPayment.depositFee);
 
             if(isNaN(enteredAmount) || (isTopup && enteredAmount < 1000) || (!isTopup && enteredAmount !== requiredAmount)) {
                 errBox.innerText = isTopup ? "Minimum deposit top-up is Ksh 1,000." : `Incorrect amount. Must match exact total of Ksh ${requiredAmount.toLocaleString()}.`;
@@ -694,150 +706,197 @@
                 return;
             }
 
-            activationRequests.push({
-                user: currentUser,
-                level: isTopup ? 'General Deposit Top-Up' : `Level ${selectedLevelForPayment.id} (${selectedLevelForPayment.name})`,
-                activationFee: isTopup ? 0 : selectedLevelForPayment.activationFee,
-                depositFee: isTopup ? enteredAmount : selectedLevelForPayment.depositFee,
-                totalPaid: isTopup ? enteredAmount : requiredAmount,
-                code: code,
-                status: "Pending"
-            });
-            saveState();
+            try {
+                await addDoc(collection(db, "zulvix_requests"), {
+                    user: window.currentUser,
+                    level: isTopup ? 'General Deposit Top-Up' : `Level ${window.selectedLevelForPayment.id} (${window.selectedLevelForPayment.name})`,
+                    activationFee: isTopup ? 0 : window.selectedLevelForPayment.activationFee,
+                    depositFee: isTopup ? enteredAmount : window.selectedLevelForPayment.depositFee,
+                    totalPaid: isTopup ? enteredAmount : requiredAmount,
+                    code: code,
+                    status: "Pending",
+                    createdAt: new Date().toISOString()
+                });
+            } catch(e) {
+                console.error("Error submitting activation:", e);
+            }
 
             triggerVibration([150, 100, 150]);
             alert(`Deposit Notification:\nYour request of Ksh ${(isTopup ? enteredAmount : requiredAmount).toLocaleString()} has been submitted successfully for confirmation.`);
             closeModal('payment-modal');
-            refreshAdminDashboard();
-        }
+        };
 
-        function submitComplaint() {
+        window.submitComplaint = async function() {
             let txt = document.getElementById('complaint-text').value.trim();
             if(!txt) return;
-            complaintsList.push({ user: currentUser, message: txt, status: "Pending" });
-            saveState();
+            try {
+                await addDoc(collection(db, "zulvix_complaints"), {
+                    user: window.currentUser,
+                    message: txt,
+                    status: "Pending",
+                    createdAt: new Date().toISOString()
+                });
+            } catch(e) {}
             alert("Complaint sent to zulvixke@gmail.com support team.");
             closeModal('complaint-modal');
-            refreshAdminDashboard();
-        }
+        };
 
-        function openAdminPortal() {
+        window.openAdminPortal = async function() {
             toggleMenu();
             let username = prompt("Enter Management Support ID:");
             let pass = prompt("Enter Support Password:");
             if(username === "3879" && pass === "Scott@254") {
-                refreshAdminDashboard();
+                await refreshAdminDashboard();
                 document.getElementById('admin-modal').style.display = 'flex';
             } else if(username !== null) {
                 alert("Invalid Credentials.");
             }
-        }
+        };
 
-        function refreshAdminDashboard() {
-            let pendingReqs = activationRequests.filter(r => r.status === "Pending").length;
-            let pendingWithdrawals = withdrawalRequests.filter(w => w.status === "Pending").length;
-            let pendingComps = complaintsList.filter(c => c.status === "Pending").length;
+        window.refreshAdminDashboard = async function() {
+            try {
+                let reqSnap = await getDocs(collection(db, "zulvix_requests"));
+                let reqList = [];
+                let reqDocs = [];
+                reqSnap.forEach(docSnap => {
+                    reqDocs.push({ id: docSnap.id, ...docSnap.data() });
+                });
 
-            document.getElementById('req-count').innerText = pendingReqs;
-            document.getElementById('withdraw-count').innerText = pendingWithdrawals;
-            document.getElementById('comp-count').innerText = pendingComps;
-            document.getElementById('user-count').innerText = registeredUsersList.length;
+                let withdrawSnap = await getDocs(collection(db, "zulvix_withdrawals"));
+                let withdrawDocs = [];
+                withdrawSnap.forEach(docSnap => {
+                    withdrawDocs.push({ id: docSnap.id, ...docSnap.data() });
+                });
 
-            let reqTbody = document.getElementById('admin-requests-tbody');
-            reqTbody.innerHTML = activationRequests.length === 0 ? `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 10px;">No requests found</td></tr>` : '';
-            activationRequests.forEach((req, idx) => {
-                reqTbody.innerHTML += `
-                    <tr style="border-bottom: 1px solid #1a3324;">
-                        <td style="padding: 6px;">${req.user}</td>
-                        <td style="padding: 6px;">${req.level}</td>
-                        <td style="padding: 6px;">${req.totalPaid.toLocaleString()} Ksh</td>
-                        <td style="padding: 6px;"><code>${req.code}</code></td>
-                        <td style="padding: 6px;">${req.status === 'Pending' ? `<button class="btn btn-green" style="padding: 4px 8px; font-size: 0.75rem;" onclick="approveRequest(${idx})">Approve</button>` : '<span style="color: var(--neon-green);">Approved</span>'}</td>
-                    </tr>`;
-            });
+                let compSnap = await getDocs(collection(db, "zulvix_complaints"));
+                let compDocs = [];
+                compSnap.forEach(docSnap => {
+                    compDocs.push({ id: docSnap.id, ...docSnap.data() });
+                });
 
-            let withdrawTbody = document.getElementById('admin-withdrawals-tbody');
-            withdrawTbody.innerHTML = withdrawalRequests.length === 0 ? `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 10px;">No withdrawal requests</td></tr>` : '';
-            withdrawalRequests.forEach((w, idx) => {
-                withdrawTbody.innerHTML += `
-                    <tr style="border-bottom: 1px solid #1a3324;">
-                        <td style="padding: 6px;">${w.user}</td>
-                        <td style="padding: 6px;">${w.amount.toLocaleString()} Ksh</td>
-                        <td style="padding: 6px;">${w.status}</td>
-                        <td style="padding: 6px;">${w.status === 'Pending' ? `<button class="btn btn-green" style="padding: 4px 8px; font-size: 0.75rem;" onclick="approveWithdrawal(${idx})">Pay / Complete</button>` : '<span style="color: var(--neon-green);">Completed</span>'}</td>
-                    </tr>`;
-            });
+                let userSnap = await getDocs(collection(db, "zulvix_users"));
+                let userDocs = [];
+                userSnap.forEach(docSnap => {
+                    userDocs.push(docSnap.data());
+                });
 
-            let compTbody = document.getElementById('admin-complaints-tbody');
-            compTbody.innerHTML = complaintsList.length === 0 ? `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 10px;">No complaints</td></tr>` : '';
-            complaintsList.forEach((c, idx) => {
-                compTbody.innerHTML += `
-                    <tr style="border-bottom: 1px solid #1a3324;">
-                        <td style="padding: 6px;">${c.user}</td>
-                        <td style="padding: 6px;">${c.message}</td>
-                        <td style="padding: 6px;">${c.status}</td>
-                        <td style="padding: 6px;">${c.status === 'Pending' ? `<button class="btn btn-gold" style="padding: 4px 8px; font-size: 0.75rem;" onclick="resolveComplaint(${idx})">Mark Resolved</button>` : '<span style="color: var(--text-muted);">Resolved</span>'}</td>
-                    </tr>`;
-            });
+                let pendingReqs = reqDocs.filter(r => r.status === "Pending").length;
+                let pendingWithdrawals = withdrawDocs.filter(w => w.status === "Pending").length;
+                let pendingComps = compDocs.filter(c => c.status === "Pending").length;
 
-            let userTbody = document.getElementById('admin-users-tbody');
-            userTbody.innerHTML = registeredUsersList.length === 0 ? `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 10px;">No registered users recorded yet</td></tr>` : '';
-            registeredUsersList.forEach(usr => {
-                userTbody.innerHTML += `
-                    <tr style="border-bottom: 1px solid #1a3324;">
-                        <td style="padding: 6px; font-weight: bold; color: var(--neon-green);">${usr.username}</td>
-                        <td style="padding: 6px;">${usr.balance ? usr.balance.toFixed(2) : '30.00'} Ksh</td>
-                        <td style="padding: 6px;">Levels: ${usr.levelsUnlocked ? usr.levelsUnlocked.join(', ') : '1'}</td>
-                    </tr>`;
-            });
-        }
+                document.getElementById('req-count').innerText = pendingReqs;
+                document.getElementById('withdraw-count').innerText = pendingWithdrawals;
+                document.getElementById('comp-count').innerText = pendingComps;
+                document.getElementById('user-count').innerText = userDocs.length;
 
-        function approveRequest(index) {
-            let req = activationRequests[index];
-            req.status = "Approved";
-            saveState();
+                let reqTbody = document.getElementById('admin-requests-tbody');
+                reqTbody.innerHTML = reqDocs.length === 0 ? `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 10px;">No requests found</td></tr>` : '';
+                reqDocs.forEach((req) => {
+                    reqTbody.innerHTML += `
+                        <tr style="border-bottom: 1px solid #1a3324;">
+                            <td style="padding: 6px;">${req.user}</td>
+                            <td style="padding: 6px;">${req.level}</td>
+                            <td style="padding: 6px;">${req.totalPaid.toLocaleString()} Ksh</td>
+                            <td style="padding: 6px;"><code>${req.code}</code></td>
+                            <td style="padding: 6px;">${req.status === 'Pending' ? `<button class="btn btn-green" style="padding: 4px 8px; font-size: 0.75rem;" onclick="approveRequest('${req.id}')">Approve</button>` : '<span style="color: var(--neon-green);">Approved</span>'}</td>
+                        </tr>`;
+                });
 
-            let targetUser = registeredUsersList.find(u => u.username === req.user);
-            if(targetUser) {
-                if(req.level.includes("Level")) {
-                    let match = req.level.match(/Level (\d+)/);
-                    if(match) {
-                        let lvlId = parseInt(match[1]);
-                        if(!targetUser.levelsUnlocked.includes(lvlId)) {
-                            targetUser.levelsUnlocked.push(lvlId);
+                let withdrawTbody = document.getElementById('admin-withdrawals-tbody');
+                withdrawTbody.innerHTML = withdrawDocs.length === 0 ? `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 10px;">No withdrawal requests</td></tr>` : '';
+                withdrawDocs.forEach((w) => {
+                    withdrawTbody.innerHTML += `
+                        <tr style="border-bottom: 1px solid #1a3324;">
+                            <td style="padding: 6px;">${w.user}</td>
+                            <td style="padding: 6px;">${w.amount.toLocaleString()} Ksh</td>
+                            <td style="padding: 6px;">${w.status}</td>
+                            <td style="padding: 6px;">${w.status === 'Pending' ? `<button class="btn btn-green" style="padding: 4px 8px; font-size: 0.75rem;" onclick="approveWithdrawal('${w.id}')">Pay / Complete</button>` : '<span style="color: var(--neon-green);">Completed</span>'}</td>
+                        </tr>`;
+                });
+
+                let compTbody = document.getElementById('admin-complaints-tbody');
+                compTbody.innerHTML = compDocs.length === 0 ? `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 10px;">No complaints</td></tr>` : '';
+                compDocs.forEach((c) => {
+                    compTbody.innerHTML += `
+                        <tr style="border-bottom: 1px solid #1a3324;">
+                            <td style="padding: 6px;">${c.user}</td>
+                            <td style="padding: 6px;">${c.message}</td>
+                            <td style="padding: 6px;">${c.status}</td>
+                            <td style="padding: 6px;">${c.status === 'Pending' ? `<button class="btn btn-gold" style="padding: 4px 8px; font-size: 0.75rem;" onclick="resolveComplaint('${c.id}')">Mark Resolved</button>` : '<span style="color: var(--text-muted);">Resolved</span>'}</td>
+                        </tr>`;
+                });
+
+                let userTbody = document.getElementById('admin-users-tbody');
+                userTbody.innerHTML = userDocs.length === 0 ? `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 10px;">No registered users recorded yet</td></tr>` : '';
+                userDocs.forEach(usr => {
+                    userTbody.innerHTML += `
+                        <tr style="border-bottom: 1px solid #1a3324;">
+                            <td style="padding: 6px; font-weight: bold; color: var(--neon-green);">${usr.username}</td>
+                            <td style="padding: 6px;">${usr.balance ? usr.balance.toFixed(2) : '30.00'} Ksh</td>
+                            <td style="padding: 6px;">Levels: ${usr.levelsUnlocked ? usr.levelsUnlocked.join(', ') : '1'}</td>
+                        </tr>`;
+                });
+            } catch(e) {
+                console.error("Error refreshing admin dashboard:", e);
+            }
+        };
+
+        window.approveRequest = async function(docId) {
+            try {
+                let reqRef = doc(db, "zulvix_requests", docId);
+                let reqSnap = await getDoc(reqRef);
+                if(!reqSnap.exists()) return;
+                let req = reqSnap.data();
+
+                await setDoc(reqRef, { status: "Approved" }, { merge: true });
+
+                let targetUserRef = doc(db, "zulvix_users", req.user);
+                let targetUserSnap = await getDoc(targetUserRef);
+                if(targetUserSnap.exists()) {
+                    let uData = targetUserSnap.data();
+                    let levels = uData.levelsUnlocked || [1];
+                    if(req.level.includes("Level")) {
+                        let match = req.level.match(/Level (\d+)/);
+                        if(match) {
+                            let lvlId = parseInt(match[1]);
+                            if(!levels.includes(lvlId)) levels.push(lvlId);
                         }
                     }
-                }
-                targetUser.balance += req.depositFee;
-                saveState();
+                    let newBal = (uData.balance || 30) + req.depositFee;
+                    await setDoc(targetUserRef, { balance: newBal, levelsUnlocked: levels }, { merge: true });
 
-                if(currentUser === targetUser.username) {
-                    userBalance = targetUser.balance;
-                    userLevelsUnlocked = [...targetUser.levelsUnlocked];
-                    document.getElementById('user-balance').innerText = userBalance.toFixed(2);
-                    renderLevels();
+                    if(window.currentUser === req.user) {
+                        window.userBalance = newBal;
+                        window.userLevelsUnlocked = [...levels];
+                        document.getElementById('user-balance').innerText = window.userBalance.toFixed(2);
+                        renderLevels();
+                    }
                 }
+
+                await window.refreshAdminDashboard();
+                alert("Request approved, account balance credited, and level unlocked permanently!");
+            } catch(e) {
+                console.error("Error approving request:", e);
             }
+        };
 
-            refreshAdminDashboard();
-            alert("Request approved, account balance credited, and level unlocked permanently!");
-        }
+        window.approveWithdrawal = async function(docId) {
+            try {
+                await setDoc(doc(db, "zulvix_withdrawals", docId), { status: "Completed" }, { merge: true });
+                await window.refreshAdminDashboard();
+                alert("Withdrawal marked as completed.");
+            } catch(e) {}
+        };
 
-        function approveWithdrawal(index) {
-            withdrawalRequests[index].status = "Completed";
-            saveState();
-            refreshAdminDashboard();
-            alert("Withdrawal marked as completed.");
-        }
+        window.resolveComplaint = async function(docId) {
+            try {
+                await setDoc(doc(db, "zulvix_complaints", docId), { status: "Resolved" }, { merge: true });
+                await window.refreshAdminDashboard();
+                alert("Complaint resolved.");
+            } catch(e) {}
+        };
 
-        function resolveComplaint(index) {
-            complaintsList[index].status = "Resolved";
-            saveState();
-            refreshAdminDashboard();
-            alert("Complaint resolved.");
-        }
-
-        function switchAdminTab(tabName, btnElem) {
+        window.switchAdminTab = function(tabName, btnElem) {
             document.querySelectorAll('.admin-section').forEach(sec => sec.classList.add('hidden'));
             
             ['requests', 'withdrawals', 'complaints', 'users'].forEach(t => {
@@ -853,7 +912,7 @@
             btnElem.style.background = 'var(--neon-green)';
             btnElem.style.color = '#000';
             btnElem.classList.add('btn-green');
-        }
+        };
     </script>
 </body>
 </html>
