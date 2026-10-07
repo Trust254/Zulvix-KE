@@ -3,214 +3,3165 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Zulvix-KE | Digital Asset Tap & Earn</title>
+
 <meta name="google-site-verification" content="bvAT-SpWX7RGs1cOlm-_6L4RhZ-kZFu9LZdKAZIhDJQ" />
+
 <script src="https://cdn.tailwindcss.com"></script>
+
 <script>
-tailwind.config={theme:{extend:{colors:{
-brandDark:'#070d0a',brandCard:'#0d1712',brandGreen:'#00ff88',brandGold:'#f3c614'
-}}}};
+tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                brandDark: '#070d0a',
+                brandCard: '#0d1712',
+                brandGreen: '#00ff88',
+                brandGold: '#f3c614'
+            }
+        }
+    }
+};
 </script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
-body{background:#070d0a;color:#f3f4f6;font-family:system-ui,-apple-system,sans-serif}
-.glow-green{box-shadow:0 0 15px rgba(0,255,136,.3)}.glow-gold{box-shadow:0 0 15px rgba(243,198,20,.3)}
-.fingerprint-ring{box-shadow:0 0 0 2px rgba(0,255,136,.18),0 0 22px rgba(0,255,136,.28),inset 0 0 18px rgba(243,198,20,.12)}
-.fingerprint-icon{filter:drop-shadow(0 0 5px rgba(0,0,0,.35))}
+body{
+    background:#070d0a;
+    color:#f3f4f6;
+    font-family:system-ui,-apple-system,sans-serif;
+}
+
+.glow-green{
+    box-shadow:0 0 15px rgba(0,255,136,.3);
+}
+
+.glow-gold{
+    box-shadow:0 0 15px rgba(243,198,20,.3);
+}
+
+/* Fingerprint tap design */
+.fingerprint-ring{
+    box-shadow:
+        0 0 0 2px rgba(0,255,136,.18),
+        0 0 25px rgba(0,255,136,.35),
+        inset 0 0 20px rgba(243,198,20,.15);
+}
+
+.fingerprint-icon{
+    filter:drop-shadow(0 0 6px rgba(0,0,0,.4));
+}
+
+.fingerprint-ring:active{
+    transform:scale(.94);
+}
 </style>
 </head>
+
 <body class="min-h-screen flex flex-col justify-between selection:bg-brandGreen selection:text-black">
 
-<div id="notificationToast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-transform duration-300 max-w-sm w-full bg-brandCard border border-brandGreen p-4 rounded-2xl shadow-2xl flex items-center gap-3">
-<div id="toastIcon" class="w-10 h-10 rounded-xl bg-brandGreen/20 text-brandGreen flex items-center justify-center text-lg flex-shrink-0"><i class="fa-solid fa-bell"></i></div>
-<div class="flex-grow"><h5 id="toastTitle" class="font-bold text-white text-xs">Notification</h5><p id="toastMessage" class="text-[11px] text-zinc-300">Action completed successfully.</p></div>
-<button onclick="hideToast()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+<!-- =========================================================
+     NOTIFICATION
+========================================================= -->
+
+<div id="notificationToast"
+     class="fixed top-5 right-5 z-[100] transform translate-x-full transition-transform duration-300 max-w-sm w-full bg-brandCard border border-brandGreen p-4 rounded-2xl shadow-2xl flex items-center gap-3">
+
+    <div id="toastIcon"
+         class="w-10 h-10 rounded-xl bg-brandGreen/20 text-brandGreen flex items-center justify-center text-lg flex-shrink-0">
+        <i class="fa-solid fa-bell"></i>
+    </div>
+
+    <div class="flex-grow">
+        <h5 id="toastTitle"
+            class="font-bold text-white text-xs">
+            Notification
+        </h5>
+
+        <p id="toastMessage"
+           class="text-[11px] text-zinc-300">
+            Action completed successfully.
+        </p>
+    </div>
+
+    <button onclick="hideToast()"
+            class="text-zinc-400 hover:text-white">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
 </div>
 
-<div id="authWrapper" class="fixed inset-0 bg-brandDark z-50 flex items-center justify-center p-4">
-<div class="bg-brandCard border border-brandGreen/40 rounded-2xl max-w-sm w-full p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">
-<div class="text-center space-y-2"><div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brandGreen to-brandGold flex items-center justify-center text-black font-black text-2xl mx-auto glow-green">Z</div><h1 class="font-extrabold text-brandGreen tracking-wide text-xl">ZULVIX-KE</h1><p id="authSubtitle" class="text-xs text-zinc-400">Secure Online Tap & Earn Portal</p></div>
-<div id="loginFormContainer" class="space-y-4">
-<div class="space-y-3">
-<div><label class="text-xs text-zinc-400 block mb-1">Mobile Number (M-Pesa)</label><input type="text" id="loginPhone" placeholder="07XXXXXXXX" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGreen"></div>
-<div><label class="text-xs text-zinc-400 block mb-1">Password</label><input type="password" id="loginPassword" placeholder="••••••••" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGreen"></div>
+
+<!-- =========================================================
+     AUTH SCREEN
+========================================================= -->
+
+<div id="authWrapper"
+     class="fixed inset-0 bg-brandDark z-50 flex items-center justify-center p-4">
+
+    <div class="bg-brandCard border border-brandGreen/40 rounded-2xl max-w-sm w-full p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">
+
+        <div class="text-center space-y-2">
+
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brandGreen to-brandGold flex items-center justify-center text-black font-black text-2xl mx-auto glow-green">
+                Z
+            </div>
+
+            <h1 class="font-extrabold text-brandGreen tracking-wide text-xl">
+                ZULVIX-KE
+            </h1>
+
+            <p id="authSubtitle"
+               class="text-xs text-zinc-400">
+                Secure Online Tap & Earn Portal
+            </p>
+
+        </div>
+
+
+        <!-- LOGIN -->
+
+        <div id="loginFormContainer"
+             class="space-y-4">
+
+            <div class="space-y-3">
+
+                <div>
+                    <label class="text-xs text-zinc-400 block mb-1">
+                        Mobile Number (M-Pesa)
+                    </label>
+
+                    <input
+                        type="text"
+                        id="loginPhone"
+                        placeholder="07XXXXXXXX"
+                        autocomplete="tel"
+                        class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGreen">
+                </div>
+
+                <div>
+                    <label class="text-xs text-zinc-400 block mb-1">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="loginPassword"
+                        placeholder="••••••••"
+                        autocomplete="current-password"
+                        class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGreen">
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                onclick="handleLogin()"
+                class="w-full bg-gradient-to-r from-brandGreen to-emerald-400 text-black font-extrabold py-3 rounded-xl text-sm transition shadow-lg glow-green cursor-pointer">
+
+                <i class="fa-solid fa-right-to-bracket mr-1"></i>
+                Sign In to Dashboard
+
+            </button>
+
+            <div class="text-center pt-2">
+
+                <p class="text-xs text-zinc-400">
+                    Don't have an account?
+
+                    <button
+                        type="button"
+                        onclick="toggleAuthMode('register')"
+                        class="text-brandGold font-bold hover:underline cursor-pointer">
+
+                        Register Account
+
+                    </button>
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- REGISTER -->
+
+        <div id="registerFormContainer"
+             class="space-y-4 hidden">
+
+            <div class="space-y-3">
+
+                <div>
+                    <label class="text-xs text-zinc-400 block mb-1">
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="regFullName"
+                        placeholder="John Doe"
+                        autocomplete="name"
+                        class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGold">
+                </div>
+
+                <div>
+                    <label class="text-xs text-zinc-400 block mb-1">
+                        Mobile Number (M-Pesa)
+                    </label>
+
+                    <input
+                        type="text"
+                        id="regPhone"
+                        placeholder="07XXXXXXXX"
+                        autocomplete="tel"
+                        class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGold">
+                </div>
+
+                <div>
+                    <label class="text-xs text-zinc-400 block mb-1">
+                        Create Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="regPassword"
+                        placeholder="••••••••"
+                        autocomplete="new-password"
+                        class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGold">
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                onclick="handleRegister()"
+                class="w-full bg-gradient-to-r from-brandGold to-yellow-400 text-black font-extrabold py-3 rounded-xl text-sm transition shadow-lg glow-gold cursor-pointer">
+
+                <i class="fa-solid fa-user-plus mr-1"></i>
+                Register & Start Free Level 1
+
+            </button>
+
+            <div class="text-center pt-2">
+
+                <p class="text-xs text-zinc-400">
+                    Already registered?
+
+                    <button
+                        type="button"
+                        onclick="toggleAuthMode('login')"
+                        class="text-brandGreen font-bold hover:underline cursor-pointer">
+
+                        Sign In
+
+                    </button>
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
 </div>
-<button onclick="handleLogin()" class="w-full bg-gradient-to-r from-brandGreen to-emerald-400 text-black font-extrabold py-3 rounded-xl text-sm transition shadow-lg glow-green cursor-pointer">Sign In to Dashboard</button>
-<div class="text-center pt-2"><p class="text-xs text-zinc-400">Don't have an account? <button onclick="toggleAuthMode('register')" class="text-brandGold font-bold hover:underline cursor-pointer">Register Account</button></p></div>
-</div>
-<div id="registerFormContainer" class="space-y-4 hidden">
-<div class="space-y-3">
-<div><label class="text-xs text-zinc-400 block mb-1">Full Name</label><input type="text" id="regFullName" placeholder="John Doe" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGold"></div>
-<div><label class="text-xs text-zinc-400 block mb-1">Mobile Number (M-Pesa)</label><input type="text" id="regPhone" placeholder="07XXXXXXXX" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGold"></div>
-<div><label class="text-xs text-zinc-400 block mb-1">Create Password</label><input type="password" id="regPassword" placeholder="••••••••" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brandGold"></div>
-</div>
-<button onclick="handleRegister()" class="w-full bg-gradient-to-r from-brandGold to-yellow-400 text-black font-extrabold py-3 rounded-xl text-sm transition shadow-lg glow-gold cursor-pointer">Register & Start Free Level 1</button>
-<div class="text-center pt-2"><p class="text-xs text-zinc-400">Already registered? <button onclick="toggleAuthMode('login')" class="text-brandGreen font-bold hover:underline cursor-pointer">Sign In</button></p></div>
-</div></div></div>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
 
 <header class="bg-brandCard border-b border-brandGreen/20 px-4 py-3 sticky top-0 z-40 flex justify-between items-center">
-<div class="flex items-center space-x-2"><div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brandGreen to-brandGold flex items-center justify-center text-black font-black text-lg glow-green">Z</div><div><h1 class="font-bold text-brandGreen tracking-wide text-sm sm:text-base">ZULVIX-KE</h1><p class="text-[10px] text-brandGold uppercase font-semibold tracking-widest">Tap & Earn Engine</p></div></div>
-<div class="flex items-center space-x-2"><button onclick="switchTab('wallet')" class="bg-brandCard border border-brandGold/40 hover:border-brandGold text-brandGold px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"><i class="fa-solid fa-wallet"></i><span id="navBalance">Ksh 0</span></button><button onclick="openAdminModal()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2.5 py-1.5 rounded-lg text-xs transition cursor-pointer"><i class="fa-solid fa-shield-halved"></i></button></div>
+
+    <div class="flex items-center space-x-2">
+
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brandGreen to-brandGold flex items-center justify-center text-black font-black text-lg glow-green">
+            Z
+        </div>
+
+        <div>
+            <h1 class="font-bold text-brandGreen tracking-wide text-sm sm:text-base">
+                ZULVIX-KE
+            </h1>
+
+            <p class="text-[10px] text-brandGold uppercase font-semibold tracking-widest">
+                Tap & Earn Engine
+            </p>
+        </div>
+
+    </div>
+
+    <div class="flex items-center space-x-2">
+
+        <button
+            onclick="switchTab('wallet')"
+            class="bg-brandCard border border-brandGold/40 hover:border-brandGold text-brandGold px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+
+            <i class="fa-solid fa-wallet"></i>
+
+            <span id="navBalance">
+                Ksh 0
+            </span>
+
+        </button>
+
+        <button
+            onclick="openAdminModal()"
+            class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2.5 py-1.5 rounded-lg text-xs transition cursor-pointer">
+
+            <i class="fa-solid fa-shield-halved"></i>
+
+        </button>
+
+    </div>
+
 </header>
 
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
 <main class="flex-grow max-w-lg w-full mx-auto p-4 pb-24">
-<section id="tab-dashboard" class="space-y-4">
-<div class="bg-brandCard border border-brandGreen/30 rounded-2xl p-4 shadow-lg relative overflow-hidden"><div class="absolute -right-6 -bottom-6 w-24 h-24 bg-brandGreen/10 rounded-full blur-xl pointer-events-none"></div><div class="flex justify-between items-start"><div><span class="text-xs uppercase tracking-wider text-zinc-400">Account Tier</span><h2 id="currentTierName" class="text-lg font-bold text-brandGreen">Level 1: Iron Box</h2></div><span class="bg-brandGreen/20 text-brandGreen border border-brandGreen/40 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase">Active</span></div><div class="mt-4 grid grid-cols-2 gap-3 pt-3 border-t border-zinc-800"><div><span class="text-[11px] text-zinc-400">Dashboard Balance</span><p id="dashBalance" class="text-xl font-black text-brandGold">Ksh 0.00</p></div><div><span class="text-[11px] text-zinc-400">Taps Status</span><p id="tapsRemaining" class="text-xl font-black text-white">6 / 6</p></div></div></div>
-<div class="bg-brandCard border border-zinc-800 rounded-2xl p-6 text-center space-y-4 shadow-xl"><div class="relative w-40 h-40 mx-auto flex items-center justify-center"><div class="absolute inset-0 rounded-full bg-brandGreen/10 animate-pulse"></div><button onclick="handleTapAsset()" id="tapButton" class="w-32 h-32 rounded-full bg-gradient-to-tr from-brandGreen to-brandGold text-black font-black text-xl shadow-lg glow-green fingerprint-ring transform active:scale-95 transition flex flex-col items-center justify-center cursor-pointer"><i id="tapAssetIcon" class="fa-solid fa-fingerprint fingerprint-icon text-5xl mb-1"></i><span>TAP ASSET</span></button></div><div id="countdownBox" class="hidden bg-zinc-900 border border-brandGold/30 rounded-xl p-3 text-center space-y-1"><p class="text-[11px] text-brandGold font-bold uppercase"><i class="fa-solid fa-clock mr-1"></i> Daily Taps Exhausted</p><p class="text-xs text-zinc-400">Next tapping session unlocks in:</p><p id="countdownTimerDisplay" class="text-lg font-black text-white">12:00:00</p></div><p id="tapFeedbackMessage" class="text-xs text-zinc-400">Tap to earn daily profits. Limit: 6 taps every 12 hours.</p></div>
-<div class="grid grid-cols-3 gap-3"><button onclick="openDepositModal()" class="bg-brandCard border border-zinc-800 hover:border-brandGreen/50 p-3 rounded-xl text-center transition group cursor-pointer"><div class="w-10 h-10 mx-auto rounded-lg bg-brandGreen/10 text-brandGreen flex items-center justify-center mb-1.5"><i class="fa-solid fa-plus"></i></div><span class="text-xs font-semibold text-zinc-300">Deposit</span></button><button onclick="openWithdrawModal()" class="bg-brandCard border border-zinc-800 hover:border-brandGold/50 p-3 rounded-xl text-center transition group cursor-pointer"><div class="w-10 h-10 mx-auto rounded-lg bg-brandGold/10 text-brandGold flex items-center justify-center mb-1.5"><i class="fa-solid fa-arrow-up-from-bracket"></i></div><span class="text-xs font-semibold text-zinc-300">Withdraw</span></button><button onclick="switchTab('levels')" class="bg-brandCard border border-zinc-800 hover:border-brandGreen/50 p-3 rounded-xl text-center transition group cursor-pointer"><div class="w-10 h-10 mx-auto rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-1.5"><i class="fa-solid fa-rocket"></i></div><span class="text-xs font-semibold text-zinc-300">Tiers (8)</span></button></div>
+
+
+<!-- DASHBOARD -->
+
+<section id="tab-dashboard"
+         class="space-y-4">
+
+    <div class="bg-brandCard border border-brandGreen/30 rounded-2xl p-4 shadow-lg relative overflow-hidden">
+
+        <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-brandGreen/10 rounded-full blur-xl pointer-events-none"></div>
+
+        <div class="flex justify-between items-start">
+
+            <div>
+
+                <span class="text-xs uppercase tracking-wider text-zinc-400">
+                    Account Tier
+                </span>
+
+                <h2 id="currentTierName"
+                    class="text-lg font-bold text-brandGreen">
+
+                    Level 1: Iron Box
+
+                </h2>
+
+            </div>
+
+            <span class="bg-brandGreen/20 text-brandGreen border border-brandGreen/40 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase">
+                Active
+            </span>
+
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-3 pt-3 border-t border-zinc-800">
+
+            <div>
+
+                <span class="text-[11px] text-zinc-400">
+                    Dashboard Balance
+                </span>
+
+                <p id="dashBalance"
+                   class="text-xl font-black text-brandGold">
+
+                    Ksh 0.00
+
+                </p>
+
+            </div>
+
+            <div>
+
+                <span class="text-[11px] text-zinc-400">
+                    Taps Status
+                </span>
+
+                <p id="tapsRemaining"
+                   class="text-xl font-black text-white">
+
+                    6 / 6
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- FINGERPRINT TAP -->
+
+    <div class="bg-brandCard border border-zinc-800 rounded-2xl p-6 text-center space-y-4 shadow-xl">
+
+        <div class="relative w-40 h-40 mx-auto flex items-center justify-center">
+
+            <div class="absolute inset-0 rounded-full bg-brandGreen/10 animate-pulse"></div>
+
+            <div class="absolute inset-3 rounded-full border border-brandGreen/20"></div>
+
+            <div class="absolute inset-6 rounded-full border border-brandGold/20"></div>
+
+            <button
+                type="button"
+                onclick="handleTapAsset()"
+                id="tapButton"
+                class="w-32 h-32 rounded-full bg-gradient-to-tr from-brandGreen to-brandGold text-black font-black text-xl shadow-lg glow-green fingerprint-ring transform active:scale-95 transition flex flex-col items-center justify-center cursor-pointer">
+
+                <i id="tapAssetIcon"
+                   class="fa-solid fa-fingerprint fingerprint-icon text-5xl mb-1"></i>
+
+                <span>
+                    TAP ASSET
+                </span>
+
+            </button>
+
+        </div>
+
+
+        <div id="countdownBox"
+             class="hidden bg-zinc-900 border border-brandGold/30 rounded-xl p-3 text-center space-y-1">
+
+            <p class="text-[11px] text-brandGold font-bold uppercase">
+
+                <i class="fa-solid fa-clock mr-1"></i>
+
+                Daily Taps Exhausted
+
+            </p>
+
+            <p class="text-xs text-zinc-400">
+                Next tapping session unlocks in:
+            </p>
+
+            <p id="countdownTimerDisplay"
+               class="text-lg font-black text-white">
+
+                12:00:00
+
+            </p>
+
+        </div>
+
+
+        <p id="tapFeedbackMessage"
+           class="text-xs text-zinc-400">
+
+            Tap to earn daily profits.
+            Limit: 6 taps every 12 hours.
+
+        </p>
+
+    </div>
+
+
+    <!-- ACTIONS -->
+
+    <div class="grid grid-cols-3 gap-3">
+
+        <button
+            onclick="openDepositModal()"
+            class="bg-brandCard border border-zinc-800 hover:border-brandGreen/50 p-3 rounded-xl text-center transition group cursor-pointer">
+
+            <div class="w-10 h-10 mx-auto rounded-lg bg-brandGreen/10 text-brandGreen flex items-center justify-center mb-1.5">
+
+                <i class="fa-solid fa-plus"></i>
+
+            </div>
+
+            <span class="text-xs font-semibold text-zinc-300">
+                Deposit
+            </span>
+
+        </button>
+
+
+        <button
+            onclick="openWithdrawModal()"
+            class="bg-brandCard border border-zinc-800 hover:border-brandGold/50 p-3 rounded-xl text-center transition group cursor-pointer">
+
+            <div class="w-10 h-10 mx-auto rounded-lg bg-brandGold/10 text-brandGold flex items-center justify-center mb-1.5">
+
+                <i class="fa-solid fa-arrow-up-from-bracket"></i>
+
+            </div>
+
+            <span class="text-xs font-semibold text-zinc-300">
+                Withdraw
+            </span>
+
+        </button>
+
+
+        <button
+            onclick="switchTab('levels')"
+            class="bg-brandCard border border-zinc-800 hover:border-brandGreen/50 p-3 rounded-xl text-center transition group cursor-pointer">
+
+            <div class="w-10 h-10 mx-auto rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-1.5">
+
+                <i class="fa-solid fa-rocket"></i>
+
+            </div>
+
+            <span class="text-xs font-semibold text-zinc-300">
+                Tiers (8)
+            </span>
+
+        </button>
+
+    </div>
+
 </section>
 
-<section id="tab-levels" class="space-y-4 hidden"><div class="mb-2"><h2 class="text-lg font-bold text-white">All 8 Asset Tiers</h2><p class="text-xs text-zinc-400">Upgrading to a higher tier automatically closes lower active tiers so you can focus solely on your highest active asset.</p></div><div class="space-y-3 pb-6" id="levelsListContainer"></div></section>
 
-<section id="tab-wallet" class="space-y-4 hidden"><div class="bg-brandCard border border-brandGold/30 rounded-2xl p-5 space-y-4"><div class="flex justify-between items-center"><div><span class="text-xs text-zinc-400">Dashboard Balance</span><h3 id="walletTotalBalance" class="text-2xl font-black text-brandGold">Ksh 0.00</h3></div><div class="space-x-1"><button onclick="openDepositModal()" class="bg-brandGreen hover:bg-emerald-400 text-black font-bold text-xs px-3 py-2 rounded-xl transition cursor-pointer"><i class="fa-solid fa-plus mr-1"></i> Deposit</button><button onclick="openWithdrawModal()" class="bg-brandGold hover:bg-yellow-400 text-black font-bold text-xs px-3 py-2 rounded-xl transition cursor-pointer"><i class="fa-solid fa-arrow-up mr-1"></i> Withdraw</button></div></div><div class="bg-zinc-900 p-3 rounded-xl border border-brandGreen/30 text-[11px] space-y-1.5"><p class="font-bold text-brandGreen"><i class="fa-solid fa-mobile-screen-button mr-1"></i> Deposit Method: M-Pesa</p><p class="text-zinc-300">Lipa na M-Pesa Paybill: <strong class="text-white">522533</strong></p><p class="text-zinc-300">Account Number: <strong class="text-white">8012296</strong></p></div><div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-800 text-[11px] text-zinc-400 space-y-1"><p><i class="fa-solid fa-triangle-exclamation text-brandGold mr-1"></i> Min withdrawal: <strong class="text-white">Ksh 2,000</strong></p><p><i class="fa-solid fa-shield text-brandGreen mr-1"></i> Active Balance Reserve: <strong class="text-white">Ksh 2,000</strong> must remain in account.</p><p><i class="fa-solid fa-bolt text-cyan-400 mr-1"></i> Max daily payout: <strong class="text-white">Ksh 150,000</strong></p></div></div><div class="space-y-2"><h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400 px-1">Recent Ledger Activity</h4><div id="transactionHistoryList" class="space-y-2"></div></div></section>
+<!-- =========================================================
+     LEVELS
+========================================================= -->
 
-<section id="tab-profile" class="space-y-4 hidden"><div class="bg-brandCard border border-zinc-800 rounded-2xl p-5 text-center space-y-3"><div class="w-16 h-16 rounded-full bg-brandGreen/20 text-brandGreen font-black text-2xl flex items-center justify-center mx-auto border border-brandGreen/40">ZK</div><div><h3 id="profileNameDisplay" class="font-bold text-white text-base">Zulvix User</h3><p id="profilePhoneDisplay" class="text-xs text-zinc-400">Active Member • (+254)</p></div></div><div class="bg-brandCard border border-zinc-800 rounded-2xl p-4 space-y-3"><h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400">Submit Support Ticket</h4><textarea id="complaintTextInput" placeholder="Describe your issue or inquiry here..." rows="3" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brandGreen"></textarea><button onclick="submitComplaint()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2 rounded-xl text-xs transition cursor-pointer">Send Complaint Request</button></div><button onclick="handleLogout()" class="w-full bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2 cursor-pointer"><i class="fa-solid fa-right-from-bracket"></i> Sign Out / Logout</button></section>
+<section id="tab-levels"
+         class="space-y-4 hidden">
+
+    <div class="mb-2">
+
+        <h2 class="text-lg font-bold text-white">
+            All 8 Asset Tiers
+        </h2>
+
+        <p class="text-xs text-zinc-400">
+            Upgrading to a higher tier automatically closes lower active tiers so you can focus solely on your highest active asset.
+        </p>
+
+    </div>
+
+    <div id="levelsListContainer"
+         class="space-y-3 pb-6">
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     WALLET
+========================================================= -->
+
+<section id="tab-wallet"
+         class="space-y-4 hidden">
+
+    <div class="bg-brandCard border border-brandGold/30 rounded-2xl p-5 space-y-4">
+
+        <div class="flex justify-between items-center">
+
+            <div>
+
+                <span class="text-xs text-zinc-400">
+                    Dashboard Balance
+                </span>
+
+                <h3 id="walletTotalBalance"
+                    class="text-2xl font-black text-brandGold">
+
+                    Ksh 0.00
+
+                </h3>
+
+            </div>
+
+            <div class="space-x-1">
+
+                <button
+                    onclick="openDepositModal()"
+                    class="bg-brandGreen hover:bg-emerald-400 text-black font-bold text-xs px-3 py-2 rounded-xl transition cursor-pointer">
+
+                    <i class="fa-solid fa-plus mr-1"></i>
+                    Deposit
+
+                </button>
+
+                <button
+                    onclick="openWithdrawModal()"
+                    class="bg-brandGold hover:bg-yellow-400 text-black font-bold text-xs px-3 py-2 rounded-xl transition cursor-pointer">
+
+                    <i class="fa-solid fa-arrow-up mr-1"></i>
+                    Withdraw
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- DEPOSIT DETAILS -->
+
+        <div class="bg-zinc-900 p-3 rounded-xl border border-brandGreen/30 text-[11px] space-y-1.5">
+
+            <p class="font-bold text-brandGreen">
+
+                <i class="fa-solid fa-mobile-screen-button mr-1"></i>
+
+                Deposit Method: M-Pesa
+
+            </p>
+
+            <p class="text-zinc-300">
+
+                Lipa na M-Pesa Paybill:
+
+                <strong class="text-white">
+                    522533
+                </strong>
+
+            </p>
+
+            <p class="text-zinc-300">
+
+                Account Number:
+
+                <strong class="text-white">
+                    8012296
+                </strong>
+
+            </p>
+
+        </div>
+
+
+        <div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-800 text-[11px] text-zinc-400 space-y-1">
+
+            <p>
+                <i class="fa-solid fa-triangle-exclamation text-brandGold mr-1"></i>
+
+                Min withdrawal:
+                <strong class="text-white">
+                    Ksh 2,000
+                </strong>
+            </p>
+
+            <p>
+                <i class="fa-solid fa-shield text-brandGreen mr-1"></i>
+
+                Active Balance Reserve:
+                <strong class="text-white">
+                    Ksh 2,000
+                </strong>
+                must remain in account.
+            </p>
+
+            <p>
+                <i class="fa-solid fa-bolt text-cyan-400 mr-1"></i>
+
+                Max daily payout:
+                <strong class="text-white">
+                    Ksh 150,000
+                </strong>
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="space-y-2">
+
+        <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400 px-1">
+            Recent Ledger Activity
+        </h4>
+
+        <div id="transactionHistoryList"
+             class="space-y-2">
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PROFILE / SUPPORT
+========================================================= -->
+
+<section id="tab-profile"
+         class="space-y-4 hidden">
+
+    <div class="bg-brandCard border border-zinc-800 rounded-2xl p-5 text-center space-y-3">
+
+        <div class="w-16 h-16 rounded-full bg-brandGreen/20 text-brandGreen font-black text-2xl flex items-center justify-center mx-auto border border-brandGreen/40">
+            ZK
+        </div>
+
+        <div>
+
+            <h3 id="profileNameDisplay"
+                class="font-bold text-white text-base">
+
+                Zulvix User
+
+            </h3>
+
+            <p id="profilePhoneDisplay"
+               class="text-xs text-zinc-400">
+
+                Active Member • (+254)
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="bg-brandCard border border-zinc-800 rounded-2xl p-4 space-y-3">
+
+        <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400">
+            Submit Support Ticket
+        </h4>
+
+        <textarea
+            id="complaintTextInput"
+            placeholder="Describe your issue or inquiry here..."
+            rows="3"
+            class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brandGreen"></textarea>
+
+        <button
+            onclick="submitComplaint()"
+            class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2 rounded-xl text-xs transition cursor-pointer">
+
+            Send Complaint Request
+
+        </button>
+
+    </div>
+
+
+    <button
+        onclick="handleLogout()"
+        class="w-full bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2 cursor-pointer">
+
+        <i class="fa-solid fa-right-from-bracket"></i>
+
+        Sign Out / Logout
+
+    </button>
+
+</section>
+
 </main>
 
-<nav class="fixed bottom-0 left-0 right-0 bg-brandCard border-t border-zinc-800 py-2.5 px-6 flex justify-between items-center z-30 max-w-lg mx-auto"><button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center text-brandGreen transition cursor-pointer"><i class="fa-solid fa-house text-lg"></i><span class="text-[10px] mt-0.5 font-bold">Home</span></button><button onclick="switchTab('levels')" id="nav-btn-levels" class="flex flex-col items-center text-zinc-400 transition cursor-pointer"><i class="fa-solid fa-layer-group text-lg"></i><span class="text-[10px] mt-0.5">Tiers</span></button><button onclick="switchTab('wallet')" id="nav-btn-wallet" class="flex flex-col items-center text-zinc-400 transition cursor-pointer"><i class="fa-solid fa-wallet text-lg"></i><span class="text-[10px] mt-0.5">Wallet</span></button><button onclick="switchTab('profile')" id="nav-btn-profile" class="flex flex-col items-center text-zinc-400 transition cursor-pointer"><i class="fa-solid fa-user text-lg"></i><span class="text-[10px] mt-0.5">Support</span></button></nav>
 
-<div id="depositModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"><div class="bg-brandCard border border-brandGreen/40 rounded-2xl max-w-sm w-full p-5 space-y-4"><div class="flex justify-between"><h3 class="font-bold">Top Up Dashboard (M-Pesa)</h3><button onclick="closeDepositModal()"><i class="fa-solid fa-xmark"></i></button></div><div class="bg-zinc-900 border border-brandGreen/30 p-3 rounded-xl text-xs"><p class="font-bold text-brandGreen">Lipa na M-Pesa Paybill: 522533</p><p class="text-zinc-300">Account No: <strong class="text-white">8012296</strong></p></div><input type="number" id="depositAmountInput" placeholder="Amount (Ksh)" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm"><input type="text" id="depositPhoneInput" placeholder="M-Pesa Phone Number" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm"><button onclick="submitDeposit()" class="w-full bg-brandGreen text-black font-bold py-2.5 rounded-xl">Submit Deposit Request</button></div></div>
+<!-- =========================================================
+     BOTTOM NAVIGATION
+========================================================= -->
 
-<div id="upgradeModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"><div class="bg-brandCard border border-brandGold/40 rounded-2xl max-w-sm w-full p-5 space-y-4"><div class="flex justify-between"><h3 id="upgradeModalTitle" class="font-bold">Tier Activation & Upgrade</h3><button onclick="closeUpgradeModal()"><i class="fa-solid fa-xmark"></i></button></div><div class="bg-zinc-900 border border-brandGold/30 p-3 rounded-xl text-xs"><p class="font-bold text-brandGold">Lipa na M-Pesa Paybill: 522533</p><p class="text-zinc-300">Account No: <strong class="text-white">8012296</strong></p></div><input type="text" id="upgradeMpesaCodeInput" placeholder="M-Pesa Confirmation Code" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm uppercase"><button onclick="confirmUpgradeSubmission()" class="w-full bg-brandGold text-black font-bold py-2.5 rounded-xl">Submit Activation Request</button></div></div>
+<nav class="fixed bottom-0 left-0 right-0 bg-brandCard border-t border-zinc-800 py-2.5 px-6 flex justify-between items-center z-30 max-w-lg mx-auto">
 
-<div id="withdrawModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"><div class="bg-brandCard border border-brandGold/40 rounded-2xl max-w-sm w-full p-5 space-y-4"><div class="flex justify-between"><h3 class="font-bold">Request Withdrawal</h3><button onclick="closeWithdrawModal()"><i class="fa-solid fa-xmark"></i></button></div><input type="number" id="withdrawAmountInput" placeholder="Withdrawal Amount (Min 2,000 Ksh)" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm"><input type="text" id="withdrawPhoneInput" placeholder="Destination Phone Number" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm"><button onclick="submitWithdrawal()" class="w-full bg-brandGold text-black font-bold py-2.5 rounded-xl">Submit Withdrawal Request</button></div></div>
+    <button
+        onclick="switchTab('dashboard')"
+        id="nav-btn-dashboard"
+        class="flex flex-col items-center text-brandGreen transition cursor-pointer">
 
-<div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"><div class="bg-brandCard border border-zinc-700 rounded-2xl max-w-lg w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto"><div class="flex justify-between border-b border-zinc-800 pb-3"><div><h3 class="font-bold">Admin Management Control Center</h3><p class="text-[10px] text-brandGreen">Online Ledger & Approvals Management</p></div><button onclick="closeAdminModal()"><i class="fa-solid fa-xmark"></i></button></div><div id="adminLoginForm"><input type="password" id="adminPasscodeInput" placeholder="Enter security PIN" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm mb-3"><button onclick="verifyAdminLogin()" class="w-full bg-zinc-700 text-white font-bold py-2.5 rounded-xl">Access Admin Portal</button></div><div id="adminPanelContent" class="hidden space-y-4"><div class="grid grid-cols-5 gap-1 bg-zinc-900 p-1 rounded-xl text-[10px] font-bold text-center"><button onclick="switchAdminTab('users')" id="adm-tab-users" class="py-2 rounded-lg bg-zinc-800 text-brandGreen">Users</button><button onclick="switchAdminTab('levels')" id="adm-tab-levels" class="py-2 text-zinc-400">Tiers</button><button onclick="switchAdminTab('deposits')" id="adm-tab-deposits" class="py-2 text-zinc-400">Deposits</button><button onclick="switchAdminTab('withdrawals')" id="adm-tab-withdrawals" class="py-2 text-zinc-400">Payouts</button><button onclick="switchAdminTab('complaints')" id="adm-tab-complaints" class="py-2 text-zinc-400">Support</button></div><div id="adm-section-users"><h4 class="text-xs font-bold uppercase">Registered Users</h4><div id="adminUsersList" class="space-y-2 max-h-60 overflow-y-auto"></div></div><div id="adm-section-levels" class="hidden"><h4 class="text-xs font-bold uppercase">Pending Tier Upgrades</h4><div id="adminLevelRequestsList" class="space-y-2 max-h-60 overflow-y-auto"></div></div><div id="adm-section-deposits" class="hidden"><h4 class="text-xs font-bold uppercase">Pending Deposit Requests</h4><div id="adminDepositRequestsList" class="space-y-2 max-h-60 overflow-y-auto"></div></div><div id="adm-section-withdrawals" class="hidden"><h4 class="text-xs font-bold uppercase">Pending Withdrawal Requests</h4><div id="adminWithdrawRequestsList" class="space-y-2 max-h-60 overflow-y-auto"></div></div><div id="adm-section-complaints" class="hidden"><h4 class="text-xs font-bold uppercase">Customer Support Complaints</h4><div id="adminComplaintsList" class="space-y-2 max-h-60 overflow-y-auto"></div></div><div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800 flex justify-between"><div><span class="text-zinc-400 block text-[10px]">Portal Retained Fees</span><span id="portalRetentionBalance" class="text-brandGreen font-black text-sm">Ksh 0.00</span></div><button onclick="lockAdminSession()" class="bg-red-500/20 text-red-400 border border-red-500/40 px-3 py-1.5 rounded-lg text-xs font-bold">Lock Session</button></div></div></div></div>
+        <i class="fa-solid fa-house text-lg"></i>
+
+        <span class="text-[10px] mt-0.5 font-bold">
+            Home
+        </span>
+
+    </button>
+
+
+    <button
+        onclick="switchTab('levels')"
+        id="nav-btn-levels"
+        class="flex flex-col items-center text-zinc-400 transition cursor-pointer">
+
+        <i class="fa-solid fa-layer-group text-lg"></i>
+
+        <span class="text-[10px] mt-0.5">
+            Tiers
+        </span>
+
+    </button>
+
+
+    <button
+        onclick="switchTab('wallet')"
+        id="nav-btn-wallet"
+        class="flex flex-col items-center text-zinc-400 transition cursor-pointer">
+
+        <i class="fa-solid fa-wallet text-lg"></i>
+
+        <span class="text-[10px] mt-0.5">
+            Wallet
+        </span>
+
+    </button>
+
+
+    <button
+        onclick="switchTab('profile')"
+        id="nav-btn-profile"
+        class="flex flex-col items-center text-zinc-400 transition cursor-pointer">
+
+        <i class="fa-solid fa-user text-lg"></i>
+
+        <span class="text-[10px] mt-0.5">
+            Support
+        </span>
+
+    </button>
+
+</nav>
+
+
+<!-- =========================================================
+     DEPOSIT MODAL
+========================================================= -->
+
+<div id="depositModal"
+     class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+
+    <div class="bg-brandCard border border-brandGreen/40 rounded-2xl max-w-sm w-full p-5 space-y-4">
+
+        <div class="flex justify-between">
+
+            <h3 class="font-bold">
+                Top Up Dashboard
+            </h3>
+
+            <button onclick="closeDepositModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+
+        <div class="bg-zinc-900 border border-brandGreen/30 p-3 rounded-xl text-xs space-y-1">
+
+            <p class="font-bold text-brandGreen">
+                Deposit Method: M-Pesa
+            </p>
+
+            <p class="text-zinc-300">
+                Lipa na M-Pesa Paybill:
+                <strong class="text-white">
+                    522533
+                </strong>
+            </p>
+
+            <p class="text-zinc-300">
+                Account Number:
+                <strong class="text-white">
+                    8012296
+                </strong>
+            </p>
+
+            <p class="text-zinc-500 pt-1">
+                Make the payment first, then submit your request below.
+            </p>
+
+        </div>
+
+
+        <input
+            type="number"
+            id="depositAmountInput"
+            placeholder="Amount (Ksh)"
+            class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm">
+
+
+        <input
+            type="text"
+            id="depositPhoneInput"
+            placeholder="M-Pesa Phone Number"
+            class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm">
+
+
+        <input
+            type="text"
+            id="depositMpesaCodeInput"
+            placeholder="M-Pesa Confirmation Code"
+            class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm uppercase">
+
+
+        <button
+            onclick="submitDeposit()"
+            class="w-full bg-brandGreen text-black font-bold py-2.5 rounded-xl">
+
+            Submit Deposit Request
+
+        </button>
+
+    </div>
+</div>
+
+
+<!-- =========================================================
+     UPGRADE MODAL
+========================================================= -->
+
+<div id="upgradeModal"
+     class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+
+    <div class="bg-brandCard border border-brandGold/40 rounded-2xl max-w-sm w-full p-5 space-y-4">
+
+        <div class="flex justify-between">
+
+            <h3 id="upgradeModalTitle"
+                class="font-bold">
+
+                Tier Activation & Upgrade
+
+            </h3>
+
+            <button onclick="closeUpgradeModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+
+        <div class="bg-zinc-900 border border-brandGold/30 p-3 rounded-xl text-xs space-y-1">
+
+            <p class="font-bold text-brandGold">
+                Lipa na M-Pesa Paybill: 522533
+            </p>
+
+            <p class="text-zinc-300">
+                Account No:
+                <strong class="text-white">
+                    8012296
+                </strong>
+            </p>
+
+        </div>
+
+
+        <input
+            type="text"
+            id="upgradeMpesaCodeInput"
+            placeholder="M-Pesa Confirmation Code"
+            class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm uppercase">
+
+
+        <button
+            onclick="confirmUpgradeSubmission()"
+            class="w-full bg-brandGold text-black font-bold py-2.5 rounded-xl">
+
+            Submit Activation Request
+
+        </button>
+
+    </div>
+</div>
+
+
+<!-- =========================================================
+     WITHDRAW MODAL
+========================================================= -->
+
+<div id="withdrawModal"
+     class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+
+    <div class="bg-brandCard border border-brandGold/40 rounded-2xl max-w-sm w-full p-5 space-y-4">
+
+        <div class="flex justify-between">
+
+            <h3 class="font-bold">
+                Request Withdrawal
+            </h3>
+
+            <button onclick="closeWithdrawModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+
+        <input
+            type="number"
+            id="withdrawAmountInput"
+            placeholder="Withdrawal Amount (Min 2,000 Ksh)"
+            class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm">
+
+
+        <input
+            type="text"
+            id="withdrawPhoneInput"
+            placeholder="Destination Phone Number"
+            class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm">
+
+
+        <button
+            onclick="submitWithdrawal()"
+            class="w-full bg-brandGold text-black font-bold py-2.5 rounded-xl">
+
+            Submit Withdrawal Request
+
+        </button>
+
+    </div>
+</div>
+
+
+<!-- =========================================================
+     ADMIN MODAL
+========================================================= -->
+
+<div id="adminModal"
+     class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+
+    <div class="bg-brandCard border border-zinc-700 rounded-2xl max-w-lg w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+
+        <div class="flex justify-between border-b border-zinc-800 pb-3">
+
+            <div>
+
+                <h3 class="font-bold">
+                    Admin Management Control Center
+                </h3>
+
+                <p class="text-[10px] text-brandGreen">
+                    Online Ledger & Approvals Management
+                </p>
+
+            </div>
+
+            <button onclick="closeAdminModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+
+        <div id="adminLoginForm">
+
+            <input
+                type="password"
+                id="adminPasscodeInput"
+                placeholder="Enter security PIN"
+                class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm mb-3">
+
+
+            <button
+                onclick="verifyAdminLogin()"
+                class="w-full bg-zinc-700 text-white font-bold py-2.5 rounded-xl">
+
+                Access Admin Portal
+
+            </button>
+
+        </div>
+
+
+        <div id="adminPanelContent"
+             class="hidden space-y-4">
+
+            <div class="grid grid-cols-5 gap-1 bg-zinc-900 p-1 rounded-xl text-[10px] font-bold text-center">
+
+                <button
+                    onclick="switchAdminTab('users')"
+                    id="adm-tab-users"
+                    class="py-2 rounded-lg bg-zinc-800 text-brandGreen">
+
+                    Users
+
+                </button>
+
+                <button
+                    onclick="switchAdminTab('levels')"
+                    id="adm-tab-levels"
+                    class="py-2 text-zinc-400">
+
+                    Tiers
+
+                </button>
+
+                <button
+                    onclick="switchAdminTab('deposits')"
+                    id="adm-tab-deposits"
+                    class="py-2 text-zinc-400">
+
+                    Deposits
+
+                </button>
+
+                <button
+                    onclick="switchAdminTab('withdrawals')"
+                    id="adm-tab-withdrawals"
+                    class="py-2 text-zinc-400">
+
+                    Payouts
+
+                </button>
+
+                <button
+                    onclick="switchAdminTab('complaints')"
+                    id="adm-tab-complaints"
+                    class="py-2 text-zinc-400">
+
+                    Support
+
+                </button>
+
+            </div>
+
+
+            <div id="adm-section-users">
+
+                <h4 class="text-xs font-bold uppercase">
+                    Registered Users
+                </h4>
+
+                <div id="adminUsersList"
+                     class="space-y-2 max-h-60 overflow-y-auto">
+                </div>
+
+            </div>
+
+
+            <div id="adm-section-levels"
+                 class="hidden">
+
+                <h4 class="text-xs font-bold uppercase">
+                    Pending Tier Upgrades
+                </h4>
+
+                <div id="adminLevelRequestsList"
+                     class="space-y-2 max-h-60 overflow-y-auto">
+                </div>
+
+            </div>
+
+
+            <div id="adm-section-deposits"
+                 class="hidden">
+
+                <h4 class="text-xs font-bold uppercase">
+                    Pending Deposit Requests
+                </h4>
+
+                <div id="adminDepositRequestsList"
+                     class="space-y-2 max-h-60 overflow-y-auto">
+                </div>
+
+            </div>
+
+
+            <div id="adm-section-withdrawals"
+                 class="hidden">
+
+                <h4 class="text-xs font-bold uppercase">
+                    Pending Withdrawal Requests
+                </h4>
+
+                <div id="adminWithdrawRequestsList"
+                     class="space-y-2 max-h-60 overflow-y-auto">
+                </div>
+
+            </div>
+
+
+            <div id="adm-section-complaints"
+                 class="hidden">
+
+                <h4 class="text-xs font-bold uppercase">
+                    Customer Support Complaints
+                </h4>
+
+                <div id="adminComplaintsList"
+                     class="space-y-2 max-h-60 overflow-y-auto">
+                </div>
+
+            </div>
+
+
+            <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800 flex justify-between">
+
+                <div>
+
+                    <span class="text-zinc-400 block text-[10px]">
+                        Portal Retained Fees
+                    </span>
+
+                    <span id="portalRetentionBalance"
+                          class="text-brandGreen font-black text-sm">
+
+                        Ksh 0.00
+
+                    </span>
+
+                </div>
+
+                <button
+                    onclick="lockAdminSession()"
+                    class="bg-red-500/20 text-red-400 border border-red-500/40 px-3 py-1.5 rounded-lg text-xs font-bold">
+
+                    Lock Session
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
 
 <script>
-const API='https://zulvix-ke-backend.onrender.com';
-const LEVELS_CONFIG=[
-{id:1,name:'Iron Box',icon:'fa-box-archive',unlockFee:0,userDeposit:0,perTap:5,dailyTotal:30},
-{id:2,name:'Smart TV',icon:'fa-tv',unlockFee:800,userDeposit:2000,perTap:20,dailyTotal:120},
-{id:3,name:'Motorbike',icon:'fa-motorcycle',unlockFee:2500,userDeposit:2000,perTap:55,dailyTotal:330},
-{id:4,name:'Economy Car',icon:'fa-car',unlockFee:6000,userDeposit:2000,perTap:140,dailyTotal:840},
-{id:5,name:'Rental House',icon:'fa-house',unlockFee:15000,userDeposit:3000,perTap:350,dailyTotal:2100},
-{id:6,name:'Commercial Plot',icon:'fa-building',unlockFee:35000,userDeposit:5000,perTap:850,dailyTotal:5100},
-{id:7,name:'Luxury Supercar',icon:'fa-car-burst',unlockFee:80000,userDeposit:10000,perTap:2100,dailyTotal:12600},
-{id:8,name:'Private Jet',icon:'fa-plane',unlockFee:180000,userDeposit:20000,perTap:5000,dailyTotal:30000}
+
+const API = "https://zulvix-ke-backend.onrender.com";
+
+let authToken = null;
+let adminToken = null;
+
+const LEVELS_CONFIG = [
+
+    {
+        id:1,
+        name:"Iron Box",
+        icon:"fa-box-archive",
+        unlockFee:0,
+        userDeposit:0,
+        perTap:5,
+        dailyTotal:30
+    },
+
+    {
+        id:2,
+        name:"Smart TV",
+        icon:"fa-tv",
+        unlockFee:800,
+        userDeposit:2000,
+        perTap:20,
+        dailyTotal:120
+    },
+
+    {
+        id:3,
+        name:"Motorbike",
+        icon:"fa-motorcycle",
+        unlockFee:2500,
+        userDeposit:2000,
+        perTap:55,
+        dailyTotal:330
+    },
+
+    {
+        id:4,
+        name:"Economy Car",
+        icon:"fa-car",
+        unlockFee:6000,
+        userDeposit:2000,
+        perTap:140,
+        dailyTotal:840
+    },
+
+    {
+        id:5,
+        name:"Rental House",
+        icon:"fa-house",
+        unlockFee:15000,
+        userDeposit:3000,
+        perTap:350,
+        dailyTotal:2100
+    },
+
+    {
+        id:6,
+        name:"Commercial Plot",
+        icon:"fa-building",
+        unlockFee:35000,
+        userDeposit:5000,
+        perTap:850,
+        dailyTotal:5100
+    },
+
+    {
+        id:7,
+        name:"Luxury Supercar",
+        icon:"fa-car-burst",
+        unlockFee:80000,
+        userDeposit:10000,
+        perTap:2100,
+        dailyTotal:12600
+    },
+
+    {
+        id:8,
+        name:"Private Jet",
+        icon:"fa-plane",
+        unlockFee:180000,
+        userDeposit:20000,
+        perTap:5000,
+        dailyTotal:30000
+    }
+
 ];
-let appState={isLoggedIn:false,currentUser:{name:'',phone:''},balance:0,currentLevelId:1,unlockedLevels:[1],tapsLeft:6,nextTapResetTime:null,transactions:[],usersDb:[],levelRequests:[],depositRequests:[],withdrawRequests:[],complaints:[],portalRetention:0};
-let selectedUpgradeLevelId=null,adminPin='';
 
-function showToast(title,message,ok=true){
- const t=document.getElementById('notificationToast'),i=document.getElementById('toastIcon');
- document.getElementById('toastTitle').innerText=title;document.getElementById('toastMessage').innerText=message;
- i.className=`w-10 h-10 rounded-xl ${ok?'bg-brandGreen/20 text-brandGreen':'bg-red-500/20 text-red-400'} flex items-center justify-center text-lg flex-shrink-0`;
- i.innerHTML=ok?'<i class="fa-solid fa-circle-check"></i>':'<i class="fa-solid fa-triangle-exclamation"></i>';
- t.classList.remove('translate-x-full');setTimeout(hideToast,4000);
+
+let appState = {
+
+    isLoggedIn:false,
+
+    currentUser:{
+        id:null,
+        name:"",
+        phone:""
+    },
+
+    balance:0,
+
+    currentLevelId:1,
+
+    unlockedLevels:[1],
+
+    tapsLeft:6,
+
+    nextTapResetTime:null,
+
+    transactions:[]
+
+};
+
+
+let selectedUpgradeLevelId = null;
+
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+function showToast(title,message,success=true){
+
+    const toast =
+        document.getElementById("notificationToast");
+
+    const icon =
+        document.getElementById("toastIcon");
+
+    document.getElementById("toastTitle").innerText =
+        title;
+
+    document.getElementById("toastMessage").innerText =
+        message;
+
+
+    icon.className =
+        success
+        ? "w-10 h-10 rounded-xl bg-brandGreen/20 text-brandGreen flex items-center justify-center text-lg flex-shrink-0"
+        : "w-10 h-10 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center text-lg flex-shrink-0";
+
+
+    icon.innerHTML =
+        success
+        ? '<i class="fa-solid fa-circle-check"></i>'
+        : '<i class="fa-solid fa-triangle-exclamation"></i>';
+
+
+    toast.classList.remove("translate-x-full");
+
+    clearTimeout(window.toastTimer);
+
+    window.toastTimer =
+        setTimeout(hideToast,4000);
 }
-function hideToast(){document.getElementById('notificationToast').classList.add('translate-x-full')}
+
+
+function hideToast(){
+
+    document
+        .getElementById("notificationToast")
+        .classList.add("translate-x-full");
+
+}
+
+
+/* =========================================================
+   API
+========================================================= */
+
 async function api(path,options={}){
- try{
-  const r=await fetch(API+path,{headers:{'Content-Type':'application/json',...(adminPin?{'x-admin-pin':adminPin}:{})},...options});
-  const data=await r.json().catch(()=>({success:false,message:'Invalid server response.'}));
-  if(!r.ok||data.success===false) throw new Error(data.message||`Server error ${r.status}`);
-  return data;
- }catch(e){showToast('Connection / Action Error',e.message,false);throw e}
-}
-function applyUser(u){
- appState.isLoggedIn=true;appState.currentUser={name:u.name,phone:u.phone};appState.balance=Number(u.balance||0);
- appState.currentLevelId=Number(u.level||1);appState.unlockedLevels=u.unlockedLevels||[1];appState.tapsLeft=Number(u.tapsLeft??6);
- appState.nextTapResetTime=u.nextTapResetTime||null;appState.transactions=u.transactions||[];
- localStorage.setItem('zulvix_active_phone',u.phone);checkAuthUI();updateUI();checkCountdownTimer();
-}
-function checkAuthUI(){document.getElementById('authWrapper').classList.toggle('hidden',appState.isLoggedIn)}
-function toggleAuthMode(mode){document.getElementById('loginFormContainer').classList.toggle('hidden',mode!=='login');document.getElementById('registerFormContainer').classList.toggle('hidden',mode!=='register');document.getElementById('authSubtitle').innerText=mode==='register'?'Register Your New Account':'Secure Online Sign In Portal'}
-async function handleRegister(){
- const name=regFullName.value.trim(),phone=regPhone.value.trim(),pass=regPassword.value.trim();
- if(!name||!phone||!pass)return showToast('Registration Error','Please fill in all required fields.',false);
- try{const d=await api('/api/register',{method:'POST',body:JSON.stringify({name,phone,password:pass})});applyUser(d.user);showToast('Welcome!',`Registration successful, ${d.user.name}.`)}catch{}
-}
-async function handleLogin(){
- const phone=loginPhone.value.trim(),pass=loginPassword.value.trim();
- if(!phone||!pass)return showToast('Login Error','Please enter both mobile number and password.',false);
- try{const d=await api('/api/login',{method:'POST',body:JSON.stringify({phone,password:pass})});applyUser(d.user);showToast('Signed In',`Welcome back, ${d.user.name}!`)}catch{}
-}
-async function refreshUser(){
- if(!appState.currentUser.phone)return;
- try{const d=await api('/api/user/'+encodeURIComponent(appState.currentUser.phone));applyUser(d.user)}catch{}
-}
-function handleLogout(){if(confirm('Are you sure you want to sign out?')){appState.isLoggedIn=false;localStorage.removeItem('zulvix_active_phone');checkAuthUI()}}
-function switchTab(id){
- ['dashboard','levels','wallet','profile'].forEach(t=>{document.getElementById('tab-'+t).classList.add('hidden');document.getElementById('nav-btn-'+t).classList.remove('text-brandGreen');document.getElementById('nav-btn-'+t).classList.add('text-zinc-400')});
- document.getElementById('tab-'+id).classList.remove('hidden');document.getElementById('nav-btn-'+id).classList.add('text-brandGreen');document.getElementById('nav-btn-'+id).classList.remove('text-zinc-400');
-}
-async function handleTapAsset(){
- if(!appState.isLoggedIn)return showToast('Sign In Required','Please sign in first.',false);
- try{const d=await api('/api/tap',{method:'POST',body:JSON.stringify({phone:appState.currentUser.phone})});applyUser(d.user);showToast('Tap Accepted',d.message)}catch(e){if(e.message.includes('12-hour')||e.message.includes('exhausted')){refreshUser()}}
-}
-function checkCountdownTimer(){
- const box=document.getElementById('countdownBox'),btn=document.getElementById('tapButton');
- if(!appState.nextTapResetTime){box.classList.add('hidden');btn.classList.remove('opacity-50','pointer-events-none');return}
- const distance=Number(appState.nextTapResetTime)-Date.now();
- if(distance>0){
-  box.classList.remove('hidden');btn.classList.add('opacity-50','pointer-events-none');
-  const h=Math.floor(distance/3600000),m=Math.floor((distance%3600000)/60000),s=Math.floor((distance%60000)/1000);
-  countdownTimerDisplay.innerText=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  setTimeout(checkCountdownTimer,1000);
- }else{box.classList.add('hidden');btn.classList.remove('opacity-50','pointer-events-none');refreshUser()}
-}
-function openUpgradeModal(id){selectedUpgradeLevelId=id;const l=LEVELS_CONFIG.find(x=>x.id===id);if(!l)return;upgradeModalTitle.innerText=`Activate Level ${l.id}: ${l.name} (Ksh ${(l.unlockFee+l.userDeposit).toLocaleString()})`;upgradeModal.classList.remove('hidden')}
-function closeUpgradeModal(){upgradeModal.classList.add('hidden');selectedUpgradeLevelId=null;upgradeMpesaCodeInput.value=''}
-async function confirmUpgradeSubmission(){
- const code=upgradeMpesaCodeInput.value.trim();if(!code)return showToast('Missing M-Pesa Code','Please enter your M-Pesa confirmation code.',false);
- try{await api('/api/upgrade-request',{method:'POST',body:JSON.stringify({phone:appState.currentUser.phone,levelId:selectedUpgradeLevelId,mpesaCode:code})});closeUpgradeModal();showToast('Activation Submitted','Tier activation request submitted for admin approval.')}catch{}
-}
-async function switchToLevel(id){if(!appState.unlockedLevels.includes(id))return;try{const d=await api('/api/user/'+encodeURIComponent(appState.currentUser.phone));if(d.user.unlockedLevels.includes(id)){appState.currentLevelId=id;/* current level selection is persisted by a dedicated endpoint below */await api('/api/user/select-level',{method:'POST',body:JSON.stringify({phone:appState.currentUser.phone,levelId:id})});applyUser({...d.user,level:id});switchTab('dashboard')}}catch{}}
-function openDepositModal(){depositModal.classList.remove('hidden')}function closeDepositModal(){depositModal.classList.add('hidden')}
-async function submitDeposit(){
- const amt=Number(depositAmountInput.value),p=depositPhoneInput.value.trim();
- if(!Number.isFinite(amt)||amt<=0)return showToast('Invalid Amount','Please enter a valid deposit amount.',false);
- try{await api('/api/deposit-request',{method:'POST',body:JSON.stringify({phone:appState.currentUser.phone,amount:amt,mpesaPhone:p})});closeDepositModal();depositAmountInput.value='';depositPhoneInput.value='';showToast('Deposit Submitted','Your deposit request has been submitted for admin approval.')}catch{}
-}
-function openWithdrawModal(){withdrawModal.classList.remove('hidden')}function closeWithdrawModal(){withdrawModal.classList.add('hidden')}
-async function submitWithdrawal(){
- const amt=Number(withdrawAmountInput.value),p=withdrawPhoneInput.value.trim();
- try{const d=await api('/api/withdraw-request',{method:'POST',body:JSON.stringify({phone:appState.currentUser.phone,amount:amt,destinationPhone:p})});applyUser(d.user);closeWithdrawModal();withdrawAmountInput.value='';withdrawPhoneInput.value='';showToast('Withdrawal Pending',d.message)}catch{}
-}
-async function submitComplaint(){
- const msg=complaintTextInput.value.trim();if(!msg)return showToast('Support','Please describe your issue.',false);
- try{await api('/api/complaints',{method:'POST',body:JSON.stringify({phone:appState.currentUser.phone,message:msg})});complaintTextInput.value='';showToast('Ticket Sent','Support complaint sent successfully.')}catch{}
-}
-function openAdminModal(){adminModal.classList.remove('hidden')}function closeAdminModal(){adminModal.classList.add('hidden')}
-async function verifyAdminLogin(){
- const pin=adminPasscodeInput.value.trim();if(!pin)return;
- try{adminPin=pin;await api('/api/admin/login',{method:'POST',body:JSON.stringify({pin})});adminLoginForm.classList.add('hidden');adminPanelContent.classList.remove('hidden');adminPasscodeInput.value='';loadAdminData()}catch{adminPin=''}
-}
-function lockAdminSession(){adminPin='';adminPanelContent.classList.add('hidden');adminLoginForm.classList.remove('hidden');closeAdminModal()}
-function switchAdminTab(tab){['users','levels','deposits','withdrawals','complaints'].forEach(t=>{document.getElementById('adm-section-'+t).classList.add('hidden');document.getElementById('adm-tab-'+t).classList.remove('bg-zinc-800','text-brandGreen');document.getElementById('adm-tab-'+t).classList.add('text-zinc-400')});document.getElementById('adm-section-'+tab).classList.remove('hidden');document.getElementById('adm-tab-'+tab).classList.add('bg-zinc-800','text-brandGreen')}
-async function loadAdminData(){
- try{const d=await api('/api/admin/data');const x=d.data;appState.usersDb=x.users;appState.levelRequests=x.levelRequests;appState.depositRequests=x.deposits;appState.withdrawRequests=x.withdrawals;appState.complaints=x.complaints;appState.portalRetention=x.portalRetention;renderAdminData()}catch{}
-}
-async function approveLevelRequest(id){try{await api('/api/admin/approve-level/'+encodeURIComponent(id),{method:'POST'});await loadAdminData();await refreshUser();showToast('Level Approved','Tier activation approved.')}catch{}}
-async function approveDeposit(id){try{await api('/api/admin/approve-deposit/'+encodeURIComponent(id),{method:'POST'});await loadAdminData();showToast('Deposit Completed','Deposit credited successfully.')}catch{}}
-async function approveWithdrawal(id){try{await api('/api/admin/approve-withdrawal/'+encodeURIComponent(id),{method:'POST'});await loadAdminData();showToast('Withdrawal Delivered','Payout marked as delivered.')}catch{}}
-async function resolveComplaint(id){try{await api('/api/admin/resolve-complaint/'+encodeURIComponent(id),{method:'POST'});await loadAdminData();showToast('Ticket Resolved','Complaint cleared.')}catch{}}
 
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function renderAdminData(){
- portalRetentionBalance.innerText=`Ksh ${Number(appState.portalRetention||0).toLocaleString()}`;
- adminUsersList.innerHTML=appState.usersDb.length?appState.usersDb.map(u=>`<div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 flex justify-between items-center text-xs"><div><p class="font-bold text-white">${esc(u.name)}</p><span class="text-[10px] text-zinc-400">${esc(u.phone)} • Level ${u.level}</span></div><span class="text-brandGold font-bold">Ksh ${Number(u.balance||0).toLocaleString()}</span></div>`).join(''):'<p class="text-xs text-zinc-500 text-center py-2">No registered users.</p>';
- adminLevelRequestsList.innerHTML=appState.levelRequests.length?appState.levelRequests.map(r=>`<div class="bg-zinc-900 border border-brandGreen/40 rounded-xl p-3 text-xs space-y-2"><div class="flex justify-between"><span class="font-bold">${esc(r.name)} (${esc(r.phone)})</span><span class="text-[10px] bg-brandGreen/20 text-brandGreen px-2 rounded">Level ${r.level_id}: ${esc(r.level_name)}</span></div><div>Fee: Ksh ${Number(r.unlock_fee).toLocaleString()} • Deposit: Ksh ${Number(r.user_deposit).toLocaleString()}</div><p>M-Pesa Code: <strong>${esc(r.mpesa_code)}</strong></p><button onclick="approveLevelRequest('${esc(r.id)}')" class="w-full bg-brandGreen text-black font-bold py-1.5 rounded-lg">Approve Level Activation</button></div>`).join(''):'<p class="text-xs text-zinc-500 text-center py-2">No pending upgrades.</p>';
- adminDepositRequestsList.innerHTML=appState.depositRequests.length?appState.depositRequests.map(r=>`<div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 flex justify-between items-center text-xs"><div><p class="font-bold">${esc(r.name)} (${esc(r.phone)})</p><span class="text-zinc-400">Amount: Ksh ${Number(r.amount).toLocaleString()}</span></div><button onclick="approveDeposit('${esc(r.id)}')" class="bg-brandGreen text-black font-bold px-3 py-1 rounded-lg">Approve</button></div>`).join(''):'<p class="text-xs text-zinc-500 text-center py-2">No pending deposits.</p>';
- adminWithdrawRequestsList.innerHTML=appState.withdrawRequests.length?appState.withdrawRequests.map(r=>`<div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 flex justify-between items-center text-xs"><div><p class="font-bold">${esc(r.name)} (${esc(r.phone)})</p><span class="text-brandGold">Payout: Ksh ${Number(r.amount).toLocaleString()}</span></div><button onclick="approveWithdrawal('${esc(r.id)}')" class="bg-brandGold text-black font-bold px-3 py-1 rounded-lg">Mark Delivered</button></div>`).join(''):'<p class="text-xs text-zinc-500 text-center py-2">No pending payouts.</p>';
- adminComplaintsList.innerHTML=appState.complaints.length?appState.complaints.map(r=>`<div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs space-y-1"><div class="flex justify-between"><span class="font-bold">${esc(r.name)} (${esc(r.phone)})</span><span class="text-zinc-500">${esc(r.created_at)}</span></div><p class="text-zinc-300">${esc(r.message)}</p><button onclick="resolveComplaint('${esc(r.id)}')" class="bg-zinc-800 text-zinc-300 font-bold px-2.5 py-1 rounded">Resolve</button></div>`).join(''):'<p class="text-xs text-zinc-500 text-center py-2">No support tickets.</p>';
+    const headers = {
+        "Content-Type":"application/json",
+        ...(options.headers || {})
+    };
+
+
+    if(authToken){
+
+        headers.Authorization =
+            `Bearer ${authToken}`;
+
+    }
+
+
+    if(adminToken){
+
+        headers["Authorization"] =
+            `Bearer ${adminToken}`;
+
+    }
+
+
+    let response;
+
+
+    try{
+
+        response =
+            await fetch(
+                API + path,
+                {
+                    ...options,
+                    headers
+                }
+            );
+
+    }catch(error){
+
+        showToast(
+            "Connection Error",
+            "Unable to connect to the Zulvix-KE server.",
+            false
+        );
+
+        throw error;
+
+    }
+
+
+    let data;
+
+    try{
+
+        data =
+            await response.json();
+
+    }catch{
+
+        data = {
+            success:false,
+            message:"Invalid response from server."
+        };
+
+    }
+
+
+    if(!response.ok || data.success === false){
+
+        throw new Error(
+            data.message ||
+            data.error ||
+            `Server error ${response.status}`
+        );
+
+    }
+
+
+    return data;
 }
+
+
+/* =========================================================
+   AUTH UI
+========================================================= */
+
+function toggleAuthMode(mode){
+
+    document
+        .getElementById("loginFormContainer")
+        .classList.toggle(
+            "hidden",
+            mode !== "login"
+        );
+
+
+    document
+        .getElementById("registerFormContainer")
+        .classList.toggle(
+            "hidden",
+            mode !== "register"
+        );
+
+
+    document
+        .getElementById("authSubtitle")
+        .innerText =
+            mode === "register"
+            ? "Register Your New Account"
+            : "Secure Online Sign In Portal";
+
+}
+
+
+function checkAuthUI(){
+
+    document
+        .getElementById("authWrapper")
+        .classList.toggle(
+            "hidden",
+            appState.isLoggedIn
+        );
+
+}
+
+
+/* =========================================================
+   APPLY USER
+========================================================= */
+
+function applyUser(user){
+
+    if(!user) return;
+
+
+    appState.isLoggedIn = true;
+
+
+    appState.currentUser = {
+
+        id:user.id || null,
+
+        name:user.name || "",
+
+        phone:user.phone || ""
+
+    };
+
+
+    appState.balance =
+        Number(user.balance || 0);
+
+
+    appState.currentLevelId =
+        Number(
+            user.active_level ??
+            user.level ??
+            1
+        );
+
+
+    appState.unlockedLevels =
+        user.unlocked_levels ||
+        user.unlockedLevels ||
+        [1];
+
+
+    appState.tapsLeft =
+        Number(
+            user.taps_left ??
+            user.tapsLeft ??
+            6
+        );
+
+
+    appState.nextTapResetTime =
+        user.next_tap_reset_time ||
+        user.nextTapResetTime ||
+        null;
+
+
+    appState.transactions =
+        user.transactions ||
+        [];
+
+
+    checkAuthUI();
+
+    updateUI();
+
+    checkCountdownTimer();
+
+}
+
+
+/* =========================================================
+   REGISTER
+========================================================= */
+
+async function handleRegister(){
+
+    const name =
+        document
+            .getElementById("regFullName")
+            .value
+            .trim();
+
+
+    const phone =
+        document
+            .getElementById("regPhone")
+            .value
+            .trim();
+
+
+    const password =
+        document
+            .getElementById("regPassword")
+            .value;
+
+
+    if(!name){
+
+        showToast(
+            "Registration Error",
+            "Please enter your full name.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    if(!phone){
+
+        showToast(
+            "Registration Error",
+            "Please enter your mobile number.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    if(password.length < 6){
+
+        showToast(
+            "Registration Error",
+            "Password must be at least 6 characters.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        showToast(
+            "Creating Account",
+            "Please wait..."
+        );
+
+
+        const data =
+            await api(
+                "/api/auth/register",
+                {
+                    method:"POST",
+
+                    body:JSON.stringify({
+
+                        name:name,
+
+                        phone:phone,
+
+                        password:password
+
+                    })
+                }
+            );
+
+
+        authToken =
+            data.token;
+
+
+        applyUser(data.user);
+
+
+        document.getElementById("regPassword").value = "";
+
+
+        showToast(
+            "Registration Successful",
+            `Welcome to Zulvix-KE, ${data.user.name}!`
+        );
+
+
+    }catch(error){
+
+        showToast(
+            "Registration Failed",
+            error.message,
+            false
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+async function handleLogin(){
+
+    const phone =
+        document
+            .getElementById("loginPhone")
+            .value
+            .trim();
+
+
+    const password =
+        document
+            .getElementById("loginPassword")
+            .value;
+
+
+    if(!phone || !password){
+
+        showToast(
+            "Login Error",
+            "Please enter both mobile number and password.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        showToast(
+            "Signing In",
+            "Checking your account..."
+        );
+
+
+        const data =
+            await api(
+                "/api/auth/login",
+                {
+                    method:"POST",
+
+                    body:JSON.stringify({
+
+                        phone:phone,
+
+                        password:password
+
+                    })
+                }
+            );
+
+
+        authToken =
+            data.token;
+
+
+        applyUser(data.user);
+
+
+        document.getElementById("loginPassword").value = "";
+
+
+        showToast(
+            "Login Successful",
+            `Welcome back, ${data.user.name}!`
+        );
+
+
+    }catch(error){
+
+        showToast(
+            "Login Failed",
+            error.message,
+            false
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CURRENT USER
+========================================================= */
+
+async function refreshUser(){
+
+    if(!authToken) return;
+
+
+    try{
+
+        const data =
+            await api("/api/me");
+
+
+        applyUser(data.user);
+
+
+    }catch(error){
+
+        authToken = null;
+
+        appState.isLoggedIn = false;
+
+        checkAuthUI();
+
+    }
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+function handleLogout(){
+
+    if(
+        !confirm(
+            "Are you sure you want to sign out?"
+        )
+    ){
+
+        return;
+
+    }
+
+
+    authToken = null;
+
+    appState.isLoggedIn = false;
+
+    appState.currentUser = {
+        id:null,
+        name:"",
+        phone:""
+    };
+
+
+    checkAuthUI();
+
+    toggleAuthMode("login");
+
+
+    showToast(
+        "Signed Out",
+        "You have been safely signed out."
+    );
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function switchTab(id){
+
+    [
+        "dashboard",
+        "levels",
+        "wallet",
+        "profile"
+    ].forEach(tab=>{
+
+        document
+            .getElementById("tab-"+tab)
+            .classList.add("hidden");
+
+
+        document
+            .getElementById("nav-btn-"+tab)
+            .classList.remove("text-brandGreen");
+
+
+        document
+            .getElementById("nav-btn-"+tab)
+            .classList.add("text-zinc-400");
+
+    });
+
+
+    document
+        .getElementById("tab-"+id)
+        .classList.remove("hidden");
+
+
+    document
+        .getElementById("nav-btn-"+id)
+        .classList.add("text-brandGreen");
+
+
+    document
+        .getElementById("nav-btn-"+id)
+        .classList.remove("text-zinc-400");
+
+}
+
+
+/* =========================================================
+   TAP
+========================================================= */
+
+async function handleTapAsset(){
+
+    if(!appState.isLoggedIn){
+
+        showToast(
+            "Sign In Required",
+            "Please sign in first.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    if(appState.tapsLeft <= 0){
+
+        showToast(
+            "Taps Exhausted",
+            "Your daily taps are finished.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    const button =
+        document.getElementById("tapButton");
+
+
+    button.disabled = true;
+
+
+    try{
+
+        const data =
+            await api(
+                "/api/tap",
+                {
+                    method:"POST"
+                }
+            );
+
+
+        applyUser(data.user);
+
+
+        showToast(
+            "Tap Accepted",
+            data.message ||
+            "Your tap has been recorded."
+        );
+
+
+    }catch(error){
+
+        showToast(
+            "Tap Failed",
+            error.message,
+            false
+        );
+
+    }finally{
+
+        button.disabled = false;
+
+    }
+
+}
+
+
+/* =========================================================
+   COUNTDOWN
+========================================================= */
+
+function checkCountdownTimer(){
+
+    const box =
+        document.getElementById("countdownBox");
+
+
+    const button =
+        document.getElementById("tapButton");
+
+
+    if(!appState.nextTapResetTime){
+
+        box.classList.add("hidden");
+
+        button.classList.remove(
+            "opacity-50",
+            "pointer-events-none"
+        );
+
+        return;
+
+    }
+
+
+    const resetTime =
+        new Date(
+            appState.nextTapResetTime
+        ).getTime();
+
+
+    const distance =
+        resetTime - Date.now();
+
+
+    if(distance > 0){
+
+        box.classList.remove("hidden");
+
+
+        button.classList.add(
+            "opacity-50",
+            "pointer-events-none"
+        );
+
+
+        const h =
+            Math.floor(
+                distance / 3600000
+            );
+
+
+        const m =
+            Math.floor(
+                (distance % 3600000) /
+                60000
+            );
+
+
+        const s =
+            Math.floor(
+                (distance % 60000) /
+                1000
+            );
+
+
+        document
+            .getElementById("countdownTimerDisplay")
+            .innerText =
+                `${String(h).padStart(2,"0")}:`+
+                `${String(m).padStart(2,"0")}:`+
+                `${String(s).padStart(2,"0")}`;
+
+
+        setTimeout(
+            checkCountdownTimer,
+            1000
+        );
+
+
+    }else{
+
+        box.classList.add("hidden");
+
+
+        button.classList.remove(
+            "opacity-50",
+            "pointer-events-none"
+        );
+
+
+        refreshUser();
+
+    }
+
+}
+
+
+/* =========================================================
+   UPGRADE
+========================================================= */
+
+function openUpgradeModal(id){
+
+    selectedUpgradeLevelId = id;
+
+
+    const level =
+        LEVELS_CONFIG.find(
+            x => x.id === id
+        );
+
+
+    if(!level) return;
+
+
+    document
+        .getElementById("upgradeModalTitle")
+        .innerText =
+            `Activate Level ${level.id}: ${level.name}`;
+
+
+    document
+        .getElementById("upgradeModal")
+        .classList.remove("hidden");
+
+}
+
+
+function closeUpgradeModal(){
+
+    document
+        .getElementById("upgradeModal")
+        .classList.add("hidden");
+
+
+    selectedUpgradeLevelId = null;
+
+
+    document
+        .getElementById("upgradeMpesaCodeInput")
+        .value = "";
+
+}
+
+
+async function confirmUpgradeSubmission(){
+
+    const code =
+        document
+            .getElementById("upgradeMpesaCodeInput")
+            .value
+            .trim();
+
+
+    if(!code){
+
+        showToast(
+            "Missing M-Pesa Code",
+            "Please enter your M-Pesa confirmation code.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        await api(
+            "/api/levels/request",
+            {
+                method:"POST",
+
+                body:JSON.stringify({
+
+                    levelId:selectedUpgradeLevelId,
+
+                    mpesaCode:code
+
+                })
+            }
+        );
+
+
+        closeUpgradeModal();
+
+
+        showToast(
+            "Activation Submitted",
+            "Your tier activation request has been submitted for admin approval."
+        );
+
+
+    }catch(error){
+
+        showToast(
+            "Activation Failed",
+            error.message,
+            false
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   DEPOSIT
+========================================================= */
+
+function openDepositModal(){
+
+    document
+        .getElementById("depositModal")
+        .classList.remove("hidden");
+
+}
+
+
+function closeDepositModal(){
+
+    document
+        .getElementById("depositModal")
+        .classList.add("hidden");
+
+}
+
+
+async function submitDeposit(){
+
+    const amount =
+        Number(
+            document
+                .getElementById("depositAmountInput")
+                .value
+        );
+
+
+    const phone =
+        document
+            .getElementById("depositPhoneInput")
+            .value
+            .trim();
+
+
+    const code =
+        document
+            .getElementById("depositMpesaCodeInput")
+            .value
+            .trim();
+
+
+    if(!amount || amount <= 0){
+
+        showToast(
+            "Invalid Amount",
+            "Please enter a valid deposit amount.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    if(!phone){
+
+        showToast(
+            "Phone Required",
+            "Please enter the M-Pesa phone number.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    if(!code){
+
+        showToast(
+            "Confirmation Code Required",
+            "Please enter the M-Pesa confirmation code.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        await api(
+            "/api/deposit-request",
+            {
+                method:"POST",
+
+                body:JSON.stringify({
+
+                    amount:amount,
+
+                    mpesaPhone:phone,
+
+                    mpesaCode:code
+
+                })
+            }
+        );
+
+
+        closeDepositModal();
+
+
+        document.getElementById(
+            "depositAmountInput"
+        ).value = "";
+
+
+        document.getElementById(
+            "depositPhoneInput"
+        ).value = "";
+
+
+        document.getElementById(
+            "depositMpesaCodeInput"
+        ).value = "";
+
+
+        showToast(
+            "Deposit Submitted",
+            "Your deposit request has been sent to Customer Care for verification."
+        );
+
+
+    }catch(error){
+
+        showToast(
+            "Deposit Failed",
+            error.message,
+            false
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   WITHDRAW
+========================================================= */
+
+function openWithdrawModal(){
+
+    document
+        .getElementById("withdrawModal")
+        .classList.remove("hidden");
+
+}
+
+
+function closeWithdrawModal(){
+
+    document
+        .getElementById("withdrawModal")
+        .classList.add("hidden");
+
+}
+
+
+async function submitWithdrawal(){
+
+    const amount =
+        Number(
+            document
+                .getElementById("withdrawAmountInput")
+                .value
+        );
+
+
+    const phone =
+        document
+            .getElementById("withdrawPhoneInput")
+            .value
+            .trim();
+
+
+    if(!amount || amount < 2000){
+
+        showToast(
+            "Invalid Withdrawal",
+            "Minimum withdrawal is Ksh 2,000.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    if(!phone){
+
+        showToast(
+            "Phone Required",
+            "Please enter the destination phone number.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        const data =
+            await api(
+                "/api/withdraw-request",
+                {
+                    method:"POST",
+
+                    body:JSON.stringify({
+
+                        amount:amount,
+
+                        destinationPhone:phone
+
+                    })
+                }
+            );
+
+
+        if(data.user){
+
+            applyUser(data.user);
+
+        }
+
+
+        closeWithdrawModal();
+
+
+        document.getElementById(
+            "withdrawAmountInput"
+        ).value = "";
+
+
+        document.getElementById(
+            "withdrawPhoneInput"
+        ).value = "";
+
+
+        showToast(
+            "Withdrawal Submitted",
+            data.message ||
+            "Withdrawal request submitted."
+        );
+
+
+    }catch(error){
+
+        showToast(
+            "Withdrawal Failed",
+            error.message,
+            false
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SUPPORT
+========================================================= */
+
+async function submitComplaint(){
+
+    const message =
+        document
+            .getElementById("complaintTextInput")
+            .value
+            .trim();
+
+
+    if(!message){
+
+        showToast(
+            "Support",
+            "Please describe your issue.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        await api(
+            "/api/complaints",
+            {
+                method:"POST",
+
+                body:JSON.stringify({
+                    message:message
+                })
+            }
+        );
+
+
+        document
+            .getElementById("complaintTextInput")
+            .value = "";
+
+
+        showToast(
+            "Ticket Sent",
+            "Your support request has been sent successfully."
+        );
+
+
+    }catch(error){
+
+        showToast(
+            "Support Error",
+            error.message,
+            false
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   ADMIN
+========================================================= */
+
+function openAdminModal(){
+
+    document
+        .getElementById("adminModal")
+        .classList.remove("hidden");
+
+}
+
+
+function closeAdminModal(){
+
+    document
+        .getElementById("adminModal")
+        .classList.add("hidden");
+
+}
+
+
+async function verifyAdminLogin(){
+
+    const email =
+        prompt(
+            "Enter Admin Email"
+        );
+
+
+    if(!email) return;
+
+
+    const password =
+        document
+            .getElementById("adminPasscodeInput")
+            .value
+            .trim();
+
+
+    if(!password){
+
+        showToast(
+            "Admin Login",
+            "Enter your admin password.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        const data =
+            await api(
+                "/api/admin/login",
+                {
+                    method:"POST",
+
+                    body:JSON.stringify({
+
+                        email:email,
+
+                        password:password
+
+                    })
+                }
+            );
+
+
+        adminToken =
+            data.token;
+
+
+        document
+            .getElementById("adminLoginForm")
+            .classList.add("hidden");
+
+
+        document
+            .getElementById("adminPanelContent")
+            .classList.remove("hidden");
+
+
+        document
+            .getElementById("adminPasscodeInput")
+            .value = "";
+
+
+        showToast(
+            "Admin Login",
+            "Admin portal opened successfully."
+        );
+
+
+        loadAdminData();
+
+
+    }catch(error){
+
+        adminToken = null;
+
+
+        showToast(
+            "Admin Login Failed",
+            error.message,
+            false
+        );
+
+    }
+
+}
+
+
+function lockAdminSession(){
+
+    adminToken = null;
+
+
+    document
+        .getElementById("adminPanelContent")
+        .classList.add("hidden");
+
+
+    document
+        .getElementById("adminLoginForm")
+        .classList.remove("hidden");
+
+
+    closeAdminModal();
+
+}
+
+
+function switchAdminTab(tab){
+
+    [
+        "users",
+        "levels",
+        "deposits",
+        "withdrawals",
+        "complaints"
+    ].forEach(t=>{
+
+        document
+            .getElementById("adm-section-"+t)
+            .classList.add("hidden");
+
+
+        document
+            .getElementById("adm-tab-"+t)
+            .classList.remove(
+                "bg-zinc-800",
+                "text-brandGreen"
+            );
+
+
+        document
+            .getElementById("adm-tab-"+t)
+            .classList.add(
+                "text-zinc-400"
+            );
+
+    });
+
+
+    document
+        .getElementById("adm-section-"+tab)
+        .classList.remove("hidden");
+
+
+    document
+        .getElementById("adm-tab-"+tab)
+        .classList.add(
+            "bg-zinc-800",
+            "text-brandGreen"
+        );
+
+}
+
+
+async function loadAdminData(){
+
+    try{
+
+        const data =
+            await api(
+                "/api/admin/dashboard"
+            );
+
+
+        const d =
+            data.data ||
+            data;
+
+
+        renderAdminData(d);
+
+
+    }catch(error){
+
+        showToast(
+            "Admin Error",
+            error.message,
+            false
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   UI
+========================================================= */
+
 function updateUI(){
- const bal=`Ksh ${Number(appState.balance).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`,l=LEVELS_CONFIG.find(x=>x.id===appState.currentLevelId)||LEVELS_CONFIG[0];
- navBalance.innerText=bal;dashBalance.innerText=bal;walletTotalBalance.innerText=bal;tapsRemaining.innerText=`${appState.tapsLeft} / 6`;currentTierName.innerText=`Level ${l.id}: ${l.name}`;tapAssetIcon.className='fa-solid fa-fingerprint fingerprint-icon text-5xl mb-1';profileNameDisplay.innerText=appState.currentUser.name||'Zulvix User';profilePhoneDisplay.innerText=`Active Member • ${appState.currentUser.phone||'+254'}`;
- levelsListContainer.innerHTML=LEVELS_CONFIG.map(x=>{
-  const active=x.id===appState.currentLevelId,unlocked=x.id===1||appState.unlockedLevels.includes(x.id),closed=x.id<appState.currentLevelId,free=x.unlockFee===0;
-  let b=active?'<span class="bg-brandGreen/20 text-brandGreen border border-brandGreen/40 text-[10px] px-2.5 py-1 rounded-lg font-bold">Active Tapping</span>':closed?'<span class="bg-zinc-800 text-zinc-500 text-[10px] px-2 py-1 rounded-lg">Closed (Upgraded)</span>':unlocked?`<button onclick="switchToLevel(${x.id})" class="bg-zinc-800 text-white text-xs px-3 py-1.5 rounded-lg font-bold">Select</button>`:`<button onclick="openUpgradeModal(${x.id})" class="bg-brandGold text-black text-xs px-3 py-1.5 rounded-lg font-bold">Upgrade (Pay)</button>`;
-  return `<div class="bg-brandCard border ${active?'border-brandGreen/60 glow-green':'border-zinc-800'} rounded-xl p-4 flex items-center gap-4 ${closed?'opacity-60':''}"><div class="w-14 h-14 rounded-xl bg-zinc-900 border border-zinc-700 text-brandGold flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid ${x.icon}"></i></div><div class="flex-grow"><span class="text-[10px] font-bold uppercase ${free?'text-brandGreen':'text-brandGold'}">${free?'Free Tier':`Total Cost: Ksh ${(x.unlockFee+x.userDeposit).toLocaleString()}`}</span><h3 class="font-bold text-white text-sm">Level ${x.id}: ${x.name}</h3><p class="text-xs text-zinc-400">Earn Ksh ${x.perTap}/tap • Ksh ${x.dailyTotal}/day</p></div><div>${b}</div></div>`;
- }).join('');
- transactionHistoryList.innerHTML=appState.transactions?.length?appState.transactions.map(t=>`<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 flex justify-between items-center text-xs"><div><p class="font-bold text-white">${esc(t.type)}</p><span class="text-[10px] text-zinc-500">${esc(t.date)}</span></div><span class="font-black ${String(t.amount).startsWith('+')?'text-brandGreen':'text-brandGold'}">${esc(t.amount)}</span></div>`).join(''):'<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 text-center text-xs text-zinc-500">No transactions recorded yet.</div>';
+
+    const balance =
+        Number(
+            appState.balance || 0
+        );
+
+
+    const formatted =
+        `Ksh ${balance.toLocaleString(
+            undefined,
+            {
+                minimumFractionDigits:2,
+                maximumFractionDigits:2
+            }
+        )}`;
+
+
+    document
+        .getElementById("navBalance")
+        .innerText = formatted;
+
+
+    document
+        .getElementById("dashBalance")
+        .innerText = formatted;
+
+
+    document
+        .getElementById("walletTotalBalance")
+        .innerText = formatted;
+
+
+    document
+        .getElementById("tapsRemaining")
+        .innerText =
+            `${appState.tapsLeft} / 6`;
+
+
+    const level =
+        LEVELS_CONFIG.find(
+            x =>
+                x.id ===
+                appState.currentLevelId
+        ) ||
+        LEVELS_CONFIG[0];
+
+
+    document
+        .getElementById("currentTierName")
+        .innerText =
+            `Level ${level.id}: ${level.name}`;
+
+
+    document
+        .getElementById("profileNameDisplay")
+        .innerText =
+            appState.currentUser.name ||
+            "Zulvix User";
+
+
+    document
+        .getElementById("profilePhoneDisplay")
+        .innerText =
+            `Active Member • ${
+                appState.currentUser.phone ||
+                "+254"
+            }`;
+
+
+    renderLevels();
+
+    renderTransactions();
+
 }
-window.addEventListener('load',async()=>{
- const p=localStorage.getItem('zulvix_active_phone');
- if(p){try{const d=await api('/api/user/'+encodeURIComponent(p));applyUser(d.user)}catch{localStorage.removeItem('zulvix_active_phone')}}
- checkAuthUI();updateUI();
-});
+
+
+/* =========================================================
+   LEVELS
+========================================================= */
+
+function renderLevels(){
+
+    const container =
+        document.getElementById(
+            "levelsListContainer"
+        );
+
+
+    container.innerHTML =
+        LEVELS_CONFIG.map(level=>{
+
+            const active =
+                level.id ===
+                appState.currentLevelId;
+
+
+            const unlocked =
+                level.id === 1 ||
+                appState.unlockedLevels.includes(
+                    level.id
+                );
+
+
+            const closed =
+                level.id <
+                appState.currentLevelId;
+
+
+            let button;
+
+
+            if(active){
+
+                button =
+                    `<span class="bg-brandGreen/20 text-brandGreen border border-brandGreen/40 text-[10px] px-2.5 py-1 rounded-lg font-bold">
+                        Active Tapping
+                    </span>`;
+
+            }else if(closed){
+
+                button =
+                    `<span class="bg-zinc-800 text-zinc-500 text-[10px] px-2 py-1 rounded-lg">
+                        Closed
+                    </span>`;
+
+            }else if(unlocked){
+
+                button =
+                    `<button onclick="selectLevel(${level.id})"
+                        class="bg-zinc-800 text-white text-xs px-3 py-1.5 rounded-lg font-bold">
+                        Select
+                    </button>`;
+
+            }else{
+
+                button =
+                    `<button onclick="openUpgradeModal(${level.id})"
+                        class="bg-brandGold text-black text-xs px-3 py-1.5 rounded-lg font-bold">
+                        Upgrade
+                    </button>`;
+
+            }
+
+
+            return `
+
+            <div class="bg-brandCard border ${
+                active
+                ? "border-brandGreen/60 glow-green"
+                : "border-zinc-800"
+            } rounded-xl p-4 flex items-center gap-4">
+
+                <div class="w-14 h-14 rounded-xl bg-zinc-900 border border-zinc-700 text-brandGold flex items-center justify-center text-xl flex-shrink-0">
+
+                    <i class="fa-solid ${level.icon}"></i>
+
+                </div>
+
+
+                <div class="flex-grow">
+
+                    <span class="text-[10px] font-bold uppercase ${
+                        level.unlockFee === 0
+                        ? "text-brandGreen"
+                        : "text-brandGold"
+                    }">
+
+                        ${
+                            level.unlockFee === 0
+                            ? "Free Tier"
+                            : `Total Cost: Ksh ${(level.unlockFee + level.userDeposit).toLocaleString()}`
+                        }
+
+                    </span>
+
+
+                    <h3 class="font-bold text-white text-sm">
+
+                        Level ${level.id}: ${level.name}
+
+                    </h3>
+
+
+                    <p class="text-xs text-zinc-400">
+
+                        Earn Ksh ${level.perTap}/tap •
+                        Ksh ${level.dailyTotal}/day
+
+                    </p>
+
+                </div>
+
+
+                <div>
+                    ${button}
+                </div>
+
+            </div>
+
+            `;
+
+        }).join("");
+
+}
+
+
+/* =========================================================
+   SELECT LEVEL
+========================================================= */
+
+async function selectLevel(id){
+
+    if(!authToken) return;
+
+
+    try{
+
+        await api(
+            "/api/levels/select",
+            {
+                method:"POST",
+
+                body:JSON.stringify({
+                    levelId:id
+                })
+            }
+        );
+
+
+        await refreshUser();
+
+
+        switchTab("dashboard");
+
+
+        showToast(
+            "Tier Selected",
+            `Level ${id} is now your active tapping tier.`
+        );
+
+
+    }catch(error){
+
+        showToast(
+            "Tier Selection Failed",
+            error.message,
+            false
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   TRANSACTIONS
+========================================================= */
+
+function renderTransactions(){
+
+    const list =
+        document.getElementById(
+            "transactionHistoryList"
+        );
+
+
+    if(!appState.transactions.length){
+
+        list.innerHTML =
+            `<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 text-center text-xs text-zinc-500">
+                No transactions recorded yet.
+            </div>`;
+
+        return;
+
+    }
+
+
+    list.innerHTML =
+        appState.transactions.map(t=>{
+
+            const amount =
+                String(
+                    t.amount ??
+                    ""
+                );
+
+
+            return `
+
+            <div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 flex justify-between items-center text-xs">
+
+                <div>
+
+                    <p class="font-bold text-white">
+                        ${escapeHTML(t.type || "Transaction")}
+                    </p>
+
+                    <span class="text-[10px] text-zinc-500">
+                        ${escapeHTML(t.date || "")}
+                    </span>
+
+                </div>
+
+
+                <span class="font-black ${
+                    amount.startsWith("+")
+                    ? "text-brandGreen"
+                    : "text-brandGold"
+                }">
+
+                    ${escapeHTML(amount)}
+
+                </span>
+
+            </div>
+
+            `;
+
+        }).join("");
+
+}
+
+
+/* =========================================================
+   ADMIN DATA
+========================================================= */
+
+function renderAdminData(data){
+
+    if(!data) return;
+
+
+    const users =
+        data.users ||
+        [];
+
+
+    document
+        .getElementById("adminUsersList")
+        .innerHTML =
+            users.length
+            ? users.map(user=>`
+
+                <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 flex justify-between items-center text-xs">
+
+                    <div>
+
+                        <p class="font-bold text-white">
+                            ${escapeHTML(user.name)}
+                        </p>
+
+                        <span class="text-[10px] text-zinc-400">
+                            ${escapeHTML(user.phone)}
+                        </span>
+
+                    </div>
+
+                    <span class="text-brandGold font-bold">
+                        Ksh ${Number(user.balance || 0).toLocaleString()}
+                    </span>
+
+                </div>
+
+            `).join("")
+            : `<p class="text-xs text-zinc-500 text-center py-2">
+                No registered users.
+            </p>`;
+
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(value){
+
+    return String(value ?? "")
+        .replace(
+            /[&<>"']/g,
+            char => ({
+
+                "&":"&amp;",
+                "<":"&lt;",
+                ">":"&gt;",
+                '"':"&quot;",
+                "'":"&#39;"
+
+            }[char])
+        );
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+window.addEventListener(
+    "load",
+    async function(){
+
+        checkAuthUI();
+
+        updateUI();
+
+        checkCountdownTimer();
+
+    }
+);
+
 </script>
+
 </body>
 </html>
