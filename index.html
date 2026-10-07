@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zulvix-KE | Digital Asset Tap & Earn</title>
-<meta name="google-site-verification" content="bvAT-SpWX7RGs1cOlm-_6L4RhZ-kZFu9LZdKAZIhDJQ">
+<meta name="google-site-verification" content="bvAT-SpWX7RGs1cOlm-_6L4RhZ-kZFu9LZdKAZIhDJQ" />
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config={theme:{extend:{colors:{
@@ -52,6 +52,7 @@ body{background:#070d0a;color:#f3f4f6;font-family:system-ui,-apple-system,sans-s
 </header>
 
 <main class="flex-grow max-w-lg w-full mx-auto p-4 pb-24">
+
 <section id="tab-dashboard" class="space-y-4">
 <div class="bg-brandCard border border-brandGreen/30 rounded-2xl p-4 shadow-lg relative overflow-hidden"><div class="absolute -right-6 -bottom-6 w-24 h-24 bg-brandGreen/10 rounded-full blur-xl pointer-events-none"></div><div class="flex justify-between items-start"><div><span class="text-xs uppercase tracking-wider text-zinc-400">Account Tier</span><h2 id="currentTierName" class="text-lg font-bold text-brandGreen">Level 1: Iron Box</h2></div><span class="bg-brandGreen/20 text-brandGreen border border-brandGreen/40 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase">Active</span></div><div class="mt-4 grid grid-cols-2 gap-3 pt-3 border-t border-zinc-800"><div><span class="text-[11px] text-zinc-400">Dashboard Balance</span><p id="dashBalance" class="text-xl font-black text-brandGold">Ksh 0.00</p></div><div><span class="text-[11px] text-zinc-400">Taps Status</span><p id="tapsRemaining" class="text-xl font-black text-white">6 / 6</p></div></div></div>
 
@@ -78,6 +79,7 @@ body{background:#070d0a;color:#f3f4f6;font-family:system-ui,-apple-system,sans-s
 <section id="tab-wallet" class="space-y-4 hidden"><div class="bg-brandCard border border-brandGold/30 rounded-2xl p-5 space-y-4"><div class="flex justify-between items-center"><div><span class="text-xs text-zinc-400">Dashboard Balance</span><h3 id="walletTotalBalance" class="text-2xl font-black text-brandGold">Ksh 0.00</h3></div><div class="space-x-1"><button onclick="openDepositModal()" class="bg-brandGreen hover:bg-emerald-400 text-black font-bold text-xs px-3 py-2 rounded-xl transition cursor-pointer"><i class="fa-solid fa-plus mr-1"></i> Deposit</button><button onclick="openWithdrawModal()" class="bg-brandGold hover:bg-yellow-400 text-black font-bold text-xs px-3 py-2 rounded-xl transition cursor-pointer"><i class="fa-solid fa-arrow-up mr-1"></i> Withdraw</button></div></div><div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-800 text-[11px] text-zinc-400 space-y-1"><p><i class="fa-solid fa-triangle-exclamation text-brandGold mr-1"></i> Min withdrawal: <strong class="text-white">Ksh 2,000</strong></p><p><i class="fa-solid fa-shield text-brandGreen mr-1"></i> Active Balance Reserve: <strong class="text-white">Ksh 2,000</strong> must remain in account.</p><p><i class="fa-solid fa-bolt text-cyan-400 mr-1"></i> Max daily payout: <strong class="text-white">Ksh 150,000</strong></p></div></div><div class="space-y-2"><h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400 px-1">Recent Ledger Activity</h4><div id="transactionHistoryList" class="space-y-2"></div></div></section>
 
 <section id="tab-profile" class="space-y-4 hidden"><div class="bg-brandCard border border-zinc-800 rounded-2xl p-5 text-center space-y-3"><div class="w-16 h-16 rounded-full bg-brandGreen/20 text-brandGreen font-black text-2xl flex items-center justify-center mx-auto border border-brandGreen/40">ZK</div><div><h3 id="profileNameDisplay" class="font-bold text-white text-base">Zulvix User</h3><p id="profilePhoneDisplay" class="text-xs text-zinc-400">Active Member • (+254)</p></div></div><div class="bg-brandCard border border-zinc-800 rounded-2xl p-4 space-y-3"><h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400">Submit Support Ticket</h4><textarea id="complaintTextInput" placeholder="Describe your issue or inquiry here..." rows="3" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brandGreen"></textarea><button onclick="submitComplaint()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2 rounded-xl text-xs transition cursor-pointer">Send Complaint Request</button></div><button onclick="handleLogout()" class="w-full bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2 cursor-pointer"><i class="fa-solid fa-right-from-bracket"></i> Sign Out / Logout</button></section>
+
 </main>
 
 <nav class="fixed bottom-0 left-0 right-0 bg-brandCard border-t border-zinc-800 py-2.5 px-6 flex justify-between items-center z-30 max-w-lg mx-auto"><button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center text-brandGreen transition cursor-pointer"><i class="fa-solid fa-house text-lg"></i><span class="text-[10px] mt-0.5 font-bold">Home</span></button><button onclick="switchTab('levels')" id="nav-btn-levels" class="flex flex-col items-center text-zinc-400 transition cursor-pointer"><i class="fa-solid fa-layer-group text-lg"></i><span class="text-[10px] mt-0.5">Tiers</span></button><button onclick="switchTab('wallet')" id="nav-btn-wallet" class="flex flex-col items-center text-zinc-400 transition cursor-pointer"><i class="fa-solid fa-wallet text-lg"></i><span class="text-[10px] mt-0.5">Wallet</span></button><button onclick="switchTab('profile')" id="nav-btn-profile" class="flex flex-col items-center text-zinc-400 transition cursor-pointer"><i class="fa-solid fa-user text-lg"></i><span class="text-[10px] mt-0.5">Support</span></button></nav>
@@ -887,6 +889,7 @@ async function submitWithdrawal(){
  }
 }
 
+/* FIXED SUPPORT TICKET SUBMISSION */
 async function submitComplaint(){
  const msg=document
   .getElementById('complaintTextInput')
@@ -905,6 +908,7 @@ async function submitComplaint(){
   await api('/api/complaints',{
    method:'POST',
    body:JSON.stringify({
+    subject:'Customer Support Request',
     message:msg
    })
   });
