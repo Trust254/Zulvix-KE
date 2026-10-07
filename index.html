@@ -107,6 +107,7 @@ async function api(path,options={}){
  }catch(e){showToast('Connection / Action Error',e.message,false);throw e}
 }
 function applyUser(u){
+ if(!u) throw new Error('No user data returned by server.');
  appState.isLoggedIn=true;appState.currentUser={name:u.name,phone:u.phone};appState.balance=Number(u.balance||0);
  appState.currentLevelId=Number(u.level||1);appState.unlockedLevels=u.unlockedLevels||[1];appState.tapsLeft=Number(u.tapsLeft??6);
  appState.nextTapResetTime=u.nextTapResetTime||null;appState.transactions=u.transactions||[];
@@ -115,12 +116,12 @@ function applyUser(u){
 function checkAuthUI(){document.getElementById('authWrapper').classList.toggle('hidden',appState.isLoggedIn)}
 function toggleAuthMode(mode){document.getElementById('loginFormContainer').classList.toggle('hidden',mode!=='login');document.getElementById('registerFormContainer').classList.toggle('hidden',mode!=='register');document.getElementById('authSubtitle').innerText=mode==='register'?'Register Your New Account':'Secure Online Sign In Portal'}
 async function handleRegister(){
- const name=regFullName.value.trim(),phone=regPhone.value.trim(),pass=regPassword.value.trim();
+ const name=document.getElementById('regFullName').value.trim(),phone=document.getElementById('regPhone').value.trim(),pass=document.getElementById('regPassword').value.trim();
  if(!name||!phone||!pass)return showToast('Registration Error','Please fill in all required fields.',false);
  try{const d=await api('/api/auth/register',{method:'POST',body:JSON.stringify({name,phone,password:pass})});if(d.token)localStorage.setItem('zulvix_auth_token',d.token);applyUser(d.user);showToast('Welcome!',`Registration successful, ${d.user.name}.`)}catch{}
 }
 async function handleLogin(){
- const phone=loginPhone.value.trim(),pass=loginPassword.value.trim();
+ const phone=document.getElementById('loginPhone').value.trim(),pass=document.getElementById('loginPassword').value.trim();
  if(!phone||!pass)return showToast('Login Error','Please enter both mobile number and password.',false);
  try{const d=await api('/api/auth/login',{method:'POST',body:JSON.stringify({phone,password:pass})});if(d.token)localStorage.setItem('zulvix_auth_token',d.token);applyUser(d.user);showToast('Signed In',`Welcome back, ${d.user.name}!`)}catch{}
 }
