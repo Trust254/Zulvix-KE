@@ -1220,8 +1220,8 @@ body{
 
 const API = "https://zulvix-ke-backend.onrender.com";
 
-let authToken = null;
-let adminToken = null;
+let authToken = localStorage.getItem("zulvix_auth_token") || null;
+let adminToken = localStorage.getItem("zulvix_admin_token") || null;
 
 const LEVELS_CONFIG = [
 
@@ -1677,8 +1677,8 @@ async function handleRegister(){
             );
 
 
-        authToken =
-            data.token;
+        authToken = data.token;
+localStorage.setItem("zulvix_auth_token", data.token);
 
 
         applyUser(data.user);
@@ -1763,8 +1763,8 @@ async function handleLogin(){
             );
 
 
-        authToken =
-            data.token;
+        authToken = data.token;
+localStorage.setItem("zulvix_auth_token", data.token);
 
 
         applyUser(data.user);
@@ -1812,7 +1812,8 @@ async function refreshUser(){
 
     }catch(error){
 
-        authToken = null;
+        localStorage.removeItem("zulvix_auth_token");
+authToken = null;
 
         appState.isLoggedIn = false;
 
