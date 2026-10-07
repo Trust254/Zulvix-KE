@@ -480,18 +480,6 @@ async function handleTapAsset(){
    body:JSON.stringify({})
   });
 
-  /*
-    The server is the source of truth.
-
-    It returns:
-    - reward
-    - taps_left
-    - next_tap_reset_time
-    - updated user
-
-    refreshUser() then updates the dashboard immediately.
-  */
-
   if(d.user){
    applyUser(d.user);
   }else{
@@ -536,12 +524,6 @@ function checkCountdownTimer(){
  const resetTimestamp=
   getResetTimestamp(appState.nextTapResetTime);
 
- /*
-   No active countdown.
-
-   If the user still has taps available,
-   TAP ASSET remains enabled.
- */
  if(!resetTimestamp){
 
   box.classList.add('hidden');
@@ -563,9 +545,6 @@ function checkCountdownTimer(){
 
  const distance=resetTimestamp-Date.now();
 
- /*
-   Active 12-hour countdown.
- */
  if(distance>0){
 
   box.classList.remove('hidden');
@@ -600,13 +579,6 @@ function checkCountdownTimer(){
   );
 
  }else{
-
-  /*
-    Countdown finished.
-
-    Clear the local countdown and ask the
-    backend for the fresh user state.
-  */
 
   box.classList.add('hidden');
 
@@ -1649,11 +1621,6 @@ function updateUI(){
   'walletTotalBalance'
  ).innerText=bal;
 
- /*
-   IMPORTANT:
-   Always display the actual remaining tap count.
-   No reward amount is used here.
- */
  document.getElementById(
   'tapsRemaining'
  ).innerText=
@@ -1714,11 +1681,6 @@ function updateUI(){
       class="bg-brandGold text-black text-xs px-3 py-1.5 rounded-lg font-bold">
       Activate (Pay)
      </button>`;
-
-   /*
-     The perTap values here are the exact Ksh values.
-     No multiplication by 1000 is performed.
-   */
 
    return `
    <div class="bg-brandCard border ${
@@ -1798,9 +1760,6 @@ function updateUI(){
   :
   '<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 text-center text-xs text-zinc-500">No transactions recorded yet.</div>';
 
- /*
-   Keep TAP button state synchronized after every UI refresh.
- */
  checkCountdownTimer();
 }
 
