@@ -577,6 +577,27 @@ button{
   text-align:right;
 }
 
+/* PAYBILL HIGHLIGHT */
+
+.paybill-highlight{
+  background:linear-gradient(135deg,rgba(243,198,20,.16),rgba(0,255,136,.08));
+  border:2px solid var(--gold);
+  border-radius:12px;
+  padding:10px 12px;
+  color:var(--white);
+  box-shadow:0 0 20px rgba(243,198,20,.08);
+}
+
+.paybill-highlight span{
+  color:#ffe77a!important;
+  font-weight:800;
+}
+
+.paybill-highlight strong{
+  color:var(--gold)!important;
+  font-size:14px;
+}
+
 /* LEDGER */
 
 .ledger-item{
@@ -731,6 +752,17 @@ button{
 
 .payment-row span{
   color:var(--muted);
+}
+
+.payment-row.total-row{
+  margin-top:5px;
+  padding-top:10px;
+  border-top:1px solid var(--border);
+}
+
+.payment-row.total-row strong{
+  color:var(--gold);
+  font-size:14px;
 }
 
 /* ADMIN */
@@ -946,7 +978,6 @@ button{
 <section id="authScreen" class="auth-screen">
   <div class="container">
 
-    <!-- LOGIN -->
     <div id="loginBox" class="auth-card">
       <div class="auth-logo">
         <i class="fa-solid fa-fingerprint"></i>
@@ -988,7 +1019,6 @@ button{
       </div>
     </div>
 
-    <!-- REGISTER -->
     <div id="registerBox" class="auth-card hidden">
       <div class="auth-logo">
         <i class="fa-solid fa-user-plus"></i>
@@ -1095,8 +1125,6 @@ button{
       </button>
     </div>
 
-    <!-- TAP CARD -->
-
     <div class="tap-card">
       <h3>Daily Asset Tap</h3>
       <p>Tap to earn your current level reward.</p>
@@ -1127,8 +1155,6 @@ button{
       <p id="resetCountdown" style="color:var(--gold);margin-top:8px;font-weight:800"></p>
     </div>
 
-    <!-- CURRENT LEVEL -->
-
     <div class="section-card">
       <div class="section-head">
         <h3>Current Asset Level</h3>
@@ -1137,8 +1163,6 @@ button{
 
       <div id="currentLevelBox"></div>
     </div>
-
-    <!-- RECENT LEDGER -->
 
     <div class="section-card">
       <div class="section-head">
@@ -1188,7 +1212,7 @@ button{
         <strong>M-Pesa</strong>
       </div>
 
-      <div class="info-row">
+      <div class="info-row paybill-highlight">
         <span>Paybill</span>
         <strong>522533</strong>
       </div>
@@ -1388,12 +1412,13 @@ button{
     </div>
 
     <div class="payment-box">
+
       <div class="payment-row">
         <span>Method</span>
         <strong>M-Pesa</strong>
       </div>
 
-      <div class="payment-row">
+      <div class="payment-row paybill-highlight">
         <span>Paybill</span>
         <strong>522533</strong>
       </div>
@@ -1402,6 +1427,7 @@ button{
         <span>Account No.</span>
         <strong>8012296</strong>
       </div>
+
     </div>
 
     <form id="depositForm">
@@ -1460,6 +1486,11 @@ button{
         <span>Maximum Daily Payout</span>
         <strong>Ksh 150,000</strong>
       </div>
+
+      <div class="payment-row">
+        <span>Available for Withdrawal</span>
+        <strong id="withdrawAvailable">Ksh 0.00</strong>
+      </div>
     </div>
 
     <form id="withdrawForm">
@@ -1469,7 +1500,8 @@ button{
         <div class="input-wrap">
           <i class="fa-solid fa-money-bill-transfer"></i>
           <input id="withdrawAmount" class="form-control"
-                 type="number" min="2000" placeholder="Minimum 2000" required>
+                 type="number" min="2000" max="150000"
+                 placeholder="Minimum 2000 / Maximum 150000" required>
         </div>
       </div>
 
@@ -1724,16 +1756,43 @@ const LEVELS_CONFIG = [
 
 
 /* =========================================================
+   DEVICE VIBRATION
+========================================================= */
+
+function vibrateSuccess(){
+
+  try{
+
+    if(
+      "vibrate" in navigator &&
+      typeof navigator.vibrate==="function"
+    ){
+      navigator.vibrate([120,70,120]);
+    }
+
+  }catch(error){
+    console.log("Vibration not available.");
+  }
+}
+
+
+/* =========================================================
    TOAST
 ========================================================= */
 
 function showToast(title,message="",success=true){
+
   const toast=document.getElementById("toast");
+
   document.getElementById("toastTitle").textContent=title;
   document.getElementById("toastMessage").textContent=message;
 
   toast.classList.toggle("error",!success);
   toast.classList.add("show");
+
+  if(success){
+    vibrateSuccess();
+  }
 
   clearTimeout(window.toastTimer);
 
@@ -1761,10 +1820,12 @@ async function request(path,options={},token=null){
   let response;
 
   try{
+
     response=await fetch(API+path,{
       ...options,
       headers
     });
+
   }catch(error){
 
     showToast(
@@ -2140,29 +2201,46 @@ function openTier(levelId){
   document.getElementById("selectedTierId").value=levelId;
 
   document.getElementById("tierModalInfo").innerHTML=`
+
     <div class="payment-row">
       <span>Selected Level</span>
       <strong>Level ${level.id}: ${escapeHtml(level.name)}</strong>
     </div>
 
     <div class="payment-row">
-      <span>Unlock Fee</span>
+      <span>Admin Activation & Maintenance</span>
       <strong>Ksh ${level.unlockFee.toLocaleString()}</strong>
     </div>
 
     <div class="payment-row">
-      <span>Required User Deposit</span>
+      <span>User Dashboard Credit</span>
       <strong>Ksh ${level.userDeposit.toLocaleString()}</strong>
     </div>
 
-    <div class="payment-row">
-      <span>Total Cost</span>
+    <div class="payment-row total-row">
+      <span>Total Payment</span>
       <strong>Ksh ${level.totalCost.toLocaleString()}</strong>
     </div>
 
-    <hr style="border:0;border-top:1px solid var(--border);margin:10px 0">
+    <div style="
+      margin-top:10px;
+      padding:10px;
+      border-radius:10px;
+      background:rgba(0,255,136,.06);
+      border:1px solid var(--border);
+      color:#a9c2b1;
+      font-size:10px;
+      line-height:1.6;
+    ">
+      After Customer Support verifies the M-Pesa payment,
+      the activation amount is retained in the admin portal for
+      activation and maintenance records, while the user dashboard
+      receives the applicable dashboard credit.
+    </div>
 
-    <div class="payment-row">
+    <hr style="border:0;border-top:1px solid var(--border);margin:12px 0">
+
+    <div class="payment-row paybill-highlight">
       <span>Paybill</span>
       <strong>522533</strong>
     </div>
@@ -2185,6 +2263,8 @@ document.getElementById("tierForm")
   const levelId=
     Number(document.getElementById("selectedTierId").value);
 
+  const level=getLevel(levelId);
+
   const mpesaCode=
     document.getElementById("tierMpesa").value.trim();
 
@@ -2202,8 +2282,18 @@ document.getElementById("tierForm")
     const data=await api("/api/levels/upgrade",{
       method:"POST",
       body:JSON.stringify({
+
         levelId,
-        mpesaCode
+
+        mpesaCode,
+
+        /* Explicit split sent with the request.
+           The server remains responsible for verification,
+           approval and actual balance update. */
+        amount:level.totalCost,
+        unlockFee:level.unlockFee,
+        userDeposit:level.userDeposit
+
       })
     });
 
@@ -2214,7 +2304,7 @@ document.getElementById("tierForm")
     showToast(
       "Activation Request Submitted",
       data.message ||
-      "Your tier activation request was sent to Customer Support for verification."
+      `Level ${levelId} request submitted for Ksh ${level.totalCost.toLocaleString()}.`
     );
 
   }catch(error){
@@ -2488,6 +2578,15 @@ document.getElementById("depositForm")
     return;
   }
 
+  if(!mpesaCode){
+    showToast(
+      "Missing M-Pesa Code",
+      "Enter your M-Pesa confirmation code.",
+      false
+    );
+    return;
+  }
+
   try{
 
     const data=await api("/api/deposits",{
@@ -2531,6 +2630,13 @@ function openWithdraw(){
       currentUser.mobile ||
       currentUser.phone ||
       "";
+
+    const balance=Number(currentUser.balance || 0);
+
+    const available=Math.max(0,balance-2000);
+
+    document.getElementById("withdrawAvailable")
+      .textContent=`Ksh ${available.toFixed(2)}`;
   }
 
   openModal("withdrawModal");
@@ -2548,11 +2654,50 @@ document.getElementById("withdrawForm")
   const mobile=
     document.getElementById("withdrawMobile").value.trim();
 
+  const balance=
+    Number(currentUser?.balance || 0);
+
+  const available=
+    Math.max(0,balance-2000);
+
   if(amount<2000){
 
     showToast(
       "Minimum Withdrawal",
       "The minimum withdrawal amount is Ksh 2,000.",
+      false
+    );
+
+    return;
+  }
+
+  if(amount>150000){
+
+    showToast(
+      "Maximum Daily Withdrawal",
+      "The maximum daily withdrawal amount is Ksh 150,000.",
+      false
+    );
+
+    return;
+  }
+
+  if(amount>available){
+
+    showToast(
+      "Insufficient Available Balance",
+      "Your Ksh 2,000 active-account reserve must remain in your account.",
+      false
+    );
+
+    return;
+  }
+
+  if(!mobile){
+
+    showToast(
+      "Mobile Number Required",
+      "Enter the M-Pesa number for the withdrawal.",
       false
     );
 
@@ -3026,6 +3171,26 @@ function renderAdminTiers(content){
 
       const level=getLevel(request.level);
 
+      const total=Number(
+        request.amount ||
+        level.totalCost ||
+        0
+      );
+
+      const retained=Number(
+        request.retained_fee ??
+        request.unlockFee ??
+        level.unlockFee ??
+        0
+      );
+
+      const userCredit=Number(
+        request.user_deposit ??
+        request.userDeposit ??
+        level.userDeposit ??
+        0
+      );
+
       return `
         <div class="admin-item">
 
@@ -3051,8 +3216,24 @@ function renderAdminTiers(content){
           </p>
 
           <p>
-            Amount:
-            Ksh ${Number(request.amount || level.totalCost || 0).toLocaleString()}
+            Total Payment:
+            <strong style="color:var(--gold)">
+              Ksh ${total.toLocaleString()}
+            </strong>
+          </p>
+
+          <p>
+            Admin Activation & Maintenance:
+            <strong style="color:var(--gold)">
+              Ksh ${retained.toLocaleString()}
+            </strong>
+          </p>
+
+          <p>
+            User Dashboard Credit:
+            <strong style="color:var(--green)">
+              Ksh ${userCredit.toLocaleString()}
+            </strong>
           </p>
 
           <p>
