@@ -1215,6 +1215,12 @@ let adminPollTimer=null;
 let previousPendingCount=null;
 
 /* =====================================================
+   TAP COUNTDOWN TIMER
+===================================================== */
+
+let tapCountdownTimer=null;
+
+/* =====================================================
    TOAST
 ===================================================== */
 
@@ -1643,6 +1649,11 @@ function handleLogout(){
    )
  ){
 
+   if(tapCountdownTimer){
+     clearTimeout(tapCountdownTimer);
+     tapCountdownTimer=null;
+   }
+
    localStorage.removeItem(
      USER_TOKEN_KEY
    );
@@ -1742,6 +1753,45 @@ async function handleTapAsset(){
 
  }
 
+ /*
+   The backend is the source of truth.
+   Do not allow another tap from the browser
+   when the server already reports zero taps.
+ */
+
+ if(Number(appState.tapsLeft)<=0){
+
+   checkCountdownTimer();
+
+   return showToast(
+     "Daily Taps Exhausted",
+     "Your next tapping session will unlock after the countdown.",
+     false
+   );
+
+ }
+
+ const button=
+ document.getElementById("tapButton");
+
+ /*
+   Prevent accidental double-clicks while the
+   current tap is being processed.
+ */
+
+ if(button.dataset.processing==="true"){
+   return;
+ }
+
+ button.dataset.processing="true";
+
+ button.disabled=true;
+
+ button.classList.add(
+   "opacity-50",
+   "pointer-events-none"
+ );
+
  try{
 
    const data=
@@ -1753,11 +1803,18 @@ async function handleTapAsset(){
      }
    );
 
+   /*
+     Always refresh from the backend after a
+     successful tap so balance, taps_left and
+     next_tap_reset_time are server values.
+   */
+
    await refreshUser(true);
 
    showToast(
      "Tap Accepted",
-     `${data.message} +Ksh ${Number(
+     data.message ||
+     `Tap completed. +Ksh ${Number(
        data.reward||0
      ).toLocaleString()}`
    );
@@ -1770,7 +1827,24 @@ async function handleTapAsset(){
      false
    );
 
+   /*
+     Refresh in case the backend changed the
+     tap state before returning an error.
+   */
+
    await refreshUser(true);
+
+ }finally{
+
+   button.dataset.processing="false";
+
+   /*
+     checkCountdownTimer() decides whether the
+     button should remain disabled or become active.
+   */
+
+   checkCountdownTimer();
+
  }
 
 }
@@ -1779,87 +1853,224 @@ async function handleTapAsset(){
    COUNTDOWN
 ===================================================== */
 
-function checkCountdownTimer(){
+function getResetTimeMilliseconds(value){
 
- const box=
- document.getElementById(
-   "countdownBox"
- );
-
- const button=
- document.getElementById(
-   "tapButton"
- );
-
- if(
-   !appState.nextTapResetTime
- ){
-
-   box.classList.add("hidden");
-
-   button.classList.remove(
-     "opacity-50",
-     "pointer-events-none"
-   );
-
-   return;
+ if(!value){
+   return null;
  }
 
- const distance=
- Number(
-   appState.nextTapResetTime
- )-
- Date.now();
+ /*
+   Backend may return:
+   - Unix milliseconds
+   - Unix seconds
+   - ISO date string
+   - Date-compatible string
+ */
 
- if(distance>0){
+ if(typeof value==="number"){
 
-   box.classList.remove("hidden");
+   if(!Number.isFinite(value)){
+     return null;
+   }
+
+   /*
+     10-digit timestamps are normally seconds.
+     13-digit timestamps are milliseconds.
+   */
+
+   if(value<100000000000){
+     return value*1000;
+   }
+
+   return value;
+ }
+
+ const numericValue=
+ Number(value);
+
+ if(
+   Number.isFinite(numericValue) &&
+   numericValue>0
+ ){
+
+   if(numericValue<100000000000){
+     return numericValue*1000;
+   }
+
+   return numericValue;
+ }
+
+ const parsed=
+ Date.parse(String(value));
+
+ return Number.isFinite(parsed)
+ ? parsed
+ : null;
+}
+
+function setTapButtonLocked(locked){
+
+ const button=
+ document.getElementById("tapButton");
+
+ if(!button)return;
+
+ if(locked){
+
+   button.disabled=true;
 
    button.classList.add(
      "opacity-50",
      "pointer-events-none"
    );
 
-   const h=
-   Math.floor(
-     distance/3600000
-   );
-
-   const m=
-   Math.floor(
-     (distance%3600000)/60000
-   );
-
-   const s=
-   Math.floor(
-     (distance%60000)/1000
-   );
-
-   document
-   .getElementById(
-     "countdownTimerDisplay"
-   )
-   .innerText=
-   `${String(h).padStart(2,"0")}:`+
-   `${String(m).padStart(2,"0")}:`+
-   `${String(s).padStart(2,"0")}`;
-
-   setTimeout(
-     checkCountdownTimer,
-     1000
-   );
-
  }else{
 
-   box.classList.add("hidden");
+   button.disabled=false;
 
    button.classList.remove(
      "opacity-50",
      "pointer-events-none"
    );
 
-   refreshUser(true);
  }
+
+}
+
+function checkCountdownTimer(){
+
+ /*
+   Stop the previous timer first.
+   This prevents multiple countdown loops
+   after login, refresh or tap.
+ */
+
+ if(tapCountdownTimer){
+
+   clearTimeout(
+     tapCountdownTimer
+   );
+
+   tapCountdownTimer=null;
+ }
+
+ const box=
+ document.getElementById(
+   "countdownBox"
+ );
+
+ const display=
+ document.getElementById(
+   "countdownTimerDisplay"
+ );
+
+ if(!box||!display)return;
+
+ /*
+   If there are still taps available,
+   there is no active 12-hour lock.
+ */
+
+ if(Number(appState.tapsLeft)>0){
+
+   box.classList.add("hidden");
+
+   setTapButtonLocked(false);
+
+   return;
+ }
+
+ /*
+   No taps remain.
+   The backend should provide the reset time.
+ */
+
+ const resetTime=
+ getResetTimeMilliseconds(
+   appState.nextTapResetTime
+ );
+
+ /*
+   If the backend has not supplied a reset time,
+   keep the button locked because taps_left is zero.
+   This avoids allowing an extra browser-only tap.
+ */
+
+ if(!resetTime){
+
+   box.classList.remove("hidden");
+
+   display.innerText=
+     "12:00:00";
+
+   setTapButtonLocked(true);
+
+   return;
+ }
+
+ const now=
+ Date.now();
+
+ const distance=
+ resetTime-now;
+
+ if(distance>0){
+
+   box.classList.remove("hidden");
+
+   setTapButtonLocked(true);
+
+   const totalSeconds=
+     Math.floor(
+       distance/1000
+     );
+
+   const h=
+     Math.floor(
+       totalSeconds/3600
+     );
+
+   const m=
+     Math.floor(
+       (totalSeconds%3600)/60
+     );
+
+   const s=
+     totalSeconds%60;
+
+   display.innerText=
+     `${String(h).padStart(2,"0")}:`+
+     `${String(m).padStart(2,"0")}:`+
+     `${String(s).padStart(2,"0")}`;
+
+   tapCountdownTimer=
+     setTimeout(
+       checkCountdownTimer,
+       1000
+     );
+
+   return;
+ }
+
+ /*
+   The 12-hour server countdown has expired.
+   Refresh the user so the backend can reset
+   taps_left and provide the new state.
+ */
+
+ box.classList.add("hidden");
+
+ setTapButtonLocked(true);
+
+ refreshUser(true).then(
+   ()=>{
+     /*
+       applyUser() calls checkCountdownTimer()
+       again using the fresh backend state.
+     */
+     checkCountdownTimer();
+   }
+ );
 
 }
 
@@ -3687,6 +3898,12 @@ function updateUI(){
  `<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 text-center text-xs text-zinc-500">
  No transactions recorded yet.
  </div>`;
+
+ /*
+   Keep the tap button state synchronized with
+   the latest user data.
+ */
+ checkCountdownTimer();
 
 }
 
