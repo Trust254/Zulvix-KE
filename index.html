@@ -4272,5 +4272,22 @@ window.addEventListener(
 
 </script>
 
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js")
+      .then(() => {
+        console.log("Zulvix-KE service worker registered");
+      })
+      .catch(error => {
+        console.error(
+          "Zulvix-KE service worker registration failed:",
+          error
+        );
+      });
+  });
+}
+</script>
+
 </body>
 </html>
