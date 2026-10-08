@@ -1,16 +1,22 @@
-const CACHE_NAME = "zulvix-ke-v1";
+const CACHE_NAME = "zulvix-ke-v2";
 
 const APP_FILES = [
   "./",
   "./index.html",
-  "./manifest.json",
-  "./icon-192.png",
-  "./icon-512-1.png"
+  "./manifest.json"
 ];
 
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES))
+    caches.open(CACHE_NAME).then(async cache => {
+      for (const file of APP_FILES) {
+        try {
+          await cache.add(file);
+        } catch (error) {
+          console.warn("Could not cache:", file);
+        }
+      }
+    })
   );
 
   self.skipWaiting();
@@ -31,9 +37,19 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
+  if (event.request.method !== "GET") return;
+
   event.respondWith(
-    fetch(event.request).catch(() =>
-      caches.match(event.request)
-    )
+    fetch(event.request)
+      .then(response => {
+        const responseClone = response.clone();
+
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, responseClone);
+        });
+
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
