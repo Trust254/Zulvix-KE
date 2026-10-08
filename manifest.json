@@ -1,13 +1,13 @@
 {
   "name": "Zulvix-KE",
   "short_name": "Zulvix-KE",
-  "description": "Zulvix-KE - Invest, Earn and Grow.",
+  "description": "Zulvix-KE Digital Asset Tap & Earn Platform",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#070d0a",
   "theme_color": "#00ff88",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "./icon-192.png",
@@ -16,7 +16,7 @@
       "purpose": "any maskable"
     },
     {
-      "src": "./icon-512.png",
+      "src": "./icon-512-1.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
