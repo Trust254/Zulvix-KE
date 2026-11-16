@@ -1206,7 +1206,7 @@ Access Admin Portal
 
 <div id="adminPanelContent" class="hidden space-y-4">
 
-<div class="grid grid-cols-5 gap-1 bg-zinc-900 p-1 rounded-xl text-[10px] font-bold text-center">
+<div class="grid grid-cols-6 gap-1 bg-zinc-900 p-1 rounded-xl text-[10px] font-bold text-center">
 
 <button onclick="switchAdminTab('users')" id="adm-tab-users" class="py-2 rounded-lg bg-zinc-800 text-brandGreen">
 Users
@@ -1226,6 +1226,9 @@ Payouts
 
 <button onclick="switchAdminTab('complaints')" id="adm-tab-complaints" class="py-2 text-zinc-400">
 Support
+</button>
+<button onclick="switchAdminTab('broadcast')" id="adm-tab-broadcast" class="py-2 text-zinc-400">
+Broadcast
 </button>
 
 </div>
@@ -1300,6 +1303,15 @@ class="space-y-2 max-h-60 overflow-y-auto">
 
 </div>
 
+
+<div id="adm-section-broadcast" class="hidden space-y-2">
+<h4 class="text-xs font-bold uppercase">Broadcast Centre</h4>
+<p class="text-[10px] text-zinc-400">Send an in-app announcement to all registered users.</p>
+<input id="broadcastTitle" maxlength="120" placeholder="Announcement title" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
+<textarea id="broadcastMessage" maxlength="3000" rows="4" placeholder="Write your announcement..." class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs"></textarea>
+<button onclick="sendAdminBroadcast()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Broadcast to All Users</button>
+<p id="broadcastResult" class="text-[10px] text-zinc-400"></p>
+</div>
 
 <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800 flex justify-between">
 
@@ -3080,9 +3092,37 @@ function lockAdminSession(){
 }
 
 
+async function setAdminUserStatus(id,status){
+ const labels={active:'activate/unblock',restricted:'restrict',blocked:'block'};
+ const reason=status==='active'?'':(prompt('Enter the reason to '+labels[status]+' this account:')||'').trim();
+ if(status!=='active'&&!reason)return showToast('Reason required','Enter a reason before changing account status.',false);
+ if(!confirm('Confirm '+labels[status]+' this account? Existing balance and history will be kept.'))return;
+ try{
+  await api('/api/admin/users/'+encodeURIComponent(id)+'/status',{method:'PATCH',body:JSON.stringify({status,reason})});
+  await loadAdminData(false);
+  showToast('Account updated','Account status changed. Existing balance and history remain unchanged.');
+ }catch(e){showToast('Account update failed',e.message,false);}
+}
+async function sendAdminBroadcast(){
+ const title=document.getElementById('broadcastTitle').value.trim();
+ const message=document.getElementById('broadcastMessage').value.trim();
+ if(!title||!message)return showToast('Announcement incomplete','Enter both a title and a message.',false);
+ if(!confirm('Send this announcement to ALL registered users now?'))return;
+ const btn=document.querySelector('#adm-section-broadcast button');
+ if(btn)btn.disabled=true;
+ try{
+  const d=await api('/api/admin/broadcast',{method:'POST',body:JSON.stringify({title,message})});
+  document.getElementById('broadcastResult').innerText='Published to '+(d.recipient_count||0)+' user inboxes.';
+  document.getElementById('broadcastTitle').value='';
+  document.getElementById('broadcastMessage').value='';
+  showToast('Broadcast sent',d.message||'Announcement published.');
+ }catch(e){showToast('Broadcast failed',e.message,false);}
+ finally{if(btn)btn.disabled=false;}
+}
+
 function switchAdminTab(tab){
 
- ['users','levels','deposits','withdrawals','complaints']
+ ['users','levels','deposits','withdrawals','complaints','broadcast']
  .forEach(t=>{
 
   document
@@ -3462,33 +3502,23 @@ function renderAdminData(){
 
   appState.usersDb.map(u=>`
 
-   <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 flex justify-between items-center text-xs">
-
-    <div>
-
-     <p class="font-bold text-white">
-      ${esc(u.name||u.full_name)}
-     </p>
-
-     <span class="text-[10px] text-zinc-400">
-
-      ${esc(u.phone||u.mobile)}
-      • Active Level
-      ${u.currentLevelId||u.active_level||1}
-
-     </span>
-
+   <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 space-y-2 text-xs">
+    <div class="flex justify-between gap-2 items-start">
+     <div class="min-w-0">
+      <p class="font-bold text-white">${esc(u.name||u.full_name)}</p>
+      <span class="text-[10px] text-zinc-400">${esc(u.phone||u.mobile)} • Level ${u.currentLevelId||u.active_level||1}</span>
+      <p class="text-[10px] text-zinc-500">Last active: ${u.last_active_at?esc(new Date(u.last_active_at).toLocaleString()):'Not recorded yet'}</p>
+     </div>
+     <div class="text-right shrink-0">
+      <span class="text-brandGold font-bold">Ksh ${Number(u.balance||0).toLocaleString()}</span>
+      <p class="text-[10px] font-bold uppercase ${(u.account_status||'active')==='active'?'text-emerald-400':'text-red-400'}">${esc(u.account_status||'active')}</p>
+     </div>
     </div>
-
-    <span class="text-brandGold font-bold">
-
-     Ksh
-     ${Number(
-      u.balance||0
-     ).toLocaleString()}
-
-    </span>
-
+    <div class="flex gap-2">
+     <button onclick="setAdminUserStatus('${esc(u.id)}','restricted')" class="flex-1 bg-amber-500/15 text-amber-300 rounded-lg py-1.5 text-[10px]">Restrict</button>
+     <button onclick="setAdminUserStatus('${esc(u.id)}','blocked')" class="flex-1 bg-red-500/15 text-red-300 rounded-lg py-1.5 text-[10px]">Block</button>
+     <button onclick="setAdminUserStatus('${esc(u.id)}','active')" class="flex-1 bg-emerald-500/15 text-emerald-300 rounded-lg py-1.5 text-[10px]">Unblock / Activate</button>
+    </div>
    </div>
 
   `).join('')
