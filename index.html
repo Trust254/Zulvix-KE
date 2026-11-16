@@ -3612,7 +3612,7 @@ function renderAdminData(){
      </div>
      <div class="text-right shrink-0">
       <span class="text-brandGold font-bold">Ksh ${Number(u.balance||0).toLocaleString()}</span>
-      <p class="text-[10px] font-bold uppercase ${(u.account_status||'active')==='active'?'text-emerald-400':'text-red-400'}">${esc(u.account_status||'active')}</p>
+      <p class="text-[10px] font-bold uppercase ${u.last_active_at&&Date.now()-Date.parse(u.last_active_at)>5*86400000?'text-amber-300':(u.account_status||'active')==='active'?'text-emerald-400':'text-red-400'}">${u.last_active_at&&Date.now()-Date.parse(u.last_active_at)>5*86400000&&(!u.account_status||u.account_status==='active')?'inactive • review':esc(u.account_status||'active')}</p>
      </div>
     </div>
     <div class="flex gap-2">
