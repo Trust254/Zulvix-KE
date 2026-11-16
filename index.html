@@ -2123,9 +2123,14 @@ async function createSponsorAd(){
 }
 async function loadSponsorAds(){
  const host=document.getElementById('sponsorAdsList');if(!host)return;
- try{const d=await api('/api/admin/sponsor-ads');host.innerHTML=(d.ads||[]).map(a=>'<div class="border border-zinc-700 rounded-lg p-2 text-xs flex justify-between gap-2"><span>'+escapeSponsorText(a.title)+' · '+escapeSponsorText(a.ad_format||a.media_type)+' · '+escapeSponsorText(a.placement)+' · '+escapeSponsorText(a.payment_status)+'</span><button class="text-amber-300" onclick="toggleSponsorAd(\''+escapeSponsorText(a.id)+'\','+(!a.is_active)+')">'+(a.is_active?'Deactivate':'Activate')+'</button></div>').join('')||'<p class="text-zinc-500 text-xs">No sponsor adverts yet.</p>';}catch(e){host.textContent='Could not load sponsor adverts: '+e.message;}
+ try{const d=await api('/api/admin/sponsor-ads');host.innerHTML=(d.ads||[]).map(a=>'<div class="border border-zinc-700 rounded-lg p-2 text-xs flex items-center justify-between gap-2"><span class="min-w-0">'+escapeSponsorText(a.title)+' · '+escapeSponsorText(a.ad_format||a.media_type)+' · '+escapeSponsorText(a.placement)+' · '+escapeSponsorText(a.payment_status)+'</span><div class="flex shrink-0 items-center gap-3"><button class="text-amber-300" onclick="toggleSponsorAd(\''+escapeSponsorText(a.id)+'\','+(!a.is_active)+')">'+(a.is_active?'Deactivate':'Activate')+'</button><button class="text-red-400 font-semibold" onclick="deleteSponsorAd(\''+escapeSponsorText(a.id)+'\',\''+escapeSponsorText(a.title).replace(/'/g,'&#39;')+'\')">Delete</button></div></div>').join('')||'<p class="text-zinc-500 text-xs">No sponsor adverts yet.</p>';}catch(e){host.textContent='Could not load sponsor adverts: '+e.message;}
 }
 async function toggleSponsorAd(id,active){try{await api('/api/admin/sponsor-ads/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({is_active:active})});await loadSponsorAds();}catch(e){showToast('Update failed',e.message,false);}}
+async function deleteSponsorAd(id,title){
+ if(!confirm('Permanently delete "'+title+'" and its uploaded advert media? This cannot be undone.'))return;
+ try{await api('/api/admin/sponsor-ads/'+encodeURIComponent(id),{method:'DELETE'});await loadSponsorAds();showToast('Advert deleted','The advert and its stored media have been removed.');}
+ catch(e){showToast('Delete failed',e.message||'Could not delete advert.',false);}
+}
 function updateTapButtonAfterAd(){
  const button=document.getElementById('tapButton');
  if(button){
