@@ -2112,27 +2112,45 @@ function updateTapButtonAfterAd(){
  }
 }
 function markSponsorVideoViewed(video){
- sponsorVideosPending=Math.max(0,sponsorVideosPending-1);
+ const placement=video&&video.dataset.adPlacement;
  const card=video&&video.closest('article');
  if(card)card.remove();
- if(sponsorVideosPending===0){
-  const host=document.getElementById('sponsorAdsBefore');
-  if(host)host.innerHTML='';
-  tapAdReady=true;
-  updateTapButtonAfterAd();
-  showToast('Advert completed','TAP ASSET is now ready.');
+ if(placement==='before_tap'){
+  sponsorVideosPending=Math.max(0,sponsorVideosPending-1);
+  if(sponsorVideosPending===0){
+   const host=document.getElementById('sponsorAdsBefore');
+   if(host)host.innerHTML='';
+   tapAdReady=true;
+   updateTapButtonAfterAd();
+   showToast('Advert completed','TAP ASSET is now ready.');
+  }
+ }else if(placement==='after_tap'){
+  const host=document.getElementById('sponsorAdsAfter');
+  if(host&&!host.querySelector('video[data-sponsor-video="1"]'))host.innerHTML='';
  }
+}
+function startSponsorVideo(button){
+ const video=button&&button.closest('.sponsor-video-wrap')?.querySelector('video');
+ if(!video)return;
+ video.play().then(()=>{button.remove();}).catch(()=>{button.textContent='Tap to start advert';});
 }
 function enforceSponsorVideo(video){
  if(video.dataset.enforced==='1')return;
  video.dataset.enforced='1';
  let lastTime=0,ended=false;
  video.controls=false;
+ video.removeAttribute('controls');
  video.addEventListener('timeupdate',()=>{if(!video.seeking)lastTime=video.currentTime;});
  video.addEventListener('seeking',()=>{if(video.currentTime>lastTime+0.75||video.currentTime<lastTime-0.75)video.currentTime=lastTime;});
  video.addEventListener('ended',()=>{ended=true;markSponsorVideoViewed(video);});
  video.addEventListener('pause',()=>{if(!ended&&!video.ended&&video.currentTime<video.duration){setTimeout(()=>{if(!ended&&video.paused)video.play().catch(()=>{});},150);}});
- video.play().catch(()=>{video.controls=true;});
+ video.addEventListener('play',()=>{const overlay=video.parentElement&&video.parentElement.querySelector('.sponsor-video-start');if(overlay)overlay.remove();});
+ video.play().catch(()=>{
+  video.controls=false;
+  video.removeAttribute('controls');
+  const overlay=video.parentElement&&video.parentElement.querySelector('.sponsor-video-start');
+  if(overlay)overlay.classList.remove('hidden');
+ });
 }
 async function renderSponsorAds(placement){
  const host=document.getElementById(placement==='before_tap'?'sponsorAdsBefore':'sponsorAdsAfter');
@@ -2143,7 +2161,7 @@ async function renderSponsorAds(placement){
   const data=await response.json(),ads=data.ads||[];
   host.innerHTML='';
   if(placement==='before_tap'){
-   sponsorVideosPending=ads.filter(a=>(a.ad_format||a.media_type)==='video').length;
+   sponsorVideosPending=ads.filter(a=>(a.ad_format||a.media_type)==='video'||a.media_type==='video'||(a.mime_type||'').startsWith('video/')).length;
    tapAdReady=sponsorVideosPending===0;
    updateTapButtonAfterAd();
   }
@@ -2155,7 +2173,7 @@ async function renderSponsorAds(placement){
    const urls=Array.isArray(a.media_urls)&&a.media_urls.length?a.media_urls:(a.media_url?[a.media_url]:[]);
    let creative='';
    if(format==='text')creative='<p class="text-xs text-zinc-200 whitespace-pre-wrap">'+escapeSponsorText(a.text_content||'')+'</p>';
-   else if(format==='video')creative='<video '+(placement==='before_tap'?'autoplay playsinline preload="auto" data-sponsor-video="1"':'controls playsinline preload="metadata"')+' class="w-full max-h-56 rounded-lg"><source src="'+escapeSponsorText(urls[0]||a.media_url||'')+'" type="'+escapeSponsorText(a.mime_type||'video/mp4')+'"></video>';
+   else if(format==='video')creative='<div class="sponsor-video-wrap relative"><video autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback" data-sponsor-video="1" data-ad-placement="'+placement+'" class="w-full max-h-56 rounded-lg"><source src="'+escapeSponsorText(urls[0]||a.media_url||'')+'" type="'+escapeSponsorText(a.mime_type||'video/mp4')+'"></video><button type="button" onclick="startSponsorVideo(this)" class="sponsor-video-start hidden absolute inset-0 m-auto w-fit h-fit rounded-full bg-brandGreen text-black font-bold px-5 py-3 shadow-lg">Tap to start advert</button></div>';
    else if(format==='carousel')creative='<div class="flex gap-2 overflow-x-auto snap-x snap-mandatory">'+urls.map(u=>'<img loading="lazy" src="'+escapeSponsorText(u)+'" alt="'+escapeSponsorText(a.title)+'" class="w-[82%] shrink-0 snap-center object-contain rounded-lg max-h-56">').join('')+'</div><p class="text-[10px] text-zinc-500">Swipe to view more</p>';
    else creative='<img loading="lazy" src="'+escapeSponsorText(urls[0]||a.media_url||'')+'" alt="'+escapeSponsorText(a.title)+'" class="w-full '+(format==='banner'?'max-h-28 object-cover':'max-h-56 object-contain')+' rounded-lg">';
    return '<article class="rounded-xl border border-zinc-700 bg-zinc-900 p-3 space-y-2"><p class="text-[10px] text-brandGold font-bold uppercase">SPONSORED · '+escapeSponsorText(format)+'</p><p class="text-xs font-bold">'+escapeSponsorText(a.title)+'</p>'+creative+'<a href="'+escapeSponsorText(a.destination_url)+'" target="_blank" rel="noopener noreferrer" class="inline-block text-xs text-brandGreen underline">Learn more</a></article>';
