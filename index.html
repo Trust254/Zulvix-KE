@@ -397,6 +397,8 @@ class="text-xl font-black text-white">
  </div>
 </div>
 
+<div id="sponsorAdsBefore" class="space-y-2"></div>
+
 <!-- TAP -->
 
 <div class="bg-brandCard border border-zinc-800 rounded-2xl p-6 text-center space-y-4 shadow-xl">
@@ -450,6 +452,8 @@ Tap to earn daily profits. Limit: 6 taps every 12 hours.
 
 </div>
 
+
+<div id="sponsorAdsAfter" class="space-y-2"></div>
 
 <!-- ACTIONS -->
 
@@ -1426,6 +1430,21 @@ class="space-y-2 max-h-60 overflow-y-auto">
 <select id="adAfterProvider" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="unconfigured">Provider not connected</option><option value="house">Zulvix-KE house advert</option><option value="google_ad_manager">Google Ad Manager (after approval)</option></select>
 <input id="adAfterUnit" maxlength="160" placeholder="Approved ad unit ID (optional)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
 </div>
+<div class="rounded-xl border border-brandGreen/30 bg-zinc-900 p-3 space-y-2">
+<strong class="text-xs text-brandGreen">Create image or video advert</strong>
+<input id="sponsorName" maxlength="120" placeholder="Business / sponsor name" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
+<input id="sponsorTitle" maxlength="160" placeholder="Advert title" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
+<select id="sponsorType" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="image">Image advert</option><option value="video">Video advert</option></select>
+<label class="text-[10px] text-zinc-400">Media file (JPG/PNG/WebP or MP4, max 8 MB)</label>
+<input id="sponsorFile" type="file" accept="image/jpeg,image/png,image/webp,video/mp4" class="w-full text-xs">
+<input id="sponsorLink" type="url" placeholder="Destination HTTPS website / WhatsApp link" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
+<select id="sponsorPlacement" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="before_tap">Before tapping</option><option value="after_tap">After tapping</option></select>
+<div class="grid grid-cols-2 gap-2"><input id="sponsorStart" type="date" class="min-w-0 bg-black border border-zinc-700 rounded-lg p-2 text-xs"><input id="sponsorEnd" type="date" class="min-w-0 bg-black border border-zinc-700 rounded-lg p-2 text-xs"></div>
+<input id="sponsorAmount" type="number" min="0" step="1" placeholder="Sponsorship amount (Ksh)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
+<label class="flex gap-2 text-xs"><input id="sponsorPaid" type="checkbox"> Sponsorship payment received</label>
+<button onclick="createSponsorAd()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Upload & Save Advert</button>
+<div id="sponsorAdsList" class="space-y-2"></div>
+</div>
 <button onclick="saveAdminAdSettings()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Save Advertising Settings</button>
 <p id="adminAdsResult" class="text-[10px] text-zinc-400"></p>
 </div>
@@ -2042,6 +2061,7 @@ async function requestPasswordRecovery(){const mobile=document.getElementById('r
 async function resetPasswordWithCode(){const mobile=document.getElementById('recoveryMobile').value.trim(),code=document.getElementById('recoveryCode').value.trim(),newPassword=document.getElementById('recoveryNewPassword').value;if(!mobile||!code||!newPassword)return showToast('Details required','Enter mobile, recovery code and new password.',false);try{const d=await api('/api/auth/password-recovery/reset',{method:'POST',body:JSON.stringify({mobile,code,newPassword})});document.getElementById('recoveryResult').innerText=d.message||'Password reset.';document.getElementById('loginPhone').value=mobile;document.getElementById('loginPassword').value='';document.getElementById('recoveryCode').value='';document.getElementById('recoveryNewPassword').value='';showToast('Password updated','You can now sign in with your new password.');}catch(e){showToast('Password reset failed',e.message,false);}}
 async function loadAdminAdSettings(){
  const result=document.getElementById('adminAdsResult');
+ loadSponsorAds();
  try{
   const d=await api('/api/admin/ads');
   const slots=d.placements||[];
@@ -2305,6 +2325,8 @@ async function handleTapAsset(){
 
  if(tapInProgress)return;
 
+ await renderSponsorAds('before_tap');
+
  if(Number(appState.tapsLeft||0)<=0){
 
   checkCountdownTimer();
@@ -2352,6 +2374,8 @@ async function handleTapAsset(){
 
   const reward=
    Number(d.reward||0);
+
+  await renderSponsorAds('after_tap');
 
   showToast(
    'Tap Accepted',
