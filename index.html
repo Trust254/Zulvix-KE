@@ -4054,11 +4054,11 @@ function updateWalletHistory(){
   return true;
  });
  host.innerHTML=filtered.slice(0,walletHistoryLimit).map(t=>{
-  const amount=Number(t.amount)||0, status=t.status||'recorded';
+  const amount=Number(t.amount)||0, displayAmount=Number(t.requested_amount??t.amount)||0, status=t.status||'recorded', pending=['pending','rejected'].includes(String(status).toLowerCase());
   return `<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 flex justify-between items-center text-xs">
    <div><p class="font-bold text-white">${esc(t.description||t.type||'Transaction')}</p>
    <span class="text-[10px] text-zinc-500">${esc(t.created_at||'')} • ${esc(status)}</span></div>
-   <span class="font-black ${amount<0?'text-red-400':'text-brandGreen'}">${amount>=0?'+':''}Ksh ${Math.abs(amount).toLocaleString()}</span>
+   <span class="font-black ${pending?'text-zinc-400':amount<0?'text-red-400':'text-brandGreen'}">${pending?'':' '+(amount>=0?'+':'-')}Ksh ${Math.abs(displayAmount).toLocaleString()}</span>
   </div>`;
  }).join('')||'<div class="text-center text-xs text-zinc-500 py-3">No matching transactions.</div>';
  const more=document.getElementById('walletHistoryMore');
