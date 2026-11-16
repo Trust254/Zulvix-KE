@@ -58,7 +58,7 @@ body{
  nav.fixed.bottom-0{max-width:min(1440px,100%);gap:clamp(28px,7vw,110px);justify-content:center;padding:14px 32px}
  nav.fixed.bottom-0 button{min-width:92px;font-size:14px}
  nav.fixed.bottom-0 button i{font-size:22px}
- #tab-dashboard{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;gap:20px}
+ #tab-dashboard:not(.hidden){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;gap:20px}
  #tab-dashboard> :nth-child(3){grid-column:1 / -1}
  #tab-dashboard> :nth-child(4){grid-column:1}
  #tab-dashboard> :nth-child(5){grid-column:2;align-self:center}
