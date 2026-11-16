@@ -2182,7 +2182,7 @@ async function renderSponsorAds(placement){
  const host=document.getElementById(placement==='before_tap'?'sponsorAdsBefore':'sponsorAdsAfter');
  if(!host)return;
  try{
-  const response=await fetch(API+'/api/ads/active?placement='+encodeURIComponent(placement));
+  const response=await fetch(API+'/api/sponsor-feed?placement='+encodeURIComponent(placement));
   if(!response.ok)throw new Error('Advert request failed');
   const data=await response.json(),ads=data.ads||[];
   host.innerHTML='';
