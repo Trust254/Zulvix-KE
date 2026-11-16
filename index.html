@@ -1435,12 +1435,14 @@ class="space-y-2 max-h-60 overflow-y-auto">
 <input id="adAfterUnit" maxlength="160" placeholder="Approved ad unit ID (optional)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
 </div>
 <div class="rounded-xl border border-brandGreen/30 bg-zinc-900 p-3 space-y-2">
-<strong class="text-xs text-brandGreen">Create image or video advert</strong>
+<strong class="text-xs text-brandGreen">Create a sponsored advert — choose a format</strong>
 <input id="sponsorName" maxlength="120" placeholder="Business / sponsor name" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
 <input id="sponsorTitle" maxlength="160" placeholder="Advert title" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
-<select id="sponsorType" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="image">Image advert</option><option value="video">Video advert</option></select>
-<label class="text-[10px] text-zinc-400">Media file (JPG/PNG/WebP or MP4, max 8 MB)</label>
+<select id="sponsorType" onchange="updateSponsorMediaInput()" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="banner">Banner advert</option><option value="image">Image advert</option><option value="video">Video advert</option><option value="text">Text advert</option><option value="carousel">Carousel (multiple images)</option></select>
+<textarea id="sponsorText" rows="3" maxlength="1200" placeholder="Text advert description / offer (required for text adverts)" class="hidden w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"></textarea>
+<label id="sponsorFileLabel" class="text-[10px] text-zinc-400">Image file (JPG/PNG/WebP, max 8 MB)</label>
 <input id="sponsorFile" type="file" accept="image/jpeg,image/png,image/webp,video/mp4" class="w-full text-xs">
+<p class="text-[10px] text-zinc-500">Carousel: choose 2–8 images. Total upload size limit: 8 MB.</p>
 <input id="sponsorLink" type="url" placeholder="Destination HTTPS website / WhatsApp link" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
 <select id="sponsorPlacement" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="before_tap">Before tapping</option><option value="after_tap">After tapping</option></select>
 <div class="grid grid-cols-2 gap-2"><input id="sponsorStart" type="date" class="min-w-0 bg-black border border-zinc-700 rounded-lg p-2 text-xs"><input id="sponsorEnd" type="date" class="min-w-0 bg-black border border-zinc-700 rounded-lg p-2 text-xs"></div>
@@ -2070,20 +2072,34 @@ async function recoverPasswordWithPasskey(){
 async function requestPasswordRecovery(){const mobile=document.getElementById('recoveryMobile').value.trim();if(!mobile)return showToast('Mobile number required','Enter the registered mobile number.',false);try{const d=await api('/api/auth/password-recovery/request',{method:'POST',body:JSON.stringify({mobile})});document.getElementById('recoveryResult').innerText=d.message||'Request submitted.';showToast('Request submitted','Contact the administrator for identity verification and your one-time code.');}catch(e){showToast('Request failed',e.message,false);}}
 async function resetPasswordWithCode(){const mobile=document.getElementById('recoveryMobile').value.trim(),code=document.getElementById('recoveryCode').value.trim(),newPassword=document.getElementById('recoveryNewPassword').value;if(!mobile||!code||!newPassword)return showToast('Details required','Enter mobile, recovery code and new password.',false);try{const d=await api('/api/auth/password-recovery/reset',{method:'POST',body:JSON.stringify({mobile,code,newPassword})});document.getElementById('recoveryResult').innerText=d.message||'Password reset.';document.getElementById('loginPhone').value=mobile;document.getElementById('loginPassword').value='';document.getElementById('recoveryCode').value='';document.getElementById('recoveryNewPassword').value='';showToast('Password updated','You can now sign in with your new password.');}catch(e){showToast('Password reset failed',e.message,false);}}
 function escapeSponsorText(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function updateSponsorMediaInput(){
+ const type=document.getElementById('sponsorType').value,file=document.getElementById('sponsorFile'),label=document.getElementById('sponsorFileLabel'),body=document.getElementById('sponsorText');
+ const needsFile=type!=='text';file.classList.toggle('hidden',!needsFile);label.classList.toggle('hidden',!needsFile);
+ file.multiple=type==='carousel';
+ file.accept=type==='video'?'video/mp4':'image/jpeg,image/png,image/webp';
+ label.textContent=type==='video'?'MP4 video, max 8 MB':type==='carousel'?'Choose 2–8 images (JPG/PNG/WebP), total max 8 MB':'Image file (JPG/PNG/WebP), max 8 MB';
+ body.classList.toggle('hidden',type!=='text');
+}
 async function createSponsorAd(){
- const file=document.getElementById('sponsorFile').files[0],type=document.getElementById('sponsorType').value;
- const allowed=type==='image'?['image/jpeg','image/png','image/webp']:['video/mp4'];
- if(!file||!allowed.includes(file.type)||file.size>8*1024*1024)return showToast('Invalid media','Choose JPG, PNG, WebP or MP4 up to 8 MB.',false);
+ const format=document.getElementById('sponsorType').value,files=Array.from(document.getElementById('sponsorFile').files||[]);
+ const textContent=document.getElementById('sponsorText').value.trim();
+ const imageTypes=['image/jpeg','image/png','image/webp'];
+ if(format==='text'&&!textContent)return showToast('Text required','Enter the text advert description.',false);
+ if(format!=='text'&&!files.length)return showToast('Media required','Choose the advert media file.',false);
+ if(format==='carousel'&&(files.length<2||files.length>8))return showToast('Carousel images','Choose between 2 and 8 images.',false);
+ if(format==='video'&&(files.length!==1||files[0].type!=='video/mp4'))return showToast('Video required','Choose one MP4 video.',false);
+ if(['banner','image','carousel'].includes(format)&&files.some(x=>!imageTypes.includes(x.type)))return showToast('Image format','Use JPG, PNG or WebP images.',false);
+ if(files.reduce((n,x)=>n+x.size,0)>8*1024*1024)return showToast('Files too large','All selected files together must be 8 MB or less.',false);
  const destination=document.getElementById('sponsorLink').value.trim();if(!/^https:\/\//i.test(destination))return showToast('Secure link required','Enter an HTTPS destination URL.',false);
  try{
-  const dataUrl=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});
-  await api('/api/admin/sponsor-ads',{method:'POST',body:JSON.stringify({sponsor_name:document.getElementById('sponsorName').value.trim(),title:document.getElementById('sponsorTitle').value.trim(),media_type:type,mime_type:file.type,file_name:file.name,data_url:dataUrl,destination_url:destination,placement:document.getElementById('sponsorPlacement').value,start_at:document.getElementById('sponsorStart').value||null,end_at:document.getElementById('sponsorEnd').value||null,sponsorship_amount:Number(document.getElementById('sponsorAmount').value||0),payment_status:document.getElementById('sponsorPaid').checked?'paid':'pending'})});
-  document.getElementById('sponsorFile').value='';await loadSponsorAds();showToast('Advert uploaded','New advert saved inactive. Activate it after confirming payment.');
+  const dataUrls=await Promise.all(files.map(file=>new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve({data_url:reader.result,mime_type:file.type,file_name:file.name});reader.onerror=reject;reader.readAsDataURL(file);})));
+  await api('/api/admin/sponsor-ads',{method:'POST',body:JSON.stringify({sponsor_name:document.getElementById('sponsorName').value.trim(),title:document.getElementById('sponsorTitle').value.trim(),ad_format:format,text_content:textContent,data_urls:dataUrls,destination_url:destination,placement:document.getElementById('sponsorPlacement').value,start_at:document.getElementById('sponsorStart').value||null,end_at:document.getElementById('sponsorEnd').value||null,sponsorship_amount:Number(document.getElementById('sponsorAmount').value||0),payment_status:document.getElementById('sponsorPaid').checked?'paid':'pending'})});
+  document.getElementById('sponsorFile').value='';document.getElementById('sponsorText').value='';await loadSponsorAds();showToast('Advert saved','New advert is inactive. Activate it after confirming payment.');
  }catch(e){showToast('Upload failed',e.message||'Could not upload advert.',false);}
 }
 async function loadSponsorAds(){
  const host=document.getElementById('sponsorAdsList');if(!host)return;
- try{const d=await api('/api/admin/sponsor-ads');host.innerHTML=(d.ads||[]).map(a=>'<div class="border border-zinc-700 rounded-lg p-2 text-xs flex justify-between gap-2"><span>'+escapeSponsorText(a.title)+' · '+escapeSponsorText(a.media_type)+' · '+escapeSponsorText(a.placement)+' · '+escapeSponsorText(a.payment_status)+'</span><button class="text-amber-300" onclick="toggleSponsorAd(\''+escapeSponsorText(a.id)+'\','+(!a.is_active)+')">'+(a.is_active?'Deactivate':'Activate')+'</button></div>').join('')||'<p class="text-zinc-500 text-xs">No sponsor adverts yet.</p>';}catch(e){host.textContent='Could not load sponsor adverts: '+e.message;}
+ try{const d=await api('/api/admin/sponsor-ads');host.innerHTML=(d.ads||[]).map(a=>'<div class="border border-zinc-700 rounded-lg p-2 text-xs flex justify-between gap-2"><span>'+escapeSponsorText(a.title)+' · '+escapeSponsorText(a.ad_format||a.media_type)+' · '+escapeSponsorText(a.placement)+' · '+escapeSponsorText(a.payment_status)+'</span><button class="text-amber-300" onclick="toggleSponsorAd(\''+escapeSponsorText(a.id)+'\','+(!a.is_active)+')">'+(a.is_active?'Deactivate':'Activate')+'</button></div>').join('')||'<p class="text-zinc-500 text-xs">No sponsor adverts yet.</p>';}catch(e){host.textContent='Could not load sponsor adverts: '+e.message;}
 }
 async function toggleSponsorAd(id,active){try{await api('/api/admin/sponsor-ads/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({is_active:active})});await loadSponsorAds();}catch(e){showToast('Update failed',e.message,false);}}
 function updateTapButtonAfterAd(){
@@ -2127,15 +2143,21 @@ async function renderSponsorAds(placement){
   const data=await response.json(),ads=data.ads||[];
   host.innerHTML='';
   if(placement==='before_tap'){
-   sponsorVideosPending=ads.filter(a=>a.media_type==='video').length;
+   sponsorVideosPending=ads.filter(a=>(a.ad_format||a.media_type)==='video').length;
    tapAdReady=sponsorVideosPending===0;
    updateTapButtonAfterAd();
   }
   if(!ads.length)return;
-  host.innerHTML=ads.map(a=>'<article class="rounded-xl border border-zinc-700 bg-zinc-900 p-3 space-y-2"><p class="text-[10px] text-brandGold font-bold uppercase">Sponsored · '+escapeSponsorText(a.sponsor_name)+'</p><p class="text-xs font-bold">'+escapeSponsorText(a.title)+'</p>'+(a.media_type==='video'?'<video autoplay playsinline preload="auto" data-sponsor-video="1" class="w-full max-h-56 rounded-lg"><source src="'+escapeSponsorText(a.media_url)+'" type="'+escapeSponsorText(a.mime_type)+'"></video>':'<img loading="lazy" src="'+escapeSponsorText(a.media_url)+'" alt="'+escapeSponsorText(a.title)+'" class="w-full max-h-56 object-contain rounded-lg">')+'</article>').join('');
-  if(placement==='before_tap'){
-   host.querySelectorAll('video[data-sponsor-video="1"]').forEach(enforceSponsorVideo);
-  }
+  host.innerHTML=ads.map(a=>{
+   const format=a.ad_format||a.media_type,urls=Array.isArray(a.media_urls)&&a.media_urls.length?a.media_urls:(a.media_url?[a.media_url]:[]);
+   let creative='';
+   if(format==='text')creative='<p class="text-xs text-zinc-200 whitespace-pre-wrap">'+escapeSponsorText(a.text_content||'')+'</p>';
+   else if(format==='video')creative='<video '+(placement==='before_tap'?'autoplay playsinline preload="auto" data-sponsor-video="1"':'controls playsinline preload="metadata"')+' class="w-full max-h-56 rounded-lg"><source src="'+escapeSponsorText(urls[0]||a.media_url||'')+'" type="'+escapeSponsorText(a.mime_type||'video/mp4')+'"></video>';
+   else if(format==='carousel')creative='<div class="flex gap-2 overflow-x-auto snap-x snap-mandatory">'+urls.map(u=>'<img loading="lazy" src="'+escapeSponsorText(u)+'" alt="'+escapeSponsorText(a.title)+'" class="w-[82%] shrink-0 snap-center object-contain rounded-lg max-h-56">').join('')+'</div><p class="text-[10px] text-zinc-500">Swipe to view more</p>';
+   else creative='<img loading="lazy" src="'+escapeSponsorText(urls[0]||a.media_url||'')+'" alt="'+escapeSponsorText(a.title)+'" class="w-full '+(format==='banner'?'max-h-28 object-cover':'max-h-56 object-contain')+' rounded-lg">';
+   return '<article class="rounded-xl border border-zinc-700 bg-zinc-900 p-3 space-y-2"><p class="text-[10px] text-brandGold font-bold uppercase">Sponsored · '+escapeSponsorText(a.sponsor_name)+' · '+escapeSponsorText(format)+'</p><p class="text-xs font-bold">'+escapeSponsorText(a.title)+'</p>'+creative+'<a href="'+escapeSponsorText(a.destination_url)+'" target="_blank" rel="noopener noreferrer" class="inline-block text-xs text-brandGreen underline">Learn more</a></article>';
+  }).join('');
+  if(placement==='before_tap')host.querySelectorAll('video[data-sponsor-video="1"]').forEach(enforceSponsorVideo);
  }catch(error){
   host.innerHTML='';
   if(placement==='before_tap'){tapAdReady=true;sponsorVideosPending=0;updateTapButtonAfterAd();}
