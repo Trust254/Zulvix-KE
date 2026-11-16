@@ -2149,13 +2149,16 @@ async function renderSponsorAds(placement){
   }
   if(!ads.length)return;
   host.innerHTML=ads.map(a=>{
-   const format=a.ad_format||a.media_type,urls=Array.isArray(a.media_urls)&&a.media_urls.length?a.media_urls:(a.media_url?[a.media_url]:[]);
+   const rawFormat=a.ad_format||a.media_type;
+   const isVideo=(a.mime_type||'').startsWith('video/')||a.media_type==='video';
+   const format=rawFormat==='image'&&isVideo?'video':rawFormat;
+   const urls=Array.isArray(a.media_urls)&&a.media_urls.length?a.media_urls:(a.media_url?[a.media_url]:[]);
    let creative='';
    if(format==='text')creative='<p class="text-xs text-zinc-200 whitespace-pre-wrap">'+escapeSponsorText(a.text_content||'')+'</p>';
    else if(format==='video')creative='<video '+(placement==='before_tap'?'autoplay playsinline preload="auto" data-sponsor-video="1"':'controls playsinline preload="metadata"')+' class="w-full max-h-56 rounded-lg"><source src="'+escapeSponsorText(urls[0]||a.media_url||'')+'" type="'+escapeSponsorText(a.mime_type||'video/mp4')+'"></video>';
    else if(format==='carousel')creative='<div class="flex gap-2 overflow-x-auto snap-x snap-mandatory">'+urls.map(u=>'<img loading="lazy" src="'+escapeSponsorText(u)+'" alt="'+escapeSponsorText(a.title)+'" class="w-[82%] shrink-0 snap-center object-contain rounded-lg max-h-56">').join('')+'</div><p class="text-[10px] text-zinc-500">Swipe to view more</p>';
    else creative='<img loading="lazy" src="'+escapeSponsorText(urls[0]||a.media_url||'')+'" alt="'+escapeSponsorText(a.title)+'" class="w-full '+(format==='banner'?'max-h-28 object-cover':'max-h-56 object-contain')+' rounded-lg">';
-   return '<article class="rounded-xl border border-zinc-700 bg-zinc-900 p-3 space-y-2"><p class="text-[10px] text-brandGold font-bold uppercase">Sponsored · '+escapeSponsorText(a.sponsor_name)+' · '+escapeSponsorText(format)+'</p><p class="text-xs font-bold">'+escapeSponsorText(a.title)+'</p>'+creative+'<a href="'+escapeSponsorText(a.destination_url)+'" target="_blank" rel="noopener noreferrer" class="inline-block text-xs text-brandGreen underline">Learn more</a></article>';
+   return '<article class="rounded-xl border border-zinc-700 bg-zinc-900 p-3 space-y-2"><p class="text-[10px] text-brandGold font-bold uppercase">SPONSORED · '+escapeSponsorText(format)+'</p><p class="text-xs font-bold">'+escapeSponsorText(a.title)+'</p>'+creative+'<a href="'+escapeSponsorText(a.destination_url)+'" target="_blank" rel="noopener noreferrer" class="inline-block text-xs text-brandGreen underline">Learn more</a></article>';
   }).join('');
   if(placement==='before_tap')host.querySelectorAll('video[data-sponsor-video="1"]').forEach(enforceSponsorVideo);
  }catch(error){
