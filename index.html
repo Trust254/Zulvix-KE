@@ -600,6 +600,14 @@ Ksh 150,000
 </div>
 
 
+<div class="grid grid-cols-2 gap-2">
+ <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3"><p class="text-[10px] text-zinc-400">Available to Withdraw</p><p id="walletAvailableBalance" class="text-sm font-black text-brandGreen">Ksh 0</p></div>
+ <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3"><p class="text-[10px] text-zinc-400">Required Account Reserve</p><p id="walletReservedBalance" class="text-sm font-black text-brandGold">Ksh 0</p></div>
+ <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3"><p class="text-[10px] text-zinc-400">Today's Earnings</p><p id="walletDailyEarnings" class="text-sm font-black text-white">Ksh 0</p></div>
+ <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3"><p class="text-[10px] text-zinc-400">Total Deposits</p><p id="walletTotalDeposits" class="text-sm font-black text-white">Ksh 0</p></div>
+ <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3 col-span-2"><p class="text-[10px] text-zinc-400">Pending Withdrawals / Paid Withdrawals</p><p id="walletWithdrawalTotals" class="text-sm font-black text-white">Ksh 0 / Ksh 0</p></div>
+</div>
+
 <div class="space-y-2">
 
 <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400 px-1">
@@ -4042,6 +4050,24 @@ function setWalletHistoryFilter(filter){
  walletHistoryFilter=filter; walletHistoryLimit=20; updateWalletHistory();
 }
 function loadMoreWalletHistory(){walletHistoryLimit+=20;updateWalletHistory();}
+function updateWalletSummary(){
+ const txs=appState.transactions||[];
+ const balance=Number(appState.balance)||0;
+ const today=new Date().toLocaleDateString();
+ const sum=(list,fn)=>list.reduce((total,t)=>total+fn(t),0);
+ const daily=sum(txs.filter(t=>String(t.type||'').includes('tap')&&t.created_at&&new Date(t.created_at).toLocaleDateString()===today),t=>Math.max(0,Number(t.amount)||0));
+ const deposits=sum(txs.filter(t=>t.type==='deposit'&&String(t.status||'approved')==='approved'),t=>Math.max(0,Number(t.amount)||0));
+ const pending=sum(txs.filter(t=>String(t.type||'').startsWith('withdrawal_')&&['pending','approved'].includes(String(t.status||'pending'))),t=>Math.abs(Number(t.amount)||0));
+ const paid=sum(txs.filter(t=>t.type==='withdrawal_paid'||String(t.status||'')==='paid'),t=>Math.abs(Number(t.amount)||0));
+ const fmt=n=>'Ksh '+Number(n||0).toLocaleString();
+ const set=(id,value)=>{const el=document.getElementById(id);if(el)el.innerText=value;};
+ set('walletAvailableBalance',fmt(Math.max(0,balance-2000)));
+ set('walletReservedBalance',fmt(Math.min(balance,2000)));
+ set('walletDailyEarnings',fmt(daily));
+ set('walletTotalDeposits',fmt(deposits));
+ set('walletWithdrawalTotals',fmt(pending)+' pending • '+fmt(paid)+' paid');
+}
+
 function updateWalletHistory(){
  const host=document.getElementById('transactionHistoryList');
  if(!host)return;
@@ -4264,6 +4290,7 @@ function updateUI(){
 
 
  updateWalletHistory();
+ updateWalletSummary();
 
 
  updateReferralLink();
