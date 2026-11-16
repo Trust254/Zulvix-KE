@@ -2381,7 +2381,9 @@ async function handleTapAsset(){
 
  if(tapInProgress)return;
 
- await renderSponsorAds('before_tap');
+ if(!tapAdReady){
+  return showToast('Advert first','Please finish the sponsor advert and press Continue to TAP first.',false);
+ }
 
  if(Number(appState.tapsLeft||0)<=0){
 
@@ -2420,18 +2422,20 @@ async function handleTapAsset(){
 
   if(d.user){
 
-   applyUser(d.user);
+   applyUser(d.user,false);
 
   }else{
 
-   await refreshUser(true);
+   await refreshUser(true,false);
 
   }
 
   const reward=
    Number(d.reward||0);
 
-  await renderSponsorAds('after_tap');
+  if(Number(appState.tapsLeft||0)<=0){
+   await renderSponsorAds('after_tap');
+  }
 
   showToast(
    'Tap Accepted',
