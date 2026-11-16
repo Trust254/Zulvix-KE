@@ -373,6 +373,15 @@ class="text-xl font-black text-white">
 
 </div>
 
+<div class="bg-brandCard border border-zinc-800 rounded-xl p-3 space-y-2">
+ <div class="flex justify-between items-center">
+  <div><h3 class="text-xs font-bold text-white">Notifications</h3><p class="text-[10px] text-zinc-500">Official updates from Zulvix-KE</p></div>
+  <button onclick="loadUserNotifications()" class="text-[10px] text-brandGreen font-bold">Refresh</button>
+ </div>
+ <div id="userNotificationList" class="space-y-2 max-h-48 overflow-y-auto">
+  <p class="text-[10px] text-zinc-500">Sign in to view announcements.</p>
+ </div>
+</div>
 
 <!-- TAP -->
 
@@ -591,16 +600,28 @@ Ksh 150,000
 </div>
 
 
+<div class="grid grid-cols-2 gap-2">
+ <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3"><p class="text-[10px] text-zinc-400">Available to Withdraw</p><p id="walletAvailableBalance" class="text-sm font-black text-brandGreen">Ksh 0</p></div>
+ <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3"><p class="text-[10px] text-zinc-400">Required Account Reserve</p><p id="walletReservedBalance" class="text-sm font-black text-brandGold">Ksh 0</p></div>
+ <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3"><p class="text-[10px] text-zinc-400">Today's Earnings</p><p id="walletDailyEarnings" class="text-sm font-black text-white">Ksh 0</p></div>
+ <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3"><p class="text-[10px] text-zinc-400">Total Deposits</p><p id="walletTotalDeposits" class="text-sm font-black text-white">Ksh 0</p></div>
+ <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3 col-span-2"><p class="text-[10px] text-zinc-400">Pending Withdrawals / Paid Withdrawals</p><p id="walletWithdrawalTotals" class="text-sm font-black text-white">Ksh 0 / Ksh 0</p></div>
+</div>
+
 <div class="space-y-2">
 
 <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400 px-1">
 Recent Ledger Activity
 </h4>
 
-<div
-id="transactionHistoryList"
-class="space-y-2">
+<div id="walletHistoryFilters" class="flex flex-wrap gap-2">
+<button onclick="setWalletHistoryFilter('all')" class="bg-zinc-800 text-white text-[11px] px-3 py-1.5 rounded-lg">All</button>
+<button onclick="setWalletHistoryFilter('earnings')" class="bg-zinc-800 text-white text-[11px] px-3 py-1.5 rounded-lg">Earnings</button>
+<button onclick="setWalletHistoryFilter('deposits')" class="bg-zinc-800 text-white text-[11px] px-3 py-1.5 rounded-lg">Deposits</button>
+<button onclick="setWalletHistoryFilter('withdrawals')" class="bg-zinc-800 text-white text-[11px] px-3 py-1.5 rounded-lg">Withdrawals</button>
 </div>
+<div id="transactionHistoryList" class="space-y-2"></div>
+<button id="walletHistoryMore" onclick="loadMoreWalletHistory()" class="w-full bg-zinc-800 text-white text-xs font-bold rounded-lg py-2">Load more</button>
 
 </div>
 
@@ -716,6 +737,8 @@ Send Complaint Request
 
 </div>
 
+
+<button onclick="document.getElementById('aboutPolicies').scrollIntoView({behavior:'smooth'})" class="w-full bg-zinc-800 text-brandGreen font-bold py-2.5 rounded-xl text-xs">About Us & Policies</button>
 
 <button
 onclick="handleLogout()"
@@ -1021,6 +1044,66 @@ Submit Deposit Request
 </div>
 
 
+<section id="aboutPolicies" class="mx-4 my-6 bg-brandCard border border-zinc-800 rounded-2xl p-4 space-y-3">
+ <h2 class="text-sm font-black text-brandGreen">About Zulvix-KE & Platform Policies</h2>
+ <p class="text-xs text-zinc-300">Zulvix-KE is the name used by this online platform for account access, tier information, wallet records and customer support. These pages explain how the platform currently operates. They do not represent a claim that Zulvix-KE is a bank, investment firm, government programme, or licensed financial institution.</p>
+ <details class="border-t border-zinc-800 pt-3">
+  <summary class="text-xs font-bold text-white cursor-pointer">About Us</summary>
+  <div class="text-[11px] text-zinc-300 space-y-2 mt-2">
+   <p>The platform provides registered users with an online dashboard to view their account, available tiers, activity records, payment requests and support messages.</p>
+   <p>Users should rely on the information displayed in their own account and on official platform notices. The operator's registered legal name, registration details and business address should be independently verified before making payments.</p>
+  </div>
+ </details>
+ <details class="border-t border-zinc-800 pt-3">
+  <summary class="text-xs font-bold text-white cursor-pointer">Terms & Conditions</summary>
+  <div class="text-[11px] text-zinc-300 space-y-2 mt-2">
+   <p>Keep your login details private and provide accurate account and payment information. Do not impersonate another person, submit false payment references, exploit system errors or interfere with another user's account.</p>
+   <p>Requests and transactions may be checked before approval. A submitted request is not proof of payment, and an approved withdrawal is not marked paid until the payment has actually been sent and confirmed.</p>
+   <p>Tier fees, deposits and other charges must be reviewed before submission. No earnings, rewards, investment return or withdrawal timing is guaranteed. Do not pay money you cannot afford to lose, and seek independent advice if you are unsure.</p>
+  </div>
+ </details>
+ <details class="border-t border-zinc-800 pt-3">
+  <summary class="text-xs font-bold text-white cursor-pointer">Earning & Level Policy</summary>
+  <div class="text-[11px] text-zinc-300 space-y-2 mt-2">
+   <p>Level 1 is free for its first 10 days. Beginning on day 11, each tap displays a warning that Level 1 will lock within the following 24 hours unless the user upgrades. Taps remain available during that warning period. Once the 24-hour warning period ends, Level 1 tapping and earning are locked until the user upgrades.</p>
+   <p>The timer must be based on a verified Level 1 activation date. Existing accounts without a verified activation date are not to be assigned an assumed start date or retroactively locked.</p>
+   <p>Displayed rewards are subject to the platform's validation rules and are not a promise of guaranteed income or investment returns. Review all tier costs and conditions before paying.</p>
+  </div>
+ </details>
+ <details class="border-t border-zinc-800 pt-3">
+  <summary class="text-xs font-bold text-white cursor-pointer">Withdrawal Policy</summary>
+  <div class="text-[11px] text-zinc-300 space-y-2 mt-2">
+   <p>Withdrawal processing is scheduled Monday to Friday, 08:00–16:00 East Africa Time (Kenya time). No withdrawal payments are processed on weekends. Requests received outside these hours remain queued for the next working window.</p>
+   <p>Requests are subject to account and balance checks and administrator review. “Approved” means authorised for payment; it does not mean the M-Pesa payment has been sent. The status changes to “Paid” only after the administrator confirms the actual payment.</p>
+   <p>Make sure the destination phone number is correct. If a request is rejected, the platform should show the reason and restore any amount reserved for that request.</p>
+  </div>
+ </details>
+ <details class="border-t border-zinc-800 pt-3">
+  <summary class="text-xs font-bold text-white cursor-pointer">Privacy Policy</summary>
+  <div class="text-[11px] text-zinc-300 space-y-2 mt-2">
+   <p>The platform may process your name, phone number, login/account details, account activity, wallet transactions, payment references, withdrawal destination and support messages to operate accounts, verify requests, prevent abuse and respond to support issues.</p>
+   <p>Do not submit passwords, PINs or one-time verification codes in support messages. Access to personal information should be limited to authorised platform administration and relevant service providers, and disclosures should only occur where necessary to operate the service or comply with law.</p>
+   <p>For a privacy request or account concern, use the Support section in your account. The platform operator should publish a verified privacy contact and retention schedule before launch.</p>
+  </div>
+ </details>
+ <details class="border-t border-zinc-800 pt-3">
+  <summary class="text-xs font-bold text-white cursor-pointer">Account Restriction & Appeals</summary>
+  <div class="text-[11px] text-zinc-300 space-y-2 mt-2">
+   <p>Accounts may be restricted or blocked for suspected fraud, false payment details, abuse or serious rule violations. Administrators should record the reason and may restore access after review.</p>
+   <p>Blocking an account does not itself cancel the user's balance or erase transaction history. Users may contact Support to request a review. Inactivity for five days may be flagged for administrator review; it does not automatically confiscate funds or permanently block an account.</p>
+  </div>
+ </details>
+ <div class="border-t border-zinc-800 pt-3 space-y-2">
+  <h3 class="text-xs font-bold text-white">Account Appeal / Contact Support</h3>
+  <p class="text-[10px] text-zinc-400">If you cannot access your account, enter your registered phone number and explain your appeal.</p>
+  <input id="publicAppealPhone" type="tel" placeholder="Registered phone number" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
+  <textarea id="publicAppealMessage" rows="3" maxlength="3000" placeholder="Explain your account concern..." class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs"></textarea>
+  <button onclick="submitPublicAppeal()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Submit Appeal</button>
+  <p id="publicAppealResult" class="text-[10px] text-zinc-400"></p>
+ </div>
+ <p class="text-[9px] text-zinc-500 border-t border-zinc-800 pt-2">These are general platform disclosures, not legal advice. The platform owner must verify the operator identity, applicable laws, fees, contact details and payment arrangements before treating these pages as final legal terms.</p>
+</section>
+
 <!-- =========================================================
      UPGRADE MODAL
 ========================================================= -->
@@ -1202,7 +1285,7 @@ Access Admin Portal
 
 <div id="adminPanelContent" class="hidden space-y-4">
 
-<div class="grid grid-cols-5 gap-1 bg-zinc-900 p-1 rounded-xl text-[10px] font-bold text-center">
+<div class="grid grid-cols-6 gap-1 bg-zinc-900 p-1 rounded-xl text-[10px] font-bold text-center">
 
 <button onclick="switchAdminTab('users')" id="adm-tab-users" class="py-2 rounded-lg bg-zinc-800 text-brandGreen">
 Users
@@ -1222,6 +1305,9 @@ Payouts
 
 <button onclick="switchAdminTab('complaints')" id="adm-tab-complaints" class="py-2 text-zinc-400">
 Support
+</button>
+<button onclick="switchAdminTab('broadcast')" id="adm-tab-broadcast" class="py-2 text-zinc-400">
+Broadcast
 </button>
 
 </div>
@@ -1296,6 +1382,15 @@ class="space-y-2 max-h-60 overflow-y-auto">
 
 </div>
 
+
+<div id="adm-section-broadcast" class="hidden space-y-2">
+<h4 class="text-xs font-bold uppercase">Broadcast Centre</h4>
+<p class="text-[10px] text-zinc-400">Send an in-app announcement to all registered users.</p>
+<input id="broadcastTitle" maxlength="120" placeholder="Announcement title" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
+<textarea id="broadcastMessage" maxlength="3000" rows="4" placeholder="Write your announcement..." class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs"></textarea>
+<button onclick="sendAdminBroadcast()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Broadcast to All Users</button>
+<p id="broadcastResult" class="text-[10px] text-zinc-400"></p>
+</div>
 
 <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800 flex justify-between">
 
@@ -1444,6 +1539,8 @@ let tapInProgress=false;
 let adminPollTimer=null;
 
 let previousPendingCount=null;
+let walletHistoryLimit=20;
+let walletHistoryFilter='all';
 
 
 /* =========================================================
@@ -1829,6 +1926,7 @@ async function handleRegister(){
   );
 
   applyUser(d.user);
+  await loadUserNotifications();
 
   showToast(
    'Welcome!',
@@ -1894,6 +1992,7 @@ async function handleLogin(){
   );
 
   applyUser(d.user);
+  await loadUserNotifications();
 
   showToast(
    'Signed In',
@@ -1917,6 +2016,37 @@ async function handleLogin(){
    REFRESH USER
 ========================================================= */
 
+async function submitPublicAppeal(){
+ const mobile=document.getElementById('publicAppealPhone').value.trim();
+ const message=document.getElementById('publicAppealMessage').value.trim();
+ if(!mobile||!message)return showToast('Appeal incomplete','Enter your phone number and appeal message.',false);
+ try{
+  const d=await api('/api/account/appeal',{method:'POST',body:JSON.stringify({mobile,message})});
+  document.getElementById('publicAppealResult').innerText=d.message||'Appeal submitted.';
+  document.getElementById('publicAppealMessage').value='';
+  showToast('Appeal submitted',d.message||'Your appeal has been sent.');
+ }catch(e){showToast('Appeal failed',e.message,false);}
+}
+
+async function loadUserNotifications(){
+ const host=document.getElementById('userNotificationList');
+ if(!host)return;
+ if(!localStorage.getItem(USER_TOKEN_KEY)){host.innerHTML='<p class="text-[10px] text-zinc-500">Sign in to view announcements.</p>';return;}
+ try{
+  const d=await api('/api/notifications');
+  const items=d.notifications||[];
+  host.innerHTML=items.length?items.map(n=>`<button onclick="markUserNotificationRead('${esc(n.id)}')" class="w-full text-left rounded-lg p-2 border ${n.read_at?'border-zinc-800 bg-zinc-900':'border-brandGreen/40 bg-brandGreen/5'}">
+   <div class="flex justify-between gap-2"><strong class="text-[11px] text-white">${esc(n.title||'Announcement')}</strong><span class="text-[9px] text-zinc-500">${n.read_at?'Read':'New'}</span></div>
+   <p class="text-[10px] text-zinc-300 whitespace-pre-wrap">${esc(n.message||'')}</p>
+   <span class="text-[9px] text-zinc-600">${n.created_at?esc(new Date(n.created_at).toLocaleString()):''}</span>
+  </button>`).join(''):'<p class="text-[10px] text-zinc-500">No announcements yet.</p>';
+ }catch(e){host.innerHTML='<p class="text-[10px] text-red-400">Could not load notifications.</p>';}
+}
+async function markUserNotificationRead(id){
+ try{await api('/api/notifications/'+encodeURIComponent(id)+'/read',{method:'POST'});await loadUserNotifications();}
+ catch(e){showToast('Notification error',e.message,false);}
+}
+
 async function refreshUser(silent=false){
 
  const token=
@@ -1932,6 +2062,7 @@ async function refreshUser(silent=false){
    await api('/api/me');
 
   applyUser(d.user);
+  await loadUserNotifications();
 
   return true;
 
@@ -3074,9 +3205,37 @@ function lockAdminSession(){
 }
 
 
+async function setAdminUserStatus(id,status){
+ const labels={active:'activate/unblock',restricted:'restrict',blocked:'block'};
+ const reason=status==='active'?'':(prompt('Enter the reason to '+labels[status]+' this account:')||'').trim();
+ if(status!=='active'&&!reason)return showToast('Reason required','Enter a reason before changing account status.',false);
+ if(!confirm('Confirm '+labels[status]+' this account? Existing balance and history will be kept.'))return;
+ try{
+  await api('/api/admin/users/'+encodeURIComponent(id)+'/status',{method:'PATCH',body:JSON.stringify({status,reason})});
+  await loadAdminData(false);
+  showToast('Account updated','Account status changed. Existing balance and history remain unchanged.');
+ }catch(e){showToast('Account update failed',e.message,false);}
+}
+async function sendAdminBroadcast(){
+ const title=document.getElementById('broadcastTitle').value.trim();
+ const message=document.getElementById('broadcastMessage').value.trim();
+ if(!title||!message)return showToast('Announcement incomplete','Enter both a title and a message.',false);
+ if(!confirm('Send this announcement to ALL registered users now?'))return;
+ const btn=document.querySelector('#adm-section-broadcast button');
+ if(btn)btn.disabled=true;
+ try{
+  const d=await api('/api/admin/broadcast',{method:'POST',body:JSON.stringify({title,message})});
+  document.getElementById('broadcastResult').innerText='Published to '+(d.recipient_count||0)+' user inboxes.';
+  document.getElementById('broadcastTitle').value='';
+  document.getElementById('broadcastMessage').value='';
+  showToast('Broadcast sent',d.message||'Announcement published.');
+ }catch(e){showToast('Broadcast failed',e.message,false);}
+ finally{if(btn)btn.disabled=false;}
+}
+
 function switchAdminTab(tab){
 
- ['users','levels','deposits','withdrawals','complaints']
+ ['users','levels','deposits','withdrawals','complaints','broadcast']
  .forEach(t=>{
 
   document
@@ -3156,6 +3315,7 @@ async function loadAdminData(showErrors=true){
    [];
 
   appState.withdrawRequests=
+   d.withdrawals||
    d.pendingWithdrawals||
    d.withdrawalRequests||
    [];
@@ -3361,35 +3521,18 @@ async function approveDeposit(id){
 
 
 async function approveWithdrawal(id){
-
  try{
-
-  const d=
-   await api(
-    '/api/admin/withdrawals/'+
-    encodeURIComponent(id)+
-    '/approve',
-    {method:'POST'}
-   );
-
+  const d=await api('/api/admin/withdrawals/'+encodeURIComponent(id)+'/approve',{method:'POST'});
   await loadAdminData(false);
-
-  showToast(
-   'Withdrawal Delivered',
-   d.message||
-   'Withdrawal has been marked delivered.'
-  );
-
- }catch(e){
-
-  showToast(
-   'Approval Error',
-   e.message,
-   false
-  );
-
- }
-
+  showToast('Withdrawal Approved',d.message||'Approved. Payment is still outstanding.');
+ }catch(e){showToast('Approval Error',e.message,false);}
+}
+async function markWithdrawalPaid(id){
+ try{
+  const d=await api('/api/admin/withdrawals/'+encodeURIComponent(id)+'/paid',{method:'POST'});
+  await loadAdminData(false);
+  showToast('Payment Recorded',d.message||'Withdrawal marked paid.');
+ }catch(e){showToast('Payment Error',e.message,false);}
 }
 
 
@@ -3472,33 +3615,23 @@ function renderAdminData(){
 
   appState.usersDb.map(u=>`
 
-   <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 flex justify-between items-center text-xs">
-
-    <div>
-
-     <p class="font-bold text-white">
-      ${esc(u.name||u.full_name)}
-     </p>
-
-     <span class="text-[10px] text-zinc-400">
-
-      ${esc(u.phone||u.mobile)}
-      • Active Level
-      ${u.currentLevelId||u.active_level||1}
-
-     </span>
-
+   <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 space-y-2 text-xs">
+    <div class="flex justify-between gap-2 items-start">
+     <div class="min-w-0">
+      <p class="font-bold text-white">${esc(u.name||u.full_name)}</p>
+      <span class="text-[10px] text-zinc-400">${esc(u.phone||u.mobile)} • Level ${u.currentLevelId||u.active_level||1}</span>
+      <p class="text-[10px] text-zinc-500">Last active: ${u.last_active_at?esc(new Date(u.last_active_at).toLocaleString()):'Not recorded yet'}</p>
+     </div>
+     <div class="text-right shrink-0">
+      <span class="text-brandGold font-bold">Ksh ${Number(u.balance||0).toLocaleString()}</span>
+      <p class="text-[10px] font-bold uppercase ${u.last_active_at&&Date.now()-Date.parse(u.last_active_at)>5*86400000?'text-amber-300':(u.account_status||'active')==='active'?'text-emerald-400':'text-red-400'}">${u.last_active_at&&Date.now()-Date.parse(u.last_active_at)>5*86400000&&(!u.account_status||u.account_status==='active')?'inactive • review':esc(u.account_status||'active')}</p>
+     </div>
     </div>
-
-    <span class="text-brandGold font-bold">
-
-     Ksh
-     ${Number(
-      u.balance||0
-     ).toLocaleString()}
-
-    </span>
-
+    <div class="flex gap-2">
+     <button onclick="setAdminUserStatus('${esc(u.id)}','restricted')" class="flex-1 bg-amber-500/15 text-amber-300 rounded-lg py-1.5 text-[10px]">Restrict</button>
+     <button onclick="setAdminUserStatus('${esc(u.id)}','blocked')" class="flex-1 bg-red-500/15 text-red-300 rounded-lg py-1.5 text-[10px]">Block</button>
+     <button onclick="setAdminUserStatus('${esc(u.id)}','active')" class="flex-1 bg-emerald-500/15 text-emerald-300 rounded-lg py-1.5 text-[10px]">Unblock / Activate</button>
+    </div>
    </div>
 
   `).join('')
@@ -3753,12 +3886,7 @@ function renderAdminData(){
   '<p class="text-xs text-zinc-500 text-center py-2">No pending deposits.</p>';
 
 
- const pendingWithdrawals=
-  appState.withdrawRequests.filter(
-   r=>String(
-    r.status||''
-   ).toLowerCase()==='pending'
-  );
+ const pendingWithdrawals=appState.withdrawRequests.filter(r=>['pending','approved'].includes(String(r.status||'').toLowerCase()));
 
 
  document
@@ -3822,13 +3950,10 @@ function renderAdminData(){
     </p>
 
 
-    <button
-     onclick="approveWithdrawal('${esc(r.id)}')"
-     class="w-full bg-brandGold text-black font-bold py-1.5 rounded-lg">
-
-     Mark Delivered
-
-    </button>
+    <p class="font-bold uppercase text-[10px] ${String(r.status).toLowerCase()==='approved'?'text-brandGold':'text-cyan-300'}">Status: ${esc(r.status||'pending')}</p>
+    ${String(r.status).toLowerCase()==='pending'
+      ? '<button onclick="approveWithdrawal(\''+esc(r.id)+'\')" class="w-full bg-brandGold text-black font-bold py-1.5 rounded-lg">Approve Request</button>'
+      : '<button onclick="markWithdrawalPaid(\''+esc(r.id)+'\')" class="w-full bg-brandGreen text-black font-bold py-1.5 rounded-lg">Confirm M-Pesa Paid</button>'}
 
    </div>`;
 
@@ -3923,6 +4048,51 @@ function renderAdminData(){
    UI
 ========================================================= */
 
+function setWalletHistoryFilter(filter){
+ walletHistoryFilter=filter; walletHistoryLimit=20; updateWalletHistory();
+}
+function loadMoreWalletHistory(){walletHistoryLimit+=20;updateWalletHistory();}
+function updateWalletSummary(){
+ const txs=appState.transactions||[];
+ const balance=Number(appState.balance)||0;
+ const today=new Date().toLocaleDateString();
+ const sum=(list,fn)=>list.reduce((total,t)=>total+fn(t),0);
+ const daily=sum(txs.filter(t=>String(t.type||'').includes('tap')&&t.created_at&&new Date(t.created_at).toLocaleDateString()===today),t=>Math.max(0,Number(t.amount)||0));
+ const deposits=sum(txs.filter(t=>t.type==='deposit'&&String(t.status||'approved')==='approved'),t=>Math.max(0,Number(t.amount)||0));
+ const pending=sum(txs.filter(t=>String(t.type||'').startsWith('withdrawal_')&&['pending','approved'].includes(String(t.status||'pending'))),t=>Math.abs(Number(t.amount)||0));
+ const paid=sum(txs.filter(t=>t.type==='withdrawal_paid'||String(t.status||'')==='paid'),t=>Math.abs(Number(t.amount)||0));
+ const fmt=n=>'Ksh '+Number(n||0).toLocaleString();
+ const set=(id,value)=>{const el=document.getElementById(id);if(el)el.innerText=value;};
+ set('walletAvailableBalance',fmt(Math.max(0,balance-2000)));
+ set('walletReservedBalance',fmt(Math.min(balance,2000)));
+ set('walletDailyEarnings',fmt(daily));
+ set('walletTotalDeposits',fmt(deposits));
+ set('walletWithdrawalTotals',fmt(pending)+' pending • '+fmt(paid)+' paid');
+}
+
+function updateWalletHistory(){
+ const host=document.getElementById('transactionHistoryList');
+ if(!host)return;
+ const txs=[...(appState.transactions||[])].sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+ const filtered=txs.filter(t=>{
+  const type=String(t.type||'').toLowerCase();
+  if(walletHistoryFilter==='earnings')return type.includes('tap')||type.includes('reward');
+  if(walletHistoryFilter==='deposits')return type.includes('deposit');
+  if(walletHistoryFilter==='withdrawals')return type.includes('withdraw');
+  return true;
+ });
+ host.innerHTML=filtered.slice(0,walletHistoryLimit).map(t=>{
+  const amount=Number(t.amount)||0, displayAmount=Number(t.requested_amount??t.amount)||0, status=t.status||'recorded', pending=['pending','rejected'].includes(String(status).toLowerCase());
+  const labels={tap_reward:'Tap earning',deposit_pending:'Deposit request',deposit:'Deposit credited',deposit_rejected:'Deposit rejected',withdrawal_pending:'Withdrawal request',withdrawal_approved:'Withdrawal approved',withdrawal_paid:'Withdrawal paid',withdrawal_rejected:'Withdrawal rejected',withdrawal_refund:'Withdrawal refund',level_dashboard_credit:'Level dashboard credit'};
+  return `<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 flex justify-between items-center text-xs">
+   <div><p class="font-bold text-white">${esc(t.description||labels[t.type]||t.type||'Transaction')}</p>
+   <span class="text-[10px] text-zinc-500">${esc(t.created_at||'')} • ${esc(status)}</span></div>
+   <span class="font-black ${pending?'text-zinc-400':amount<0?'text-red-400':'text-brandGreen'}">${pending?'':' '+(amount>=0?'+':'-')}Ksh ${Math.abs(displayAmount).toLocaleString()}</span>
+  </div>`;
+ }).join('')||'<div class="text-center text-xs text-zinc-500 py-3">No matching transactions.</div>';
+ const more=document.getElementById('walletHistoryMore');
+ if(more)more.classList.toggle('hidden',filtered.length<=walletHistoryLimit);
+}
 function updateUI(){
 
  const bal=
@@ -4122,68 +4292,8 @@ function updateUI(){
   }).join('');
 
 
- document
-  .getElementById(
-   'transactionHistoryList'
-  )
-  .innerHTML=
-
-  appState.transactions.length
-
-   ?
-
-   appState.transactions
-    .slice(0,20)
-    .map(t=>{
-
-     const n=
-      Number(t.amount)||0;
-
-     const label=
-      t.description||
-      t.type||
-      'Transaction';
-
-     return `
-
-     <div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 flex justify-between items-center text-xs">
-
-      <div>
-
-       <p class="font-bold text-white">
-        ${esc(label)}
-       </p>
-
-       <span class="text-[10px] text-zinc-500">
-        ${esc(
-         t.created_at||''
-        )}
-       </span>
-
-      </div>
-
-
-      <span class="font-black ${
-       n<0
-        ?'text-red-400'
-        :'text-brandGreen'
-      }">
-
-       ${n>=0?'+':''}
-       Ksh
-       ${Math.abs(
-        n
-       ).toLocaleString()}
-
-      </span>
-
-     </div>`;
-
-    }).join('')
-
-   :
-
-   '<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 text-center text-xs text-zinc-500">No transactions recorded yet.</div>';
+ updateWalletHistory();
+ updateWalletSummary();
 
 
  updateReferralLink();
@@ -4283,6 +4393,61 @@ if ("serviceWorker" in navigator) {
             });
     });
 }
+</script>
+
+
+<!-- Install Zulvix-KE app prompt -->
+<style>
+#installAppNotice{position:fixed;left:16px;right:16px;bottom:16px;z-index:90;max-width:520px;margin:auto;background:#0d1712;border:1px solid #00ff88;border-radius:18px;padding:16px;box-shadow:0 12px 40px #0009;display:none}
+#installAppNotice button{border-radius:10px;padding:9px 13px;font-size:12px;font-weight:800}
+</style>
+<section id="installAppNotice" role="dialog" aria-live="polite" aria-label="Install Zulvix-KE">
+ <div style="display:flex;align-items:flex-start;gap:12px">
+  <div style="width:42px;height:42px;flex:none;border-radius:12px;background:#00ff8822;color:#00ff88;display:grid;place-items:center;font-size:20px"><i class="fa-solid fa-mobile-screen-button"></i></div>
+  <div style="flex:1;min-width:0">
+   <div style="font-weight:800;color:white;font-size:14px">Install Zulvix-KE</div>
+   <p id="installAppMessage" style="font-size:12px;color:#d4d4d8;margin:4px 0 12px">Add Zulvix-KE to your home screen for quick access, just like an app.</p>
+   <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button id="installAppAction" type="button" style="background:#00ff88;color:#07110b">Install App</button>
+    <button id="installAppLater" type="button" style="background:#26332c;color:white">Not now</button>
+   </div>
+  </div>
+  <button id="installAppClose" type="button" aria-label="Close install message" style="background:transparent;color:#a1a1aa;padding:2px 6px">✕</button>
+ </div>
+</section>
+<script>
+(()=>{
+ let installPrompt=null;
+ const notice=document.getElementById('installAppNotice');
+ const action=document.getElementById('installAppAction');
+ const message=document.getElementById('installAppMessage');
+ if(!notice||!action)return;
+ const standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+ const dismissedAt=Number(localStorage.getItem('zulvixInstallNoticeDismissedAt')||0);
+ const recentlyDismissed=Date.now()-dismissedAt<7*24*60*60*1000;
+ const show=()=>{if(!standalone&&!recentlyDismissed)notice.style.display='block';};
+ const hide=(remember)=>{notice.style.display='none';if(remember)localStorage.setItem('zulvixInstallNoticeDismissedAt',String(Date.now()));};
+ window.addEventListener('beforeinstallprompt',event=>{
+  event.preventDefault();installPrompt=event;action.textContent='Install App';show();
+ });
+ window.addEventListener('appinstalled',()=>{hide(true);installPrompt=null;});
+ action.addEventListener('click',async()=>{
+  if(installPrompt){
+   installPrompt.prompt();
+   try{await installPrompt.userChoice;}catch(error){console.info('Install prompt result unavailable',error);}
+   installPrompt=null;hide(true);return;
+  }
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  message.textContent=isIOS
+   ? 'In Safari, tap Share, then choose “Add to Home Screen”.'
+   : 'In Chrome, tap the ⋮ menu, then choose “Install app” or “Add to Home screen”.';
+  action.textContent='Got it';
+  action.onclick=()=>hide(true);
+ });
+ document.getElementById('installAppLater')?.addEventListener('click',()=>hide(true));
+ document.getElementById('installAppClose')?.addEventListener('click',()=>hide(true));
+ if(!standalone&&!recentlyDismissed)window.setTimeout(show,2500);
+})();
 </script>
 
 </body>
