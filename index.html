@@ -1600,6 +1600,8 @@ let adminLoggedIn=false;
 let countdownTimer=null;
 
 let tapInProgress=false;
+let tapAdReady=true;
+let sponsorVideosPending=0;
 
 let adminPollTimer=null;
 
@@ -1824,7 +1826,7 @@ function getIncomingReferralCode(){
    APPLY USER
 ========================================================= */
 
-function applyUser(u){
+function applyUser(u,loadAds=true){
 
  appState.isLoggedIn=true;
 
@@ -1883,6 +1885,10 @@ function applyUser(u){
  updateReferralLink();
 
  checkCountdownTimer();
+ if(loadAds){
+  if(appState.tapsLeft>0)renderSponsorAds('before_tap');
+  else renderSponsorAds('after_tap');
+ }
 
 }
 
@@ -2076,9 +2082,38 @@ async function loadSponsorAds(){
  try{const d=await api('/api/admin/sponsor-ads');host.innerHTML=(d.ads||[]).map(a=>'<div class="border border-zinc-700 rounded-lg p-2 text-xs flex justify-between gap-2"><span>'+escapeSponsorText(a.title)+' · '+escapeSponsorText(a.media_type)+' · '+escapeSponsorText(a.placement)+' · '+escapeSponsorText(a.payment_status)+'</span><button class="text-amber-300" onclick="toggleSponsorAd(\''+escapeSponsorText(a.id)+'\','+(!a.is_active)+')">'+(a.is_active?'Deactivate':'Activate')+'</button></div>').join('')||'<p class="text-zinc-500 text-xs">No sponsor adverts yet.</p>';}catch(e){host.textContent='Could not load sponsor adverts: '+e.message;}
 }
 async function toggleSponsorAd(id,active){try{await api('/api/admin/sponsor-ads/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({is_active:active})});await loadSponsorAds();}catch(e){showToast('Update failed',e.message,false);}}
+function acknowledgeSponsorAd(){
+ tapAdReady=true;
+ const button=document.getElementById('sponsorContinueButton');
+ if(button){button.textContent='Ready — Tap Asset';button.disabled=true;button.classList.add('opacity-60');}
+ showToast('Advert completed','You can now tap your asset.');
+}
+function markSponsorVideoViewed(){
+ sponsorVideosPending=Math.max(0,sponsorVideosPending-1);
+ const button=document.getElementById('sponsorContinueButton');
+ if(button&&sponsorVideosPending===0)button.disabled=false;
+}
 async function renderSponsorAds(placement){
- const host=document.getElementById(placement==='before_tap'?'sponsorAdsBefore':'sponsorAdsAfter');if(!host)return;
- try{const response=await fetch(API+'/api/ads/active?placement='+encodeURIComponent(placement));const d=await response.json();host.innerHTML=(d.ads||[]).map(a=>'<article class="rounded-xl border border-zinc-700 bg-zinc-900 p-3 space-y-2"><p class="text-[10px] text-brandGold font-bold uppercase">Sponsored · '+escapeSponsorText(a.sponsor_name)+'</p><p class="text-xs font-bold">'+escapeSponsorText(a.title)+'</p><a href="'+escapeSponsorText(a.destination_url)+'" target="_blank" rel="noopener noreferrer" class="block">'+(a.media_type==='video'?'<video controls playsinline preload="metadata" class="w-full max-h-56 rounded-lg"><source src="'+escapeSponsorText(a.media_url)+'" type="'+escapeSponsorText(a.mime_type)+'"></video>':'<img loading="lazy" src="'+escapeSponsorText(a.media_url)+'" alt="'+escapeSponsorText(a.title)+'" class="w-full max-h-56 object-contain rounded-lg">')+'</a><a href="'+escapeSponsorText(a.destination_url)+'" target="_blank" rel="noopener noreferrer" class="text-[10px] text-brandGreen underline">Learn more</a></article>').join('');}catch(e){host.innerHTML='';}
+ const host=document.getElementById(placement==='before_tap'?'sponsorAdsBefore':'sponsorAdsAfter');
+ if(!host)return;
+ try{
+  const response=await fetch(API+'/api/ads/active?placement='+encodeURIComponent(placement));
+  if(!response.ok)throw new Error('Advert request failed');
+  const data=await response.json(),ads=data.ads||[];
+  host.innerHTML='';
+  if(placement==='before_tap')tapAdReady=ads.length===0;
+  if(!ads.length)return;
+  sponsorVideosPending=placement==='before_tap'?ads.filter(a=>a.media_type==='video').length:0;
+  host.innerHTML=ads.map(a=>'<article class="rounded-xl border border-zinc-700 bg-zinc-900 p-3 space-y-2"><p class="text-[10px] text-brandGold font-bold uppercase">Sponsored · '+escapeSponsorText(a.sponsor_name)+'</p><p class="text-xs font-bold">'+escapeSponsorText(a.title)+'</p>'+(a.media_type==='video'?'<video controls autoplay muted playsinline preload="auto" onended="markSponsorVideoViewed()" class="w-full max-h-56 rounded-lg"><source src="'+escapeSponsorText(a.media_url)+'" type="'+escapeSponsorText(a.mime_type)+'"></video>':'<a href="'+escapeSponsorText(a.destination_url)+'" target="_blank" rel="noopener noreferrer" class="block"><img loading="lazy" src="'+escapeSponsorText(a.media_url)+'" alt="'+escapeSponsorText(a.title)+'" class="w-full max-h-56 object-contain rounded-lg"></a>')+'<a href="'+escapeSponsorText(a.destination_url)+'" target="_blank" rel="noopener noreferrer" class="text-[10px] text-brandGreen underline">Learn more</a></article>').join('');
+  if(placement==='before_tap'){
+   host.insertAdjacentHTML('beforeend','<button id="sponsorContinueButton" onclick="acknowledgeSponsorAd()" '+(sponsorVideosPending?'disabled':'')+' class="w-full bg-brandGreen text-black font-bold text-sm py-3 rounded-xl disabled:opacity-40">Continue to TAP</button>');
+   tapAdReady=false;
+  }
+ }catch(error){
+  host.innerHTML='';
+  if(placement==='before_tap')tapAdReady=true;
+  console.error('Sponsor advert load failed',error);
+ }
 }
 async function loadAdminAdSettings(){
  const result=document.getElementById('adminAdsResult');
@@ -2147,7 +2182,7 @@ async function markUserNotificationRead(id){
  catch(e){showToast('Notification error',e.message,false);}
 }
 
-async function refreshUser(silent=false){
+async function refreshUser(silent=false,loadAds=true){
 
  const token=
   localStorage.getItem(
@@ -2161,7 +2196,7 @@ async function refreshUser(silent=false){
   const d=
    await api('/api/me');
 
-  applyUser(d.user);
+  applyUser(d.user,loadAds);
   await loadUserNotifications();
 
   return true;
@@ -2346,7 +2381,9 @@ async function handleTapAsset(){
 
  if(tapInProgress)return;
 
- await renderSponsorAds('before_tap');
+ if(!tapAdReady){
+  return showToast('Advert first','Please finish the sponsor advert and press Continue to TAP first.',false);
+ }
 
  if(Number(appState.tapsLeft||0)<=0){
 
@@ -2385,18 +2422,20 @@ async function handleTapAsset(){
 
   if(d.user){
 
-   applyUser(d.user);
+   applyUser(d.user,false);
 
   }else{
 
-   await refreshUser(true);
+   await refreshUser(true,false);
 
   }
 
   const reward=
    Number(d.reward||0);
 
-  await renderSponsorAds('after_tap');
+  if(Number(appState.tapsLeft||0)<=0){
+   await renderSponsorAds('after_tap');
+  }
 
   showToast(
    'Tap Accepted',
