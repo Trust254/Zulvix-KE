@@ -1301,7 +1301,7 @@ Access Admin Portal
 
 <div id="adminPanelContent" class="hidden space-y-4">
 
-<div class="grid grid-cols-7 gap-1 bg-zinc-900 p-1 rounded-xl text-[9px] font-bold text-center">
+<div class="grid grid-cols-8 gap-1 bg-zinc-900 p-1 rounded-xl text-[9px] font-bold text-center">
 
 <button onclick="switchAdminTab('users')" id="adm-tab-users" class="py-2 rounded-lg bg-zinc-800 text-brandGreen">
 Users
@@ -1326,6 +1326,7 @@ Support
 Broadcast
 </button>
 <button onclick="switchAdminTab('recovery')" id="adm-tab-recovery" class="py-2 text-zinc-400">Recovery</button>
+<button onclick="switchAdminTab('ads')" id="adm-tab-ads" class="py-2 text-zinc-400">Ads</button>
 
 </div>
 
@@ -1405,6 +1406,25 @@ class="space-y-2 max-h-60 overflow-y-auto">
  <p class="text-[10px] text-zinc-400">Verify the user's identity independently before issuing a code. Codes are shown once and expire after 15 minutes.</p>
  <button onclick="loadAdminRecoveryRequests()" class="w-full bg-zinc-800 text-white font-bold py-2 rounded-lg text-xs">Refresh Recovery Requests</button>
  <div id="adminRecoveryRequestsList" class="space-y-2 max-h-60 overflow-y-auto"></div>
+</div>
+<div id="adm-section-ads" class="hidden space-y-3">
+<h4 class="text-xs font-bold uppercase text-brandGreen">Advertising Controls</h4>
+<p class="text-[10px] text-zinc-400">Configure the two proposed ad placements. Saving these settings does not publish ads or load third-party ad code. Connect only a provider that has approved Zulvix-KE's tapping model.</p>
+<div class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-[10px] text-amber-200">Provider approval required before live ads. Do not ask users to click ads, and do not reward ad views with cash or wallet credits.</div>
+<div class="rounded-xl border border-zinc-800 bg-zinc-900 p-3 space-y-2">
+<strong class="text-xs">Before tapping</strong>
+<label class="flex items-center gap-2 text-xs"><input id="adBeforeEnabled" type="checkbox"> Enable placement (configuration only)</label>
+<select id="adBeforeProvider" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="unconfigured">Provider not connected</option><option value="house">Zulvix-KE house advert</option><option value="google_ad_manager">Google Ad Manager (after approval)</option></select>
+<input id="adBeforeUnit" maxlength="160" placeholder="Approved ad unit ID (optional)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
+</div>
+<div class="rounded-xl border border-zinc-800 bg-zinc-900 p-3 space-y-2">
+<strong class="text-xs">After tapping</strong>
+<label class="flex items-center gap-2 text-xs"><input id="adAfterEnabled" type="checkbox"> Enable placement (configuration only)</label>
+<select id="adAfterProvider" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="unconfigured">Provider not connected</option><option value="house">Zulvix-KE house advert</option><option value="google_ad_manager">Google Ad Manager (after approval)</option></select>
+<input id="adAfterUnit" maxlength="160" placeholder="Approved ad unit ID (optional)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
+</div>
+<button onclick="saveAdminAdSettings()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Save Advertising Settings</button>
+<p id="adminAdsResult" class="text-[10px] text-zinc-400"></p>
 </div>
 <div id="adm-section-broadcast" class="hidden space-y-2">
 <h4 class="text-xs font-bold uppercase">Broadcast Centre</h4>
@@ -2002,6 +2022,34 @@ async function handlePasskeyLogin(){const mobile=document.getElementById('loginP
 function toggleRecoveryPanel(){const p=document.getElementById('passwordRecoveryPanel');p.classList.toggle('hidden');const m=document.getElementById('loginPhone').value.trim();if(m&&!document.getElementById('recoveryMobile').value)document.getElementById('recoveryMobile').value=m;}
 async function requestPasswordRecovery(){const mobile=document.getElementById('recoveryMobile').value.trim();if(!mobile)return showToast('Mobile number required','Enter the registered mobile number.',false);try{const d=await api('/api/auth/password-recovery/request',{method:'POST',body:JSON.stringify({mobile})});document.getElementById('recoveryResult').innerText=d.message||'Request submitted.';showToast('Request submitted','Contact the administrator for identity verification and your one-time code.');}catch(e){showToast('Request failed',e.message,false);}}
 async function resetPasswordWithCode(){const mobile=document.getElementById('recoveryMobile').value.trim(),code=document.getElementById('recoveryCode').value.trim(),newPassword=document.getElementById('recoveryNewPassword').value;if(!mobile||!code||!newPassword)return showToast('Details required','Enter mobile, recovery code and new password.',false);try{const d=await api('/api/auth/password-recovery/reset',{method:'POST',body:JSON.stringify({mobile,code,newPassword})});document.getElementById('recoveryResult').innerText=d.message||'Password reset.';document.getElementById('loginPhone').value=mobile;document.getElementById('loginPassword').value='';document.getElementById('recoveryCode').value='';document.getElementById('recoveryNewPassword').value='';showToast('Password updated','You can now sign in with your new password.');}catch(e){showToast('Password reset failed',e.message,false);}}
+async function loadAdminAdSettings(){
+ const result=document.getElementById('adminAdsResult');
+ try{
+  const d=await api('/api/admin/ads');
+  const slots=d.placements||[];
+  const before=slots.find(x=>x.placement==='before_tap')||{};
+  const after=slots.find(x=>x.placement==='after_tap')||{};
+  document.getElementById('adBeforeEnabled').checked=!!before.enabled;
+  document.getElementById('adBeforeProvider').value=before.provider||'unconfigured';
+  document.getElementById('adBeforeUnit').value=before.ad_unit_id||'';
+  document.getElementById('adAfterEnabled').checked=!!after.enabled;
+  document.getElementById('adAfterProvider').value=after.provider||'unconfigured';
+  document.getElementById('adAfterUnit').value=after.ad_unit_id||'';
+  result.textContent='Settings loaded. No live ad code is being served.';
+ }catch(e){result.textContent='Could not load advertising settings: '+e.message;}
+}
+async function saveAdminAdSettings(){
+ const result=document.getElementById('adminAdsResult');
+ const items=[
+  {placement:'before_tap',enabled:document.getElementById('adBeforeEnabled').checked,provider:document.getElementById('adBeforeProvider').value,ad_unit_id:document.getElementById('adBeforeUnit').value.trim()},
+  {placement:'after_tap',enabled:document.getElementById('adAfterEnabled').checked,provider:document.getElementById('adAfterProvider').value,ad_unit_id:document.getElementById('adAfterUnit').value.trim()}
+ ];
+ try{
+  for(const item of items) await api('/api/admin/ads/'+item.placement,{method:'PUT',body:JSON.stringify(item)});
+  result.textContent='Advertising settings saved. Live ads remain off until an approved provider integration is completed.';
+  showToast('Settings saved','Advertising configuration updated. No ads are live yet.');
+ }catch(e){result.textContent='Save failed: '+e.message;showToast('Save failed',e.message,false);}
+}
 async function loadAdminRecoveryRequests(){const host=document.getElementById('adminRecoveryRequestsList');if(!host)return;host.innerHTML='<p class="text-xs text-zinc-500">Loading requests...</p>';try{api('/api/admin/password-recovery/requests').then(d=>{const items=d.requests||[];host.innerHTML=items.length?items.map(r=>'<div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3 space-y-2 text-xs"><div class="flex justify-between gap-2"><strong>'+esc(r.name||'User')+'</strong><span class="text-brandGold uppercase">'+esc(r.status)+'</span></div><p class="text-zinc-400">Mobile: <strong class="text-white">'+esc(r.mobile)+'</strong></p><p class="text-[10px] text-zinc-500">Requested: '+esc(new Date(r.created_at).toLocaleString())+'</p><button data-recovery-id="'+esc(r.id)+'" onclick="issueAdminRecoveryCode(this.dataset.recoveryId)" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg">Verify Identity & Generate Code</button></div>').join(''):'<p class="text-xs text-zinc-500">No open recovery requests.</p>';}).catch(e=>{host.innerHTML='<p class="text-xs text-red-400">'+esc(e.message)+'</p>';});}catch(e){host.innerHTML='<p class="text-xs text-red-400">'+esc(e.message)+'</p>';}}
 async function issueAdminRecoveryCode(id){if(!confirm('Have you independently verified this user identity? Generate a one-time password recovery code?'))return;try{const d=await api('/api/admin/password-recovery/'+encodeURIComponent(id)+'/issue',{method:'POST',body:'{}'});await loadAdminRecoveryRequests();const nl=String.fromCharCode(10),msg='Recovery code for '+d.mobile+': '+d.code+nl+'Expires in 15 minutes. Share it only with the verified account owner.';try{await navigator.clipboard.writeText(d.code);}catch(_){}alert(msg+nl+nl+'The code has been copied if clipboard access is available.');}catch(e){showToast('Could not issue code',e.message,false);}}
 
@@ -3230,7 +3278,7 @@ async function sendAdminBroadcast(){
 
 function switchAdminTab(tab){
 
- ['users','levels','deposits','withdrawals','complaints','broadcast','recovery']
+ ['users','levels','deposits','withdrawals','complaints','broadcast','recovery','ads']
  .forEach(t=>{
 
   document
@@ -3274,6 +3322,7 @@ function switchAdminTab(tab){
   );
 
  if(tab==='recovery') loadAdminRecoveryRequests();
+ if(tab==='ads') loadAdminAdSettings();
 
 }
 
