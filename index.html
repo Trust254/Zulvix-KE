@@ -1600,6 +1600,8 @@ let adminLoggedIn=false;
 let countdownTimer=null;
 
 let tapInProgress=false;
+let tapAdReady=true;
+let sponsorVideosPending=0;
 
 let adminPollTimer=null;
 
@@ -1824,7 +1826,7 @@ function getIncomingReferralCode(){
    APPLY USER
 ========================================================= */
 
-function applyUser(u){
+function applyUser(u,loadAds=true){
 
  appState.isLoggedIn=true;
 
@@ -1883,6 +1885,10 @@ function applyUser(u){
  updateReferralLink();
 
  checkCountdownTimer();
+ if(loadAds){
+  if(appState.tapsLeft>0)renderSponsorAds('before_tap');
+  else renderSponsorAds('after_tap');
+ }
 
 }
 
@@ -2147,7 +2153,7 @@ async function markUserNotificationRead(id){
  catch(e){showToast('Notification error',e.message,false);}
 }
 
-async function refreshUser(silent=false){
+async function refreshUser(silent=false,loadAds=true){
 
  const token=
   localStorage.getItem(
@@ -2161,7 +2167,7 @@ async function refreshUser(silent=false){
   const d=
    await api('/api/me');
 
-  applyUser(d.user);
+  applyUser(d.user,loadAds);
   await loadUserNotifications();
 
   return true;
