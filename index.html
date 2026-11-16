@@ -2091,13 +2091,28 @@ function updateTapButtonAfterAd(){
   button.classList.toggle('cursor-pointer',tapAdReady);
  }
 }
-function markSponsorVideoViewed(){
+function markSponsorVideoViewed(video){
  sponsorVideosPending=Math.max(0,sponsorVideosPending-1);
+ const card=video&&video.closest('article');
+ if(card)card.remove();
  if(sponsorVideosPending===0){
+  const host=document.getElementById('sponsorAdsBefore');
+  if(host)host.innerHTML='';
   tapAdReady=true;
   updateTapButtonAfterAd();
-  showToast('Advert finished','TAP ASSET is now ready.');
+  showToast('Advert completed','TAP ASSET is now ready.');
  }
+}
+function enforceSponsorVideo(video){
+ if(video.dataset.enforced==='1')return;
+ video.dataset.enforced='1';
+ let lastTime=0,ended=false;
+ video.controls=false;
+ video.addEventListener('timeupdate',()=>{if(!video.seeking)lastTime=video.currentTime;});
+ video.addEventListener('seeking',()=>{if(video.currentTime>lastTime+0.75||video.currentTime<lastTime-0.75)video.currentTime=lastTime;});
+ video.addEventListener('ended',()=>{ended=true;markSponsorVideoViewed(video);});
+ video.addEventListener('pause',()=>{if(!ended&&!video.ended&&video.currentTime<video.duration){setTimeout(()=>{if(!ended&&video.paused)video.play().catch(()=>{});},150);}});
+ video.play().catch(()=>{video.controls=true;});
 }
 async function renderSponsorAds(placement){
  const host=document.getElementById(placement==='before_tap'?'sponsorAdsBefore':'sponsorAdsAfter');
@@ -2113,7 +2128,10 @@ async function renderSponsorAds(placement){
    updateTapButtonAfterAd();
   }
   if(!ads.length)return;
-  host.innerHTML=ads.map(a=>'<article class="rounded-xl border border-zinc-700 bg-zinc-900 p-3 space-y-2"><p class="text-[10px] text-brandGold font-bold uppercase">Sponsored · '+escapeSponsorText(a.sponsor_name)+'</p><p class="text-xs font-bold">'+escapeSponsorText(a.title)+'</p>'+(a.media_type==='video'?'<video controls playsinline preload="metadata" onended="markSponsorVideoViewed()" class="w-full max-h-56 rounded-lg"><source src="'+escapeSponsorText(a.media_url)+'" type="'+escapeSponsorText(a.mime_type)+'"></video>':'<a href="'+escapeSponsorText(a.destination_url)+'" target="_blank" rel="noopener noreferrer" class="block"><img loading="lazy" src="'+escapeSponsorText(a.media_url)+'" alt="'+escapeSponsorText(a.title)+'" class="w-full max-h-56 object-contain rounded-lg"></a>')+'<a href="'+escapeSponsorText(a.destination_url)+'" target="_blank" rel="noopener noreferrer" class="text-[10px] text-brandGreen underline">Learn more</a></article>').join('');
+  host.innerHTML=ads.map(a=>'<article class="rounded-xl border border-zinc-700 bg-zinc-900 p-3 space-y-2"><p class="text-[10px] text-brandGold font-bold uppercase">Sponsored · '+escapeSponsorText(a.sponsor_name)+'</p><p class="text-xs font-bold">'+escapeSponsorText(a.title)+'</p>'+(a.media_type==='video'?'<video autoplay playsinline preload="auto" data-sponsor-video="1" class="w-full max-h-56 rounded-lg"><source src="'+escapeSponsorText(a.media_url)+'" type="'+escapeSponsorText(a.mime_type)+'"></video>':'<img loading="lazy" src="'+escapeSponsorText(a.media_url)+'" alt="'+escapeSponsorText(a.title)+'" class="w-full max-h-56 object-contain rounded-lg">')+'</article>').join('');
+  if(placement==='before_tap'){
+   host.querySelectorAll('video[data-sponsor-video="1"]').forEach(enforceSponsorVideo);
+  }
  }catch(error){
   host.innerHTML='';
   if(placement==='before_tap'){tapAdReady=true;sponsorVideosPending=0;updateTapButtonAfterAd();}
