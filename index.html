@@ -148,10 +148,14 @@ Sign In to Dashboard
 
 </button>
 <button onclick="handlePasskeyLogin()" class="w-full bg-zinc-800 border border-brandGreen/40 text-brandGreen font-bold py-2.5 rounded-xl text-sm"><i class="fa-solid fa-fingerprint mr-2"></i>Sign In with Passkey / Fingerprint</button>
-<button onclick="toggleRecoveryPanel()" class="w-full text-xs text-brandGold underline">Forgot password? Request an admin recovery code</button>
+<button onclick="toggleRecoveryPanel()" class="w-full text-xs text-brandGold underline">Forgot password? Choose a recovery method</button>
 <div id="passwordRecoveryPanel" class="hidden border border-zinc-700 rounded-xl p-3 space-y-2">
- <p class="text-[11px] text-zinc-300">Request a one-time code from the administrator, then use it below to set a new password.</p>
+ <p class="text-[11px] text-zinc-300">Recover with a previously enabled phone passkey, or request a one-time code from the administrator.</p>
  <input id="recoveryMobile" type="tel" placeholder="Registered mobile number" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
+  <input id="recoveryMobile" type="tel" placeholder="Registered mobile number" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
+ <input id="passkeyRecoveryNewPassword" type="password" minlength="8" placeholder="New password (at least 8 characters)" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
+ <button onclick="recoverPasswordWithPasskey()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs"><i class="fa-solid fa-fingerprint mr-1"></i>Verify Fingerprint & Set New Password</button>
+ <div class="border-t border-zinc-700 pt-2"><p class="text-[10px] text-zinc-400">Or use administrator recovery:</p></div>
  <button onclick="requestPasswordRecovery()" class="w-full bg-zinc-700 text-white font-bold py-2 rounded-lg text-xs">Request Recovery Code</button>
  <input id="recoveryCode" inputmode="numeric" maxlength="8" placeholder="8-digit recovery code" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
  <input id="recoveryNewPassword" type="password" minlength="8" placeholder="New password (at least 8 characters)" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
@@ -751,7 +755,7 @@ Send Complaint Request
 
 <div class="bg-brandCard border border-brandGreen/30 rounded-2xl p-4 space-y-2">
  <h4 class="text-xs font-bold text-brandGreen"><i class="fa-solid fa-shield-halved mr-1"></i>Account Security</h4>
- <p class="text-[10px] text-zinc-400">Register a passkey on this device. Your phone may use fingerprint, face recognition or screen-lock PIN. Zulvix-KE does not receive your biometric data.</p>
+ <p class="text-[10px] text-zinc-400">Optional: register a passkey on this device after signing in. Your phone may use fingerprint, face recognition or screen-lock PIN. This is not required for registration. Zulvix-KE never receives your biometric data.</p>
  <input id="passkeyCurrentPassword" type="password" autocomplete="current-password" placeholder="Confirm current password" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
  <button onclick="registerPasskey()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Register This Device as a Passkey</button>
 </div><button onclick="document.getElementById('aboutPolicies').scrollIntoView({behavior:'smooth'})" class="w-full bg-zinc-800 text-brandGreen font-bold py-2.5 rounded-xl text-xs">About Us & Policies</button>
@@ -1918,30 +1922,19 @@ async function handleRegister(){
  const pass=document.getElementById('regPassword').value;
 
  if(!name||!phone||!pass)return showToast('Registration Error','Please fill in all required fields.',false);
- if(!window.PublicKeyCredential||!navigator.credentials?.create)return showToast('Fingerprint registration unavailable','Please use an updated Chrome browser on an Android phone with screen lock or biometrics enabled.',false);
- if(!window.isSecureContext)return showToast('Secure connection required','Open Zulvix-KE using its HTTPS website address.',false);
+ if(pass.length<8)return showToast('Registration Error','Your password must contain at least 8 characters.',false);
 
  try{
   const referralCode=getIncomingReferralCode();
   const payload={name,phone,password:pass};
   if(referralCode){payload.referralCode=referralCode;payload.referral_code=referralCode;}
-
-  showToast('Verify your device','Your phone will ask for fingerprint, face or screen-lock PIN to complete registration.');
-  const start=await api('/api/auth/register/passkey/options',{method:'POST',body:JSON.stringify(payload)});
-  const credential=await navigator.credentials.create({publicKey:prepPasskeyOptions(start.options)});
-  if(!credential)throw new Error('Device verification was cancelled. No account was created.');
-
-  const result=await api('/api/auth/register/passkey/verify',{
-   method:'POST',
-   body:JSON.stringify({registrationId:start.registrationId,credential:serializePasskey(credential)})
-  });
-
+  const result=await api('/api/auth/register',{method:'POST',body:JSON.stringify(payload)});
   localStorage.setItem(USER_TOKEN_KEY,result.token);
   applyUser(result.user);
   await loadUserNotifications();
-  showToast('Registration successful',`Welcome, ${result.user.name}. Your device verification is registered.`);
+  showToast('Registration successful',`Welcome, ${result.user.name}. You can optionally enable a passkey later in Account Security.`);
  }catch(e){
-  showToast('Registration not completed',e.message||'Device verification failed. Please try again.',false);
+  showToast('Registration not completed',e.message||'Please try again.',false);
  }
 }
 
@@ -2020,6 +2013,32 @@ function serializePasskey(c){const r=c.response,d={id:c.id,rawId:bytesToB64url(c
 async function registerPasskey(){if(!localStorage.getItem(USER_TOKEN_KEY))return showToast('Sign in required','Sign in before registering a passkey.',false);if(!window.PublicKeyCredential||!navigator.credentials)return showToast('Passkeys unavailable','This browser or device does not support passkeys.',false);const currentPassword=document.getElementById('passkeyCurrentPassword').value;if(!currentPassword)return showToast('Password required','Confirm your current password to add a passkey.',false);try{const s=await api('/api/auth/passkey/register/options',{method:'POST',body:JSON.stringify({currentPassword})});const c=await navigator.credentials.create({publicKey:prepPasskeyOptions(s.options)});if(!c)throw new Error('Passkey registration was cancelled.');const d=await api('/api/auth/passkey/register/verify',{method:'POST',body:JSON.stringify(serializePasskey(c))});document.getElementById('passkeyCurrentPassword').value='';showToast('Passkey registered',d.message||'This device can now sign in with a passkey.');}catch(e){document.getElementById('passkeyCurrentPassword').value='';showToast('Passkey setup failed',e.message||'Unable to register a passkey.',false);}}
 async function handlePasskeyLogin(){const mobile=document.getElementById('loginPhone').value.trim();if(!mobile)return showToast('Mobile number required','Enter your registered mobile number, then choose passkey sign-in.',false);if(!window.PublicKeyCredential||!navigator.credentials)return showToast('Passkeys unavailable','This browser or device does not support passkeys.',false);try{const s=await api('/api/auth/passkey/login/options',{method:'POST',body:JSON.stringify({mobile})});const c=await navigator.credentials.get({publicKey:prepPasskeyOptions(s.options)});if(!c)throw new Error('Passkey sign-in was cancelled.');const d=await api('/api/auth/passkey/login/verify',{method:'POST',body:JSON.stringify({mobile,...serializePasskey(c)})});localStorage.setItem(USER_TOKEN_KEY,d.token);applyUser(d.user);await loadUserNotifications();showToast('Signed In','Passkey sign-in successful.');}catch(e){showToast('Passkey sign-in failed',e.message||'Try signing in with your password.',false);}}
 function toggleRecoveryPanel(){const p=document.getElementById('passwordRecoveryPanel');p.classList.toggle('hidden');const m=document.getElementById('loginPhone').value.trim();if(m&&!document.getElementById('recoveryMobile').value)document.getElementById('recoveryMobile').value=m;}
+async function recoverPasswordWithPasskey(){
+ const mobile=document.getElementById('recoveryMobile').value.trim();
+ const newPassword=document.getElementById('passkeyRecoveryNewPassword').value;
+ if(!mobile||!newPassword)return showToast('Details required','Enter your registered mobile number and a new password.',false);
+ if(newPassword.length<8)return showToast('Password too short','Use at least 8 characters.',false);
+ if(!window.PublicKeyCredential||!navigator.credentials)return showToast('Passkeys unavailable','This device or browser does not support passkeys.',false);
+ let temporaryToken='';
+ try{
+  const start=await api('/api/auth/passkey/login/options',{method:'POST',body:JSON.stringify({mobile})});
+  const credential=await navigator.credentials.get({publicKey:prepPasskeyOptions(start.options)});
+  if(!credential)throw new Error('Fingerprint verification was cancelled.');
+  const verified=await api('/api/auth/passkey/login/verify',{method:'POST',body:JSON.stringify({mobile,...serializePasskey(credential)})});
+  temporaryToken=verified.token;
+  localStorage.setItem(USER_TOKEN_KEY,temporaryToken);
+  const result=await api('/api/auth/password-recovery/passkey-reset',{method:'POST',body:JSON.stringify({newPassword})});
+  localStorage.removeItem(USER_TOKEN_KEY);
+  document.getElementById('loginPhone').value=mobile;
+  document.getElementById('loginPassword').value='';
+  document.getElementById('passkeyRecoveryNewPassword').value='';
+  document.getElementById('recoveryResult').innerText=result.message||'Password updated. Sign in with your new password.';
+  showToast('Password updated','Fingerprint verified. You can now sign in using your new password.');
+ }catch(e){
+  if(temporaryToken)localStorage.removeItem(USER_TOKEN_KEY);
+  showToast('Fingerprint recovery failed',e.message||'Use administrator recovery or try again.',false);
+ }
+}
 async function requestPasswordRecovery(){const mobile=document.getElementById('recoveryMobile').value.trim();if(!mobile)return showToast('Mobile number required','Enter the registered mobile number.',false);try{const d=await api('/api/auth/password-recovery/request',{method:'POST',body:JSON.stringify({mobile})});document.getElementById('recoveryResult').innerText=d.message||'Request submitted.';showToast('Request submitted','Contact the administrator for identity verification and your one-time code.');}catch(e){showToast('Request failed',e.message,false);}}
 async function resetPasswordWithCode(){const mobile=document.getElementById('recoveryMobile').value.trim(),code=document.getElementById('recoveryCode').value.trim(),newPassword=document.getElementById('recoveryNewPassword').value;if(!mobile||!code||!newPassword)return showToast('Details required','Enter mobile, recovery code and new password.',false);try{const d=await api('/api/auth/password-recovery/reset',{method:'POST',body:JSON.stringify({mobile,code,newPassword})});document.getElementById('recoveryResult').innerText=d.message||'Password reset.';document.getElementById('loginPhone').value=mobile;document.getElementById('loginPassword').value='';document.getElementById('recoveryCode').value='';document.getElementById('recoveryNewPassword').value='';showToast('Password updated','You can now sign in with your new password.');}catch(e){showToast('Password reset failed',e.message,false);}}
 async function loadAdminAdSettings(){
