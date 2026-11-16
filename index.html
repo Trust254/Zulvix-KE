@@ -4081,8 +4081,9 @@ function updateWalletHistory(){
  });
  host.innerHTML=filtered.slice(0,walletHistoryLimit).map(t=>{
   const amount=Number(t.amount)||0, displayAmount=Number(t.requested_amount??t.amount)||0, status=t.status||'recorded', pending=['pending','rejected'].includes(String(status).toLowerCase());
+  const labels={tap_reward:'Tap earning',deposit_pending:'Deposit request',deposit:'Deposit credited',deposit_rejected:'Deposit rejected',withdrawal_pending:'Withdrawal request',withdrawal_approved:'Withdrawal approved',withdrawal_paid:'Withdrawal paid',withdrawal_rejected:'Withdrawal rejected',withdrawal_refund:'Withdrawal refund',level_dashboard_credit:'Level dashboard credit'};
   return `<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 flex justify-between items-center text-xs">
-   <div><p class="font-bold text-white">${esc(t.description||t.type||'Transaction')}</p>
+   <div><p class="font-bold text-white">${esc(t.description||labels[t.type]||t.type||'Transaction')}</p>
    <span class="text-[10px] text-zinc-500">${esc(t.created_at||'')} • ${esc(status)}</span></div>
    <span class="font-black ${pending?'text-zinc-400':amount<0?'text-red-400':'text-brandGreen'}">${pending?'':' '+(amount>=0?'+':'-')}Ksh ${Math.abs(displayAmount).toLocaleString()}</span>
   </div>`;
