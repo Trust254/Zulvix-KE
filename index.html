@@ -397,8 +397,7 @@ class="text-xl font-black text-white">
  </div>
 </div>
 
-<div id="sponsorAdsBefore" class="space-y-2"></div>
-<div id="sponsorAdsAfter" class="space-y-2"></div>
+<div id="sponsorAdsDashboardSlot" class="space-y-2"><div id="sponsorAdsBefore" class="space-y-2"></div><div id="sponsorAdsAfter" class="space-y-2"></div></div>
 
 <!-- TAP -->
 
@@ -518,6 +517,7 @@ Tiers (8)
 <!-- LEVELS -->
 
 <section id="tab-levels" class="space-y-4 hidden">
+<div id="sponsorAdsLevelsSlot" class="space-y-2"></div>
 
 <div class="mb-2">
 
@@ -542,6 +542,7 @@ id="levelsListContainer">
 <!-- WALLET -->
 
 <section id="tab-wallet" class="space-y-4 hidden">
+<div id="sponsorAdsWalletSlot" class="space-y-2"></div>
 
 <div class="bg-brandCard border border-brandGold/30 rounded-2xl p-5 space-y-4">
 
@@ -650,6 +651,7 @@ Recent Ledger Activity
 <!-- PROFILE / SUPPORT -->
 
 <section id="tab-profile" class="space-y-4 hidden">
+<div id="sponsorAdsProfileSlot" class="space-y-2"></div>
 
 <div class="bg-brandCard border border-zinc-800 rounded-2xl p-5 text-center space-y-3">
 
@@ -1137,6 +1139,7 @@ id="upgradeModal"
 class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
 
 <div class="bg-brandCard border border-brandGold/40 rounded-2xl max-w-sm w-full p-5 space-y-4">
+<div id="sponsorAdsWithdrawSlot" class="space-y-2"></div>
 
 <div class="flex justify-between">
 
@@ -2307,7 +2310,19 @@ function handleLogout(){
    NAVIGATION
 ========================================================= */
 
+function moveSponsorAdsTo(slotId){
+ const slot=document.getElementById(slotId);
+ const before=document.getElementById('sponsorAdsBefore');
+ const after=document.getElementById('sponsorAdsAfter');
+ if(!slot||!before||!after)return;
+ slot.appendChild(before);
+ slot.appendChild(after);
+}
+
 function switchTab(id){
+
+ const adSlots={dashboard:'sponsorAdsDashboardSlot',levels:'sponsorAdsLevelsSlot',wallet:'sponsorAdsWalletSlot',profile:'sponsorAdsProfileSlot'};
+ if(adSlots[id])moveSponsorAdsTo(adSlots[id]);
 
  ['dashboard','levels','wallet','profile']
  .forEach(t=>{
@@ -2907,6 +2922,8 @@ async function submitDeposit(){
 
 function openWithdrawModal(){
 
+ moveSponsorAdsTo('sponsorAdsWithdrawSlot');
+
  document
   .getElementById(
    'withdrawPhoneInput'
@@ -2924,6 +2941,8 @@ function openWithdrawModal(){
 
 
 function closeWithdrawModal(){
+
+ moveSponsorAdsTo('sponsorAdsWalletSlot');
 
  document
   .getElementById(
