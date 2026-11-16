@@ -63,9 +63,13 @@ body{
  #tab-dashboard> :nth-child(4){grid-column:1}
  #tab-dashboard> :nth-child(5){grid-column:2;align-self:center}
  #levelsListContainer{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
- #sponsorAdsBefore,#sponsorAdsAfter{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
- #sponsorAdsBefore article,#sponsorAdsAfter article{min-width:0}
- .sponsor-video-wrap video{width:100%;max-height:420px;object-fit:contain;background:#000}
+ #sponsorAdsDashboardSlot,#sponsorAdsLevelsSlot,#sponsorAdsWalletSlot,#sponsorAdsProfileSlot,#sponsorAdsWithdrawSlot{width:100%;min-width:0}
+ #sponsorAdsBefore,#sponsorAdsAfter{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;width:100%;min-width:0}
+ #sponsorAdsBefore article,#sponsorAdsAfter article{min-width:0;width:100%;max-width:100%}
+ .sponsor-video-wrap{position:relative;width:100%;min-width:0;background:#000;border-radius:.5rem;overflow:hidden}
+ .sponsor-video-wrap video{display:block;width:100%;max-height:420px;min-height:220px;object-fit:contain;background:#000}
+ .sponsor-video-start{z-index:2;cursor:pointer}
+ #tab-dashboard:not(.hidden)>#sponsorAdsDashboardSlot{grid-column:1 / -1}
 }
 @media (min-width: 1200px){
  main.flex-grow.max-w-lg{max-width:min(1440px,calc(100% - 96px))}
@@ -2202,7 +2206,7 @@ async function renderSponsorAds(placement){
   }).join('');
   host.querySelectorAll('video[data-sponsor-video="1"]').forEach(enforceSponsorVideo);
  }catch(error){
-  host.innerHTML='';
+  host.innerHTML='<p class="rounded-lg border border-zinc-700 bg-zinc-900 p-3 text-xs text-zinc-400">Sponsored adverts are temporarily unavailable. Please refresh the page.</p>';
   if(placement==='before_tap'){tapAdReady=true;sponsorVideosPending=0;updateTapButtonAfterAd();}
   console.error('Sponsor advert load failed',error);
  }
