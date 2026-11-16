@@ -1916,6 +1916,7 @@ async function handleRegister(){
   );
 
   applyUser(d.user);
+  await loadUserNotifications();
 
   showToast(
    'Welcome!',
@@ -1981,6 +1982,7 @@ async function handleLogin(){
   );
 
   applyUser(d.user);
+  await loadUserNotifications();
 
   showToast(
    'Signed In',
