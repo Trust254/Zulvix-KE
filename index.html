@@ -50,6 +50,26 @@ body{
  0%,100%{box-shadow:0 0 0 0 rgba(0,255,136,.25)}
  50%{box-shadow:0 0 0 12px rgba(0,255,136,0)}
 }
+
+/* Desktop layout: use the available screen instead of a narrow mobile column. */
+@media (min-width: 768px){
+ main.flex-grow.max-w-lg{max-width:min(1440px,calc(100% - 64px));padding:28px 32px 112px}
+ header{padding-left:32px!important;padding-right:32px!important}
+ nav.fixed.bottom-0{max-width:min(1440px,100%);gap:clamp(28px,7vw,110px);justify-content:center;padding:14px 32px}
+ nav.fixed.bottom-0 button{min-width:92px;font-size:14px}
+ nav.fixed.bottom-0 button i{font-size:22px}
+ #tab-dashboard{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;gap:20px}
+ #tab-dashboard> :nth-child(3){grid-column:1 / -1}
+ #tab-dashboard> :nth-child(4){grid-column:1}
+ #tab-dashboard> :nth-child(5){grid-column:2;align-self:center}
+ #levelsListContainer{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+ #sponsorAdsBefore,#sponsorAdsAfter{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+ #sponsorAdsBefore article,#sponsorAdsAfter article{min-width:0}
+ .sponsor-video-wrap video{width:100%;max-height:420px;object-fit:contain;background:#000}
+}
+@media (min-width: 1200px){
+ main.flex-grow.max-w-lg{max-width:min(1440px,calc(100% - 96px))}
+}
 </style>
 </head>
 
@@ -2132,7 +2152,8 @@ function markSponsorVideoViewed(video){
 function startSponsorVideo(button){
  const video=button&&button.closest('.sponsor-video-wrap')?.querySelector('video');
  if(!video)return;
- video.play().then(()=>{button.remove();}).catch(()=>{button.textContent='Tap to start advert';});
+ video.muted=false;
+ video.play().then(()=>{if(button.isConnected)button.remove();}).catch(()=>{button.textContent='Play advert';});
 }
 function enforceSponsorVideo(video){
  if(video.dataset.enforced==='1')return;
@@ -2145,11 +2166,12 @@ function enforceSponsorVideo(video){
  video.addEventListener('ended',()=>{ended=true;markSponsorVideoViewed(video);});
  video.addEventListener('pause',()=>{if(!ended&&!video.ended&&video.currentTime<video.duration){setTimeout(()=>{if(!ended&&video.paused)video.play().catch(()=>{});},150);}});
  video.addEventListener('play',()=>{const overlay=video.parentElement&&video.parentElement.querySelector('.sponsor-video-start');if(overlay)overlay.remove();});
+ video.muted=false;
  video.play().catch(()=>{
   video.controls=false;
   video.removeAttribute('controls');
   const overlay=video.parentElement&&video.parentElement.querySelector('.sponsor-video-start');
-  if(overlay)overlay.classList.remove('hidden');
+  if(overlay){overlay.textContent='Play advert';overlay.classList.remove('hidden');}
  });
 }
 async function renderSponsorAds(placement){
@@ -2173,7 +2195,7 @@ async function renderSponsorAds(placement){
    const urls=Array.isArray(a.media_urls)&&a.media_urls.length?a.media_urls:(a.media_url?[a.media_url]:[]);
    let creative='';
    if(format==='text')creative='<p class="text-xs text-zinc-200 whitespace-pre-wrap">'+escapeSponsorText(a.text_content||'')+'</p>';
-   else if(format==='video')creative='<div class="sponsor-video-wrap relative"><video autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback" data-sponsor-video="1" data-ad-placement="'+placement+'" class="w-full max-h-56 rounded-lg"><source src="'+escapeSponsorText(urls[0]||a.media_url||'')+'" type="'+escapeSponsorText(a.mime_type||'video/mp4')+'"></video><button type="button" onclick="startSponsorVideo(this)" class="sponsor-video-start hidden absolute inset-0 m-auto w-fit h-fit rounded-full bg-brandGreen text-black font-bold px-5 py-3 shadow-lg">Tap to start advert</button></div>';
+   else if(format==='video')creative='<div class="sponsor-video-wrap relative"><video autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback" data-sponsor-video="1" data-ad-placement="'+placement+'" class="w-full max-h-56 rounded-lg"><source src="'+escapeSponsorText(urls[0]||a.media_url||'')+'" type="'+escapeSponsorText(a.mime_type||'video/mp4')+'"></video><button type="button" onclick="startSponsorVideo(this)" class="sponsor-video-start absolute inset-0 m-auto w-fit h-fit rounded-full bg-brandGreen text-black font-bold px-5 py-3 shadow-lg">Play advert</button></div>';
    else if(format==='carousel')creative='<div class="flex gap-2 overflow-x-auto snap-x snap-mandatory">'+urls.map(u=>'<img loading="lazy" src="'+escapeSponsorText(u)+'" alt="'+escapeSponsorText(a.title)+'" class="w-[82%] shrink-0 snap-center object-contain rounded-lg max-h-56">').join('')+'</div><p class="text-[10px] text-zinc-500">Swipe to view more</p>';
    else creative='<img loading="lazy" src="'+escapeSponsorText(urls[0]||a.media_url||'')+'" alt="'+escapeSponsorText(a.title)+'" class="w-full '+(format==='banner'?'max-h-28 object-cover':'max-h-56 object-contain')+' rounded-lg">';
    return '<article class="rounded-xl border border-zinc-700 bg-zinc-900 p-3 space-y-2"><p class="text-[10px] text-brandGold font-bold uppercase">SPONSORED · '+escapeSponsorText(format)+'</p><p class="text-xs font-bold">'+escapeSponsorText(a.title)+'</p>'+creative+'<a href="'+escapeSponsorText(a.destination_url)+'" target="_blank" rel="noopener noreferrer" class="inline-block text-xs text-brandGreen underline">Learn more</a></article>';
