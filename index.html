@@ -597,10 +597,14 @@ Ksh 150,000
 Recent Ledger Activity
 </h4>
 
-<div
-id="transactionHistoryList"
-class="space-y-2">
+<div id="walletHistoryFilters" class="flex flex-wrap gap-2">
+<button onclick="setWalletHistoryFilter('all')" class="bg-zinc-800 text-white text-[11px] px-3 py-1.5 rounded-lg">All</button>
+<button onclick="setWalletHistoryFilter('earnings')" class="bg-zinc-800 text-white text-[11px] px-3 py-1.5 rounded-lg">Earnings</button>
+<button onclick="setWalletHistoryFilter('deposits')" class="bg-zinc-800 text-white text-[11px] px-3 py-1.5 rounded-lg">Deposits</button>
+<button onclick="setWalletHistoryFilter('withdrawals')" class="bg-zinc-800 text-white text-[11px] px-3 py-1.5 rounded-lg">Withdrawals</button>
 </div>
+<div id="transactionHistoryList" class="space-y-2"></div>
+<button id="walletHistoryMore" onclick="loadMoreWalletHistory()" class="w-full bg-zinc-800 text-white text-xs font-bold rounded-lg py-2">Load more</button>
 
 </div>
 
@@ -1444,6 +1448,8 @@ let tapInProgress=false;
 let adminPollTimer=null;
 
 let previousPendingCount=null;
+let walletHistoryLimit=20;
+let walletHistoryFilter='all';
 
 
 /* =========================================================
@@ -3156,6 +3162,7 @@ async function loadAdminData(showErrors=true){
    [];
 
   appState.withdrawRequests=
+   d.withdrawals||
    d.pendingWithdrawals||
    d.withdrawalRequests||
    [];
@@ -3361,35 +3368,18 @@ async function approveDeposit(id){
 
 
 async function approveWithdrawal(id){
-
  try{
-
-  const d=
-   await api(
-    '/api/admin/withdrawals/'+
-    encodeURIComponent(id)+
-    '/approve',
-    {method:'POST'}
-   );
-
+  const d=await api('/api/admin/withdrawals/'+encodeURIComponent(id)+'/approve',{method:'POST'});
   await loadAdminData(false);
-
-  showToast(
-   'Withdrawal Delivered',
-   d.message||
-   'Withdrawal has been marked delivered.'
-  );
-
- }catch(e){
-
-  showToast(
-   'Approval Error',
-   e.message,
-   false
-  );
-
- }
-
+  showToast('Withdrawal Approved',d.message||'Approved. Payment is still outstanding.');
+ }catch(e){showToast('Approval Error',e.message,false);}
+}
+async function markWithdrawalPaid(id){
+ try{
+  const d=await api('/api/admin/withdrawals/'+encodeURIComponent(id)+'/paid',{method:'POST'});
+  await loadAdminData(false);
+  showToast('Payment Recorded',d.message||'Withdrawal marked paid.');
+ }catch(e){showToast('Payment Error',e.message,false);}
 }
 
 
@@ -3753,12 +3743,7 @@ function renderAdminData(){
   '<p class="text-xs text-zinc-500 text-center py-2">No pending deposits.</p>';
 
 
- const pendingWithdrawals=
-  appState.withdrawRequests.filter(
-   r=>String(
-    r.status||''
-   ).toLowerCase()==='pending'
-  );
+ const pendingWithdrawals=appState.withdrawRequests.filter(r=>['pending','approved'].includes(String(r.status||'').toLowerCase()));
 
 
  document
@@ -3822,13 +3807,10 @@ function renderAdminData(){
     </p>
 
 
-    <button
-     onclick="approveWithdrawal('${esc(r.id)}')"
-     class="w-full bg-brandGold text-black font-bold py-1.5 rounded-lg">
-
-     Mark Delivered
-
-    </button>
+    <p class="font-bold uppercase text-[10px] ${String(r.status).toLowerCase()==='approved'?'text-brandGold':'text-cyan-300'}">Status: ${esc(r.status||'pending')}</p>
+    ${String(r.status).toLowerCase()==='pending'
+      ? '<button onclick="approveWithdrawal(\''+esc(r.id)+'\')" class="w-full bg-brandGold text-black font-bold py-1.5 rounded-lg">Approve Request</button>'
+      : '<button onclick="markWithdrawalPaid(\''+esc(r.id)+'\')" class="w-full bg-brandGreen text-black font-bold py-1.5 rounded-lg">Confirm M-Pesa Paid</button>'}
 
    </div>`;
 
@@ -3923,6 +3905,32 @@ function renderAdminData(){
    UI
 ========================================================= */
 
+function setWalletHistoryFilter(filter){
+ walletHistoryFilter=filter; walletHistoryLimit=20; updateWalletHistory();
+}
+function loadMoreWalletHistory(){walletHistoryLimit+=20;updateWalletHistory();}
+function updateWalletHistory(){
+ const host=document.getElementById('transactionHistoryList');
+ if(!host)return;
+ const txs=[...(appState.transactions||[])].sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+ const filtered=txs.filter(t=>{
+  const type=String(t.type||'').toLowerCase();
+  if(walletHistoryFilter==='earnings')return type.includes('tap')||type.includes('reward');
+  if(walletHistoryFilter==='deposits')return type.includes('deposit');
+  if(walletHistoryFilter==='withdrawals')return type.includes('withdraw');
+  return true;
+ });
+ host.innerHTML=filtered.slice(0,walletHistoryLimit).map(t=>{
+  const amount=Number(t.amount)||0, status=t.status||'recorded';
+  return `<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 flex justify-between items-center text-xs">
+   <div><p class="font-bold text-white">${esc(t.description||t.type||'Transaction')}</p>
+   <span class="text-[10px] text-zinc-500">${esc(t.created_at||'')} • ${esc(status)}</span></div>
+   <span class="font-black ${amount<0?'text-red-400':'text-brandGreen'}">${amount>=0?'+':''}Ksh ${Math.abs(amount).toLocaleString()}</span>
+  </div>`;
+ }).join('')||'<div class="text-center text-xs text-zinc-500 py-3">No matching transactions.</div>';
+ const more=document.getElementById('walletHistoryMore');
+ if(more)more.classList.toggle('hidden',filtered.length<=walletHistoryLimit);
+}
 function updateUI(){
 
  const bal=
@@ -4122,68 +4130,7 @@ function updateUI(){
   }).join('');
 
 
- document
-  .getElementById(
-   'transactionHistoryList'
-  )
-  .innerHTML=
-
-  appState.transactions.length
-
-   ?
-
-   appState.transactions
-    .slice(0,20)
-    .map(t=>{
-
-     const n=
-      Number(t.amount)||0;
-
-     const label=
-      t.description||
-      t.type||
-      'Transaction';
-
-     return `
-
-     <div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 flex justify-between items-center text-xs">
-
-      <div>
-
-       <p class="font-bold text-white">
-        ${esc(label)}
-       </p>
-
-       <span class="text-[10px] text-zinc-500">
-        ${esc(
-         t.created_at||''
-        )}
-       </span>
-
-      </div>
-
-
-      <span class="font-black ${
-       n<0
-        ?'text-red-400'
-        :'text-brandGreen'
-      }">
-
-       ${n>=0?'+':''}
-       Ksh
-       ${Math.abs(
-        n
-       ).toLocaleString()}
-
-      </span>
-
-     </div>`;
-
-    }).join('')
-
-   :
-
-   '<div class="bg-brandCard border border-zinc-800/60 rounded-xl p-3 text-center text-xs text-zinc-500">No transactions recorded yet.</div>';
+ updateWalletHistory();
 
 
  updateReferralLink();
