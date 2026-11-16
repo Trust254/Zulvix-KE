@@ -2178,7 +2178,7 @@ async function renderSponsorAds(placement){
    else creative='<img loading="lazy" src="'+escapeSponsorText(urls[0]||a.media_url||'')+'" alt="'+escapeSponsorText(a.title)+'" class="w-full '+(format==='banner'?'max-h-28 object-cover':'max-h-56 object-contain')+' rounded-lg">';
    return '<article class="rounded-xl border border-zinc-700 bg-zinc-900 p-3 space-y-2"><p class="text-[10px] text-brandGold font-bold uppercase">SPONSORED · '+escapeSponsorText(format)+'</p><p class="text-xs font-bold">'+escapeSponsorText(a.title)+'</p>'+creative+'<a href="'+escapeSponsorText(a.destination_url)+'" target="_blank" rel="noopener noreferrer" class="inline-block text-xs text-brandGreen underline">Learn more</a></article>';
   }).join('');
-  if(placement==='before_tap')host.querySelectorAll('video[data-sponsor-video="1"]').forEach(enforceSponsorVideo);
+  host.querySelectorAll('video[data-sponsor-video="1"]').forEach(enforceSponsorVideo);
  }catch(error){
   host.innerHTML='';
   if(placement==='before_tap'){tapAdReady=true;sponsorVideosPending=0;updateTapButtonAfterAd();}
