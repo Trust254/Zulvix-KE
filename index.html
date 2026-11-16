@@ -397,6 +397,8 @@ class="text-xl font-black text-white">
  </div>
 </div>
 
+<div id="sponsorAdsBefore" class="space-y-2"></div>
+
 <!-- TAP -->
 
 <div class="bg-brandCard border border-zinc-800 rounded-2xl p-6 text-center space-y-4 shadow-xl">
@@ -450,6 +452,8 @@ Tap to earn daily profits. Limit: 6 taps every 12 hours.
 
 </div>
 
+
+<div id="sponsorAdsAfter" class="space-y-2"></div>
 
 <!-- ACTIONS -->
 
@@ -1426,6 +1430,21 @@ class="space-y-2 max-h-60 overflow-y-auto">
 <select id="adAfterProvider" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="unconfigured">Provider not connected</option><option value="house">Zulvix-KE house advert</option><option value="google_ad_manager">Google Ad Manager (after approval)</option></select>
 <input id="adAfterUnit" maxlength="160" placeholder="Approved ad unit ID (optional)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
 </div>
+<div class="rounded-xl border border-brandGreen/30 bg-zinc-900 p-3 space-y-2">
+<strong class="text-xs text-brandGreen">Create image or video advert</strong>
+<input id="sponsorName" maxlength="120" placeholder="Business / sponsor name" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
+<input id="sponsorTitle" maxlength="160" placeholder="Advert title" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
+<select id="sponsorType" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="image">Image advert</option><option value="video">Video advert</option></select>
+<label class="text-[10px] text-zinc-400">Media file (JPG/PNG/WebP or MP4, max 8 MB)</label>
+<input id="sponsorFile" type="file" accept="image/jpeg,image/png,image/webp,video/mp4" class="w-full text-xs">
+<input id="sponsorLink" type="url" placeholder="Destination HTTPS website / WhatsApp link" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
+<select id="sponsorPlacement" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="before_tap">Before tapping</option><option value="after_tap">After tapping</option></select>
+<div class="grid grid-cols-2 gap-2"><input id="sponsorStart" type="date" class="min-w-0 bg-black border border-zinc-700 rounded-lg p-2 text-xs"><input id="sponsorEnd" type="date" class="min-w-0 bg-black border border-zinc-700 rounded-lg p-2 text-xs"></div>
+<input id="sponsorAmount" type="number" min="0" step="1" placeholder="Sponsorship amount (Ksh)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
+<label class="flex gap-2 text-xs"><input id="sponsorPaid" type="checkbox"> Sponsorship payment received</label>
+<button onclick="createSponsorAd()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Upload & Save Advert</button>
+<div id="sponsorAdsList" class="space-y-2"></div>
+</div>
 <button onclick="saveAdminAdSettings()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Save Advertising Settings</button>
 <p id="adminAdsResult" class="text-[10px] text-zinc-400"></p>
 </div>
@@ -2040,8 +2059,30 @@ async function recoverPasswordWithPasskey(){
 }
 async function requestPasswordRecovery(){const mobile=document.getElementById('recoveryMobile').value.trim();if(!mobile)return showToast('Mobile number required','Enter the registered mobile number.',false);try{const d=await api('/api/auth/password-recovery/request',{method:'POST',body:JSON.stringify({mobile})});document.getElementById('recoveryResult').innerText=d.message||'Request submitted.';showToast('Request submitted','Contact the administrator for identity verification and your one-time code.');}catch(e){showToast('Request failed',e.message,false);}}
 async function resetPasswordWithCode(){const mobile=document.getElementById('recoveryMobile').value.trim(),code=document.getElementById('recoveryCode').value.trim(),newPassword=document.getElementById('recoveryNewPassword').value;if(!mobile||!code||!newPassword)return showToast('Details required','Enter mobile, recovery code and new password.',false);try{const d=await api('/api/auth/password-recovery/reset',{method:'POST',body:JSON.stringify({mobile,code,newPassword})});document.getElementById('recoveryResult').innerText=d.message||'Password reset.';document.getElementById('loginPhone').value=mobile;document.getElementById('loginPassword').value='';document.getElementById('recoveryCode').value='';document.getElementById('recoveryNewPassword').value='';showToast('Password updated','You can now sign in with your new password.');}catch(e){showToast('Password reset failed',e.message,false);}}
+function escapeSponsorText(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+async function createSponsorAd(){
+ const file=document.getElementById('sponsorFile').files[0],type=document.getElementById('sponsorType').value;
+ const allowed=type==='image'?['image/jpeg','image/png','image/webp']:['video/mp4'];
+ if(!file||!allowed.includes(file.type)||file.size>8*1024*1024)return showToast('Invalid media','Choose JPG, PNG, WebP or MP4 up to 8 MB.',false);
+ const destination=document.getElementById('sponsorLink').value.trim();if(!/^https:\/\//i.test(destination))return showToast('Secure link required','Enter an HTTPS destination URL.',false);
+ try{
+  const dataUrl=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});
+  await api('/api/admin/sponsor-ads',{method:'POST',body:JSON.stringify({sponsor_name:document.getElementById('sponsorName').value.trim(),title:document.getElementById('sponsorTitle').value.trim(),media_type:type,mime_type:file.type,file_name:file.name,data_url:dataUrl,destination_url:destination,placement:document.getElementById('sponsorPlacement').value,start_at:document.getElementById('sponsorStart').value||null,end_at:document.getElementById('sponsorEnd').value||null,sponsorship_amount:Number(document.getElementById('sponsorAmount').value||0),payment_status:document.getElementById('sponsorPaid').checked?'paid':'pending'})});
+  document.getElementById('sponsorFile').value='';await loadSponsorAds();showToast('Advert uploaded','New advert saved inactive. Activate it after confirming payment.');
+ }catch(e){showToast('Upload failed',e.message||'Could not upload advert.',false);}
+}
+async function loadSponsorAds(){
+ const host=document.getElementById('sponsorAdsList');if(!host)return;
+ try{const d=await api('/api/admin/sponsor-ads');host.innerHTML=(d.ads||[]).map(a=>'<div class="border border-zinc-700 rounded-lg p-2 text-xs flex justify-between gap-2"><span>'+escapeSponsorText(a.title)+' · '+escapeSponsorText(a.media_type)+' · '+escapeSponsorText(a.placement)+' · '+escapeSponsorText(a.payment_status)+'</span><button class="text-amber-300" onclick="toggleSponsorAd(\''+escapeSponsorText(a.id)+'\','+(!a.is_active)+')">'+(a.is_active?'Deactivate':'Activate')+'</button></div>').join('')||'<p class="text-zinc-500 text-xs">No sponsor adverts yet.</p>';}catch(e){host.textContent='Could not load sponsor adverts: '+e.message;}
+}
+async function toggleSponsorAd(id,active){try{await api('/api/admin/sponsor-ads/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({is_active:active})});await loadSponsorAds();}catch(e){showToast('Update failed',e.message,false);}}
+async function renderSponsorAds(placement){
+ const host=document.getElementById(placement==='before_tap'?'sponsorAdsBefore':'sponsorAdsAfter');if(!host)return;
+ try{const response=await fetch(API+'/api/ads/active?placement='+encodeURIComponent(placement));const d=await response.json();host.innerHTML=(d.ads||[]).map(a=>'<article class="rounded-xl border border-zinc-700 bg-zinc-900 p-3 space-y-2"><p class="text-[10px] text-brandGold font-bold uppercase">Sponsored · '+escapeSponsorText(a.sponsor_name)+'</p><p class="text-xs font-bold">'+escapeSponsorText(a.title)+'</p><a href="'+escapeSponsorText(a.destination_url)+'" target="_blank" rel="noopener noreferrer" class="block">'+(a.media_type==='video'?'<video controls playsinline preload="metadata" class="w-full max-h-56 rounded-lg"><source src="'+escapeSponsorText(a.media_url)+'" type="'+escapeSponsorText(a.mime_type)+'"></video>':'<img loading="lazy" src="'+escapeSponsorText(a.media_url)+'" alt="'+escapeSponsorText(a.title)+'" class="w-full max-h-56 object-contain rounded-lg">')+'</a><a href="'+escapeSponsorText(a.destination_url)+'" target="_blank" rel="noopener noreferrer" class="text-[10px] text-brandGreen underline">Learn more</a></article>').join('');}catch(e){host.innerHTML='';}
+}
 async function loadAdminAdSettings(){
  const result=document.getElementById('adminAdsResult');
+ loadSponsorAds();
  try{
   const d=await api('/api/admin/ads');
   const slots=d.placements||[];
@@ -2305,6 +2346,8 @@ async function handleTapAsset(){
 
  if(tapInProgress)return;
 
+ await renderSponsorAds('before_tap');
+
  if(Number(appState.tapsLeft||0)<=0){
 
   checkCountdownTimer();
@@ -2352,6 +2395,8 @@ async function handleTapAsset(){
 
   const reward=
    Number(d.reward||0);
+
+  await renderSponsorAds('after_tap');
 
   showToast(
    'Tap Accepted',
