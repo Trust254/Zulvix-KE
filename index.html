@@ -373,6 +373,15 @@ class="text-xl font-black text-white">
 
 </div>
 
+<div class="bg-brandCard border border-zinc-800 rounded-xl p-3 space-y-2">
+ <div class="flex justify-between items-center">
+  <div><h3 class="text-xs font-bold text-white">Notifications</h3><p class="text-[10px] text-zinc-500">Official updates from Zulvix-KE</p></div>
+  <button onclick="loadUserNotifications()" class="text-[10px] text-brandGreen font-bold">Refresh</button>
+ </div>
+ <div id="userNotificationList" class="space-y-2 max-h-48 overflow-y-auto">
+  <p class="text-[10px] text-zinc-500">Sign in to view announcements.</p>
+ </div>
+</div>
 
 <!-- TAP -->
 
@@ -1935,6 +1944,25 @@ async function handleLogin(){
    REFRESH USER
 ========================================================= */
 
+async function loadUserNotifications(){
+ const host=document.getElementById('userNotificationList');
+ if(!host)return;
+ if(!localStorage.getItem(USER_TOKEN_KEY)){host.innerHTML='<p class="text-[10px] text-zinc-500">Sign in to view announcements.</p>';return;}
+ try{
+  const d=await api('/api/notifications');
+  const items=d.notifications||[];
+  host.innerHTML=items.length?items.map(n=>`<button onclick="markUserNotificationRead('${esc(n.id)}')" class="w-full text-left rounded-lg p-2 border ${n.read_at?'border-zinc-800 bg-zinc-900':'border-brandGreen/40 bg-brandGreen/5'}">
+   <div class="flex justify-between gap-2"><strong class="text-[11px] text-white">${esc(n.title||'Announcement')}</strong><span class="text-[9px] text-zinc-500">${n.read_at?'Read':'New'}</span></div>
+   <p class="text-[10px] text-zinc-300 whitespace-pre-wrap">${esc(n.message||'')}</p>
+   <span class="text-[9px] text-zinc-600">${n.created_at?esc(new Date(n.created_at).toLocaleString()):''}</span>
+  </button>`).join(''):'<p class="text-[10px] text-zinc-500">No announcements yet.</p>';
+ }catch(e){host.innerHTML='<p class="text-[10px] text-red-400">Could not load notifications.</p>';}
+}
+async function markUserNotificationRead(id){
+ try{await api('/api/notifications/'+encodeURIComponent(id)+'/read',{method:'POST'});await loadUserNotifications();}
+ catch(e){showToast('Notification error',e.message,false);}
+}
+
 async function refreshUser(silent=false){
 
  const token=
@@ -1950,6 +1978,7 @@ async function refreshUser(silent=false){
    await api('/api/me');
 
   applyUser(d.user);
+  await loadUserNotifications();
 
   return true;
 
