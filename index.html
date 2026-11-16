@@ -1083,6 +1083,14 @@ Submit Deposit Request
    <p>Blocking an account does not itself cancel the user's balance or erase transaction history. Users may contact Support to request a review. Inactivity for five days may be flagged for administrator review; it does not automatically confiscate funds or permanently block an account.</p>
   </div>
  </details>
+ <div class="border-t border-zinc-800 pt-3 space-y-2">
+  <h3 class="text-xs font-bold text-white">Account Appeal / Contact Support</h3>
+  <p class="text-[10px] text-zinc-400">If you cannot access your account, enter your registered phone number and explain your appeal.</p>
+  <input id="publicAppealPhone" type="tel" placeholder="Registered phone number" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
+  <textarea id="publicAppealMessage" rows="3" maxlength="3000" placeholder="Explain your account concern..." class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs"></textarea>
+  <button onclick="submitPublicAppeal()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Submit Appeal</button>
+  <p id="publicAppealResult" class="text-[10px] text-zinc-400"></p>
+ </div>
  <p class="text-[9px] text-zinc-500 border-t border-zinc-800 pt-2">These are general platform disclosures, not legal advice. The platform owner must verify the operator identity, applicable laws, fees, contact details and payment arrangements before treating these pages as final legal terms.</p>
 </section>
 
@@ -1995,6 +2003,18 @@ async function handleLogin(){
 /* =========================================================
    REFRESH USER
 ========================================================= */
+
+async function submitPublicAppeal(){
+ const mobile=document.getElementById('publicAppealPhone').value.trim();
+ const message=document.getElementById('publicAppealMessage').value.trim();
+ if(!mobile||!message)return showToast('Appeal incomplete','Enter your phone number and appeal message.',false);
+ try{
+  const d=await api('/api/account/appeal',{method:'POST',body:JSON.stringify({mobile,message})});
+  document.getElementById('publicAppealResult').innerText=d.message||'Appeal submitted.';
+  document.getElementById('publicAppealMessage').value='';
+  showToast('Appeal submitted',d.message||'Your appeal has been sent.');
+ }catch(e){showToast('Appeal failed',e.message,false);}
+}
 
 async function loadUserNotifications(){
  const host=document.getElementById('userNotificationList');
