@@ -2104,6 +2104,19 @@ function updateSponsorMediaInput(){
  label.textContent=type==='video'?'MP4 video, max 8 MB':type==='carousel'?'Choose 2–8 images (JPG/PNG/WebP), total max 8 MB':'Image file (JPG/PNG/WebP), max 8 MB';
  body.classList.toggle('hidden',type!=='text');
 }
+function readSponsorFile(file,mimeType){
+ return new Promise((resolve,reject)=>{
+  const reader=new FileReader();
+  reader.onload=()=>{
+   if(typeof reader.result!=='string'||!reader.result.startsWith('data:'))return reject(new Error('The selected file could not be converted for upload. Please choose the MP4 again.'));
+   resolve({data_url:reader.result,mime_type:mimeType,file_name:file.name});
+  };
+  reader.onerror=()=>reject(new Error('Your browser could not read "'+file.name+'". Please choose the video again or try a smaller MP4 file.'));
+  reader.onabort=()=>reject(new Error('Reading "'+file.name+'" was cancelled. Please try again.'));
+  const source=file.type===mimeType?file:file.slice(0,file.size,mimeType);
+  reader.readAsDataURL(source);
+ });
+}
 async function createSponsorAd(){
  const format=document.getElementById('sponsorType').value,files=Array.from(document.getElementById('sponsorFile').files||[]);
  const textContent=document.getElementById('sponsorText').value.trim();
@@ -2111,15 +2124,26 @@ async function createSponsorAd(){
  if(format==='text'&&!textContent)return showToast('Text required','Enter the text advert description.',false);
  if(format!=='text'&&!files.length)return showToast('Media required','Choose the advert media file.',false);
  if(format==='carousel'&&(files.length<2||files.length>8))return showToast('Carousel images','Choose between 2 and 8 images.',false);
- if(format==='video'&&(files.length!==1||files[0].type!=='video/mp4'))return showToast('Video required','Choose one MP4 video.',false);
+ const videoMime=format==='video'&&files.length===1&&/\.mp4$/i.test(files[0].name)?(files[0].type||'video/mp4'):'';
+ if(format==='video'&&(files.length!==1||!['video/mp4','application/mp4'].includes(videoMime)))return showToast('Video required','Choose one MP4 video file.',false);
  if(['banner','image','carousel'].includes(format)&&files.some(x=>!imageTypes.includes(x.type)))return showToast('Image format','Use JPG, PNG or WebP images.',false);
+ if(files.some(x=>!Number.isFinite(x.size)||x.size<=0))return showToast('Invalid file','The selected file is empty or cannot be read.',false);
  if(files.reduce((n,x)=>n+x.size,0)>8*1024*1024)return showToast('Files too large','All selected files together must be 8 MB or less.',false);
  const destination=document.getElementById('sponsorLink').value.trim();if(!/^https:\/\//i.test(destination))return showToast('Secure link required','Enter an HTTPS destination URL.',false);
+ const uploadButton=document.querySelector('button[onclick="createSponsorAd()"]');
+ const originalButtonText=uploadButton?uploadButton.textContent:'Upload & Save Advert';
+ if(uploadButton){uploadButton.disabled=true;uploadButton.textContent='Uploading advert…';uploadButton.classList.add('opacity-60');}
  try{
-  const dataUrls=await Promise.all(files.map(file=>new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve({data_url:reader.result,mime_type:file.type,file_name:file.name});reader.onerror=reject;reader.readAsDataURL(file);})));
+  const dataUrls=await Promise.all(files.map(file=>readSponsorFile(file,format==='video'?'video/mp4':file.type)));
   await api('/api/admin/sponsor-ads',{method:'POST',body:JSON.stringify({sponsor_name:document.getElementById('sponsorName').value.trim(),title:document.getElementById('sponsorTitle').value.trim(),ad_format:format,text_content:textContent,data_urls:dataUrls,destination_url:destination,placement:document.getElementById('sponsorPlacement').value,start_at:document.getElementById('sponsorStart').value||null,end_at:document.getElementById('sponsorEnd').value||null,sponsorship_amount:Number(document.getElementById('sponsorAmount').value||0),payment_status:document.getElementById('sponsorPaid').checked?'paid':'pending'})});
   document.getElementById('sponsorFile').value='';document.getElementById('sponsorText').value='';await loadSponsorAds();showToast('Advert saved','New advert is inactive. Activate it after confirming payment.');
- }catch(e){showToast('Upload failed',e.message||'Could not upload advert.',false);}
+ }catch(e){
+  const message=e&&e.message?e.message:'The browser could not read or send the selected file. Please retry with an MP4 under 8 MB.';
+  console.error('SPONSOR AD UPLOAD FAILED',e);
+  showToast('Upload failed',message,false);
+ }finally{
+  if(uploadButton){uploadButton.disabled=false;uploadButton.textContent=originalButtonText;uploadButton.classList.remove('opacity-60');}
+ }
 }
 async function loadSponsorAds(){
  const host=document.getElementById('sponsorAdsList');if(!host)return;
