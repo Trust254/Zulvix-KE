@@ -1493,7 +1493,7 @@ class="space-y-2 max-h-60 overflow-y-auto">
    </div>
    <textarea id="sponsorText" rows="3" maxlength="1200" placeholder="Text advert description / offer" class="hidden w-full bg-black border border-zinc-700 rounded-xl p-3 text-xs"></textarea>
    <label id="sponsorFileLabel" for="sponsorFile" class="block text-xs text-zinc-300">Choose MP4 video · maximum 8 MB</label>
-   <input id="sponsorFile" type="file" accept="video/mp4,.mp4" class="block w-full rounded-xl border border-dashed border-zinc-600 bg-black p-3 text-xs">
+   <input id="sponsorFile" type="file" accept="video/mp4,.mp4" onchange="showSponsorFileInfo()" class="block w-full rounded-xl border border-dashed border-zinc-600 bg-black p-3 text-xs">
    <div id="sponsorFileInfo" class="text-[10px] text-zinc-500" aria-live="polite">Choose a video file from your phone or computer.</div>
    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
     <input id="sponsorLink" type="url" placeholder="Destination HTTPS website link" class="w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs">
