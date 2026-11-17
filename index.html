@@ -180,10 +180,22 @@ Sign In to Dashboard
 <button onclick="handlePasskeyLogin()" class="w-full bg-zinc-800 border border-brandGreen/40 text-brandGreen font-bold py-2.5 rounded-xl text-sm"><i class="fa-solid fa-fingerprint mr-2"></i>Sign In with Passkey / Fingerprint</button>
 <button onclick="toggleRecoveryPanel()" class="w-full text-xs text-brandGold underline">Forgot password? Choose a recovery method</button>
 <div id="passwordRecoveryPanel" class="hidden border border-zinc-700 rounded-xl p-3 space-y-2">
- <p class="text-[11px] text-zinc-300">Recover with a previously enabled phone passkey, or request a one-time code from the administrator.</p>
+ <p class="text-[11px] text-zinc-300">Choose a recovery method you previously enabled, or request a one-time code from the administrator.</p>
  <input id="recoveryMobile" type="tel" placeholder="Registered mobile number" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
- <input id="passkeyRecoveryNewPassword" type="password" minlength="8" placeholder="New password (at least 8 characters)" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
- <button onclick="recoverPasswordWithPasskey()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs"><i class="fa-solid fa-fingerprint mr-1"></i>Verify Fingerprint & Set New Password</button>
+ <div class="border-t border-zinc-700 pt-2 space-y-2">
+  <p class="text-[10px] text-zinc-400">Google Authenticator (if you enabled it earlier):</p>
+  <input id="authenticatorRecoveryCode" inputmode="numeric" maxlength="6" placeholder="6-digit Google Authenticator code" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
+  <button onclick="verifyAuthenticatorRecovery()" class="w-full bg-zinc-700 text-white font-bold py-2 rounded-lg text-xs">Verify Google Authenticator</button>
+  <div id="authenticatorResetFields" class="hidden space-y-2">
+   <input id="authenticatorNewPassword" type="password" minlength="8" placeholder="New password (at least 8 characters)" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
+   <button onclick="resetPasswordWithAuthenticator()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Set New Password</button>
+  </div>
+ </div>
+ <div class="border-t border-zinc-700 pt-2 space-y-2">
+  <p class="text-[10px] text-zinc-400">Other available recovery methods:</p>
+  <input id="passkeyRecoveryNewPassword" type="password" minlength="8" placeholder="New password (at least 8 characters)" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
+  <button onclick="recoverPasswordWithPasskey()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs"><i class="fa-solid fa-fingerprint mr-1"></i>Verify Fingerprint & Set New Password</button>
+ </div>
  <div class="border-t border-zinc-700 pt-2"><p class="text-[10px] text-zinc-400">Or use administrator recovery:</p></div>
  <button onclick="requestPasswordRecovery()" class="w-full bg-zinc-700 text-white font-bold py-2 rounded-lg text-xs">Request Recovery Code</button>
  <input id="recoveryCode" inputmode="numeric" maxlength="8" placeholder="8-digit recovery code" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
@@ -787,6 +799,19 @@ Send Complaint Request
  <p class="text-[10px] text-zinc-400">Optional: register a passkey on this device after signing in. Your phone may use fingerprint, face recognition or screen-lock PIN. This is not required for registration. Zulvix-KE never receives your biometric data.</p>
  <input id="passkeyCurrentPassword" type="password" autocomplete="current-password" placeholder="Confirm current password" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
  <button onclick="registerPasskey()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Register This Device as a Passkey</button>
+ <div class="border-t border-zinc-700 pt-3 mt-2 space-y-2">
+  <h5 class="text-xs font-bold text-brandGreen"><i class="fa-brands fa-google mr-1"></i>Google Authenticator (Optional Password Recovery)</h5>
+  <p id="authenticatorStatus" class="text-[10px] text-zinc-400">Not enabled. Set it up to recover your password without SMS.</p>
+  <input id="authenticatorCurrentPassword" type="password" autocomplete="current-password" placeholder="Confirm your current password" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
+  <button onclick="setupGoogleAuthenticator()" class="w-full bg-zinc-700 text-white font-bold py-2 rounded-lg text-xs">Set Up Google Authenticator</button>
+  <div id="authenticatorSetupPanel" class="hidden space-y-2 border border-zinc-700 rounded-lg p-2">
+   <p class="text-[10px] text-zinc-300">In Google Authenticator, tap +, choose Enter a setup key, name it Zulvix-KE, and enter this key as a time-based code:</p>
+   <code id="authenticatorSetupSecret" class="block break-all text-xs text-brandGreen select-all"></code>
+   <button onclick="copyAuthenticatorSecret()" class="w-full bg-zinc-700 text-white font-bold py-2 rounded-lg text-xs">Copy Setup Key</button>
+   <input id="authenticatorEnableCode" inputmode="numeric" maxlength="6" placeholder="Enter the 6-digit code from Google Authenticator" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs">
+   <button onclick="enableGoogleAuthenticator()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Verify Code & Enable</button>
+  </div>
+ </div>
 </div><button onclick="document.getElementById('aboutPolicies').scrollIntoView({behavior:'smooth'})" class="w-full bg-zinc-800 text-brandGreen font-bold py-2.5 rounded-xl text-xs">About Us & Policies</button>
 
 <button
@@ -2188,6 +2213,59 @@ function passkeyErrorMessage(error){
  return error&&error.message||'Unable to register a passkey. Please try again.';
 }
 async function handlePasskeyLogin(){const mobile=document.getElementById('loginPhone').value.trim();if(!mobile)return showToast('Mobile number required','Enter your registered mobile number, then choose passkey sign-in.',false);if(!window.PublicKeyCredential||!navigator.credentials)return showToast('Passkeys unavailable','This browser or device does not support passkeys.',false);try{const s=await api('/api/auth/passkey/login/options',{method:'POST',body:JSON.stringify({mobile})});const c=await navigator.credentials.get({publicKey:prepPasskeyOptions(s.options)});if(!c)throw new Error('Passkey sign-in was cancelled.');const d=await api('/api/auth/passkey/login/verify',{method:'POST',body:JSON.stringify({mobile,challengeId:s.challengeId,...serializePasskey(c)})});localStorage.setItem(USER_TOKEN_KEY,d.token);applyUser(d.user);await loadUserNotifications();showToast('Signed In','Passkey sign-in successful.');}catch(e){showToast('Passkey sign-in failed',e.message||'Try signing in with your password.',false);}}
+let authenticatorResetToken='';
+async function loadAuthenticatorStatus(){try{const d=await api('/api/authenticator/status');const el=document.getElementById('authenticatorStatus');if(el)el.textContent=d.enabled?'Google Authenticator is enabled for password recovery.':'Not enabled. Set it up to recover your password without SMS.';}catch(e){}}
+async function setupGoogleAuthenticator(){
+ const password=document.getElementById('authenticatorCurrentPassword').value;
+ if(!password)return showToast('Password required','Confirm your current password to set up Google Authenticator.',false);
+ try{
+  const d=await api('/api/authenticator/setup',{method:'POST',body:JSON.stringify({currentPassword:password})});
+  document.getElementById('authenticatorSetupSecret').textContent=d.secret;
+  document.getElementById('authenticatorSetupPanel').classList.remove('hidden');
+  showToast('Setup key ready','Add the key to Google Authenticator, then enter its six-digit code here.');
+ }catch(e){showToast('Authenticator setup failed',e.message||'Please try again.',false);}
+}
+async function copyAuthenticatorSecret(){const secret=document.getElementById('authenticatorSetupSecret').textContent;if(!secret)return;try{await navigator.clipboard.writeText(secret);showToast('Copied','Authenticator setup key copied.');}catch(e){showToast('Copy unavailable','Select and copy the setup key manually.',false);}}
+async function enableGoogleAuthenticator(){
+ const code=document.getElementById('authenticatorEnableCode').value.trim();
+ if(!/^\\d{6}$/.test(code))return showToast('Code required','Enter the six-digit code shown in Google Authenticator.',false);
+ try{
+  const d=await api('/api/authenticator/enable',{method:'POST',body:JSON.stringify({code})});
+  document.getElementById('authenticatorSetupPanel').classList.add('hidden');
+  document.getElementById('authenticatorCurrentPassword').value='';
+  document.getElementById('authenticatorEnableCode').value='';
+  document.getElementById('authenticatorStatus').textContent='Google Authenticator is enabled for password recovery.';
+  showToast('Authenticator enabled',d.message||'You can use it to recover your password.');
+ }catch(e){showToast('Verification failed',e.message||'Check the code and try again.',false);}
+}
+async function verifyAuthenticatorRecovery(){
+ const mobile=document.getElementById('recoveryMobile').value.trim();
+ const code=document.getElementById('authenticatorRecoveryCode').value.trim();
+ if(!mobile||!code)return showToast('Details required','Enter your registered mobile number and six-digit code.',false);
+ try{
+  const d=await api('/api/authenticator/password-recovery/verify',{method:'POST',body:JSON.stringify({mobile,code})});
+  authenticatorResetToken=d.resetToken;
+  document.getElementById('authenticatorResetFields').classList.remove('hidden');
+  showToast('Verification successful','Now enter your new password within five minutes.');
+ }catch(e){authenticatorResetToken='';showToast('Authenticator verification failed',e.message||'Check your code and try again.',false);}
+}
+async function resetPasswordWithAuthenticator(){
+ const mobile=document.getElementById('recoveryMobile').value.trim();
+ const newPassword=document.getElementById('authenticatorNewPassword').value;
+ if(!authenticatorResetToken)return showToast('Verification required','Verify your Google Authenticator code first.',false);
+ if(newPassword.length<8)return showToast('Password too short','Use at least 8 characters.',false);
+ try{
+  const d=await api('/api/authenticator/password-recovery/reset',{method:'POST',body:JSON.stringify({mobile,resetToken:authenticatorResetToken,newPassword})});
+  authenticatorResetToken='';
+  document.getElementById('authenticatorResetFields').classList.add('hidden');
+  document.getElementById('authenticatorRecoveryCode').value='';
+  document.getElementById('authenticatorNewPassword').value='';
+  document.getElementById('loginPhone').value=mobile;
+  document.getElementById('loginPassword').value='';
+  document.getElementById('recoveryResult').innerText=d.message||'Password reset successfully.';
+  showToast('Password updated','You can now sign in with your new password.');
+ }catch(e){showToast('Password reset failed',e.message||'Verify again and retry.',false);}
+}
 function toggleRecoveryPanel(){const p=document.getElementById('passwordRecoveryPanel');p.classList.toggle('hidden');const m=document.getElementById('loginPhone').value.trim();if(m&&!document.getElementById('recoveryMobile').value)document.getElementById('recoveryMobile').value=m;}
 async function recoverPasswordWithPasskey(){
  const mobile=document.getElementById('recoveryMobile').value.trim();
