@@ -2187,7 +2187,7 @@ function passkeyErrorMessage(error){
  if(name==='NotSupportedError')return 'This device does not currently offer a compatible screen-lock or biometric passkey.';
  return error&&error.message||'Unable to register a passkey. Please try again.';
 }
-async function handlePasskeyLogin(){const mobile=document.getElementById('loginPhone').value.trim();if(!mobile)return showToast('Mobile number required','Enter your registered mobile number, then choose passkey sign-in.',false);if(!window.PublicKeyCredential||!navigator.credentials)return showToast('Passkeys unavailable','This browser or device does not support passkeys.',false);try{const s=await api('/api/auth/passkey/login/options',{method:'POST',body:JSON.stringify({mobile})});const c=await navigator.credentials.get({publicKey:prepPasskeyOptions(s.options)});if(!c)throw new Error('Passkey sign-in was cancelled.');const d=await api('/api/auth/passkey/login/verify',{method:'POST',body:JSON.stringify({mobile,...serializePasskey(c)})});localStorage.setItem(USER_TOKEN_KEY,d.token);applyUser(d.user);await loadUserNotifications();showToast('Signed In','Passkey sign-in successful.');}catch(e){showToast('Passkey sign-in failed',e.message||'Try signing in with your password.',false);}}
+async function handlePasskeyLogin(){const mobile=document.getElementById('loginPhone').value.trim();if(!mobile)return showToast('Mobile number required','Enter your registered mobile number, then choose passkey sign-in.',false);if(!window.PublicKeyCredential||!navigator.credentials)return showToast('Passkeys unavailable','This browser or device does not support passkeys.',false);try{const s=await api('/api/auth/passkey/login/options',{method:'POST',body:JSON.stringify({mobile})});const c=await navigator.credentials.get({publicKey:prepPasskeyOptions(s.options)});if(!c)throw new Error('Passkey sign-in was cancelled.');const d=await api('/api/auth/passkey/login/verify',{method:'POST',body:JSON.stringify({mobile,challengeId:s.challengeId,...serializePasskey(c)})});localStorage.setItem(USER_TOKEN_KEY,d.token);applyUser(d.user);await loadUserNotifications();showToast('Signed In','Passkey sign-in successful.');}catch(e){showToast('Passkey sign-in failed',e.message||'Try signing in with your password.',false);}}
 function toggleRecoveryPanel(){const p=document.getElementById('passwordRecoveryPanel');p.classList.toggle('hidden');const m=document.getElementById('loginPhone').value.trim();if(m&&!document.getElementById('recoveryMobile').value)document.getElementById('recoveryMobile').value=m;}
 async function recoverPasswordWithPasskey(){
  const mobile=document.getElementById('recoveryMobile').value.trim();
@@ -2200,7 +2200,7 @@ async function recoverPasswordWithPasskey(){
   const start=await api('/api/auth/passkey/login/options',{method:'POST',body:JSON.stringify({mobile})});
   const credential=await navigator.credentials.get({publicKey:prepPasskeyOptions(start.options)});
   if(!credential)throw new Error('Fingerprint verification was cancelled.');
-  const verified=await api('/api/auth/passkey/login/verify',{method:'POST',body:JSON.stringify({mobile,...serializePasskey(credential)})});
+  const verified=await api('/api/auth/passkey/login/verify',{method:'POST',body:JSON.stringify({mobile,challengeId:start.challengeId,...serializePasskey(credential)})});
   temporaryToken=verified.token;
   localStorage.setItem(USER_TOKEN_KEY,temporaryToken);
   const result=await api('/api/auth/password-recovery/passkey-reset',{method:'POST',body:JSON.stringify({newPassword})});
