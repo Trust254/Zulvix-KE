@@ -1756,7 +1756,7 @@ async function api(path,options={}){
  }
 
  const response=
-  await fetch(API+path,{
+  await fetchWithRetry(API+path,{
    ...options,
    headers
   });
