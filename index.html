@@ -1509,11 +1509,13 @@ const USER_TOKEN_KEY='zulvix_auth_token';
 const ADMIN_TOKEN_KEY='zulvix_admin_token';
 
 /* Ads Manager -> public Zulvix-KE ad feed */
-const zulvixLiveAds={before:null,after:null};
+const zulvixLiveAds={all:[]};
 let sponsorBeforeTapPending=false;
-let sponsorBeforeTapStarted=false;
 let sponsorBeforeTapVideo=null;
 let sponsorGestureRetryInstalled=false;
+let sponsorDashboardStarted=false;
+let sponsorDashboardIndex=0;
+let sponsorDashboardTimer=null;
 function setSponsorTapLocked(locked){
  const b=document.getElementById("tapButton");
  if(!b)return;
@@ -1541,18 +1543,27 @@ function enableSponsorGestureRetry(){
  document.addEventListener("pointerdown",retrySponsorVideoFromGesture,true);
  document.addEventListener("keydown",retrySponsorVideoFromGesture,true);
 }
+function showNextDashboardSponsorAd(){
+ if(sponsorDashboardTimer){clearTimeout(sponsorDashboardTimer);sponsorDashboardTimer=null;}
+ if(!appState.isLoggedIn||sponsorDashboardIndex>=zulvixLiveAds.all.length)return;
+ const ad=zulvixLiveAds.all[sponsorDashboardIndex++];
+ showLiveAd(ad,"dashboard");
+}
 function showLiveAd(ad,where){
- const p=where==="before_tap"?"zulvixAdBefore":"zulvixAdAfter",root=document.getElementById(p);
+ const dashboard=where==="dashboard";
+ const p=where==="after_tap"?"zulvixAdAfter":"zulvixAdBefore",root=document.getElementById(p);
  if(!root||!ad)return;
  const im=document.getElementById(p+"Image"),v=document.getElementById(p+"Video"),tx=document.getElementById(p+"Text"),a=document.getElementById(p+"Link");
- if(where==="before_tap"){
-  sponsorBeforeTapStarted=true;
+ const beforeTap=where==="before_tap"||(dashboard&&ad.placement==="before_tap");
+ if(beforeTap){
   sponsorBeforeTapPending=false;
   sponsorBeforeTapVideo=null;
   removeSponsorGestureRetry();
  }
+ const hint=document.getElementById(p+"Hint");
+ if(hint)hint.classList.toggle("hidden",!beforeTap);
  im.classList.add("hidden");v.classList.add("hidden");tx.classList.add("hidden");
- v.pause();v.muted=false;v.defaultMuted=false;v.volume=1;v.removeAttribute("src");v.load();
+ v.pause();v.onended=null;v.onerror=null;v.muted=false;v.defaultMuted=false;v.volume=1;v.removeAttribute("src");v.load();
  a.href=ad.destination_url||"#";
  document.getElementById(p+"Title").textContent=ad.title||"";
  document.getElementById(p+"Sponsor").textContent=ad.sponsor_name||"";
@@ -1560,31 +1571,41 @@ function showLiveAd(ad,where){
  if(kind==="video"){
   v.src=ad.media_url||(ad.media_urls||[])[0]||"";
   v.preload="auto";
+  v.controls=true;
   v.classList.remove("hidden");
-  v.controls=where!=="before_tap";
-  if(where==="before_tap"){
+  if(beforeTap){
    sponsorBeforeTapPending=true;
    sponsorBeforeTapVideo=v;
    setSponsorTapLocked(true);
-   const hint=document.getElementById(p+"Hint");
-   if(hint)hint.classList.remove("hidden");
   }
   v.onended=()=>{
    root.classList.add("hidden");
-   if(where==="before_tap"){
+   if(beforeTap){
     sponsorBeforeTapPending=false;
     sponsorBeforeTapVideo=null;
     removeSponsorGestureRetry();
     checkCountdownTimer();
    }
+   if(dashboard)showNextDashboardSponsorAd();
+  };
+  v.onerror=()=>{
+   console.warn("Sponsored video could not be loaded:",v.currentSrc||v.src);
+   root.classList.add("hidden");
+   if(beforeTap){
+    sponsorBeforeTapPending=false;
+    sponsorBeforeTapVideo=null;
+    removeSponsorGestureRetry();
+    checkCountdownTimer();
+   }
+   if(dashboard)showNextDashboardSponsorAd();
   };
   root.classList.remove("hidden");
   v.muted=false;v.defaultMuted=false;v.volume=1;
   const attempt=v.play();
   if(attempt&&typeof attempt.catch==="function"){
    attempt.catch(e=>{
-    console.warn("Chrome blocked advert autoplay with sound. The tap remains locked until the advert plays and finishes.",e);
-    if(where==="before_tap"&&e&&e.name==="NotAllowedError")enableSponsorGestureRetry();
+    console.warn("Browser blocked advert autoplay. Use the visible video play control; the tap remains locked for a before-tap campaign until playback finishes.",e);
+    if(beforeTap&&e&&e.name==="NotAllowedError")enableSponsorGestureRetry();
    });
   }
   return;
@@ -1597,21 +1618,27 @@ function showLiveAd(ad,where){
   im.classList.remove("hidden");
  }
  root.classList.remove("hidden");
+ if(dashboard)sponsorDashboardTimer=window.setTimeout(showNextDashboardSponsorAd,10000);
 }
 function activatePendingBeforeTapAd(){
- if(appState.isLoggedIn&&zulvixLiveAds.before&&!sponsorBeforeTapStarted)showLiveAd(zulvixLiveAds.before,"before_tap");
+ if(appState.isLoggedIn&&zulvixLiveAds.all.length&&!sponsorDashboardStarted){
+  sponsorDashboardStarted=true;
+  sponsorDashboardIndex=0;
+  showNextDashboardSponsorAd();
+ }
 }
 async function loadLiveSponsorAds(){
  try{
   const r=await fetch(API+"/api/ads/active",{cache:"no-store"});
   if(!r.ok)return;
   const d=await r.json(),ads=Array.isArray(d.ads)?d.ads:[];
-  const b=ads.find(x=>x.placement==="before_tap"),a=ads.find(x=>x.placement==="after_tap");
-  if(b){zulvixLiveAds.before=b;if(appState.isLoggedIn)showLiveAd(b,"before_tap");}
-  if(a)zulvixLiveAds.after=a;
+  ads.sort((a,b)=>(a.placement==="before_tap"?0:1)-(b.placement==="before_tap"?0:1));
+  zulvixLiveAds.all=ads;
+  activatePendingBeforeTapAd();
  }catch(e){console.warn("Sponsor adverts unavailable",e);}
 }
-function showAfterTapSponsorAd(){if(zulvixLiveAds.after)showLiveAd(zulvixLiveAds.after,"after_tap");}
+function showAfterTapSponsorAd(){/* Active campaigns now play from the dashboard without waiting for a tap. */}
+
 
 
 
