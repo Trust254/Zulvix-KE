@@ -12,7 +12,7 @@
 <form id="adForm">
 <div class="field"><label>Sponsor / business name</label><input id="sponsor" maxlength="120" required placeholder="Business name"></div>
 <div class="field"><label>Advert title</label><input id="title" maxlength="160" required placeholder="Campaign title"></div>
-<div class="row"><div class="field"><label>Media type</label><select id="mediaType"><option value="image">Image</option><option value="video">MP4 video</option><option value="text">Text only</option></select></div><div class="field"><label>Placement</label><select id="placement"><option value="before_tap">Before tap</option><option value="after_tap">After tap</option></select></div></div>
+<div class="row"><div class="field"><label>Media type</label><select id="mediaType"><option value="image">Image</option><option value="video">MP4 video</option><option value="text">Text only</option></select></div><div class="field"><label>Placement</label><select id="placement"><option value="dashboard">Dashboard (anytime)</option><option value="before_tap">Before tap (locks tap until video ends)</option><option value="after_tap">Dashboard (no tap lock)</option></select></div></div>
 <div class="field" id="fileField"><label id="fileLabel">Image file (JPG, PNG, WebP; max 10 MB)</label><input id="mediaFile" type="file" accept="image/jpeg,image/png,image/webp"></div>
 <div class="field hidden" id="textField"><label>Text advert content</label><textarea id="textContent" rows="3" maxlength="1200"></textarea></div>
 <div class="field"><label>Destination link (HTTPS)</label><input id="destination" type="url" placeholder="https://example.com" required></div>
