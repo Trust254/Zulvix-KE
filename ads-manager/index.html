@@ -40,6 +40,22 @@ function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&l
 async function toggleAd(id,value){try{if(value&&!ads.find(a=>a.id===id)?.payment_status?.includes("paid")){const a=ads.find(x=>x.id===id);if(a?.payment_status!=="paid")throw new Error("Mark the campaign as paid before activating it.");}await api("/api/admin/sponsor-ads/"+encodeURIComponent(id),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({is_active:value})});await loadAds();}catch(e){msg("listMsg",e.message,"error");}}
 async function togglePayment(id,value){try{await api("/api/admin/sponsor-ads/"+encodeURIComponent(id),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({payment_status:value})});await loadAds();}catch(e){msg("listMsg",e.message,"error");}}
 async function deleteAd(id){if(!confirm("Delete this advert and its uploaded media permanently?"))return;try{await api("/api/admin/sponsor-ads/"+encodeURIComponent(id),{method:"DELETE"});msg("listMsg","Advert deleted.","ok");await loadAds();}catch(e){msg("listMsg",e.message,"error");}}
+async function fileAsDataUrl(file){
+ if(!file)throw new Error("Please select the advert file again.");
+ try{
+  if(typeof file.arrayBuffer==="function"){
+   const buffer=await file.arrayBuffer(),bytes=new Uint8Array(buffer);let binary="";
+   for(let offset=0;offset<bytes.length;offset+=32768)binary+=String.fromCharCode(...bytes.subarray(offset,offset+32768));
+   return "data:"+file.type+";base64,"+btoa(binary);
+  }
+ }catch(error){console.warn("ArrayBuffer media read failed; trying FileReader fallback.",error);}
+ return new Promise((resolve,reject)=>{
+  const reader=new FileReader();
+  reader.onload=()=>resolve(reader.result);
+  reader.onerror=()=>reject(new Error("Your browser could not access this file. Reopen the file picker and select it again from your device storage."));
+  reader.readAsDataURL(file);
+ });
+}
 async function createAd(e){
  e.preventDefault();clearMsg("formMsg");
  const type=$("mediaType").value,file=$("mediaFile").files[0],destination=$("destination").value.trim();
@@ -47,27 +63,19 @@ async function createAd(e){
  if(type!=="text"&&!file)return msg("formMsg","Please select the advert media file.","error");
  if(file&&file.size>10*1024*1024)return msg("formMsg","Media file must be 10 MB or smaller.","error");
  if(type==="video"&&file.type!=="video/mp4")return msg("formMsg","Select an MP4 video file.","error");
- if(type==="image"&&!["image/jpeg","image/png","image/webp"].includes(file.type))return msg("formMsg","Select a JPG, PNG or WebP image.","error");
+ if(type==="image"&& !["image/jpeg","image/png","image/webp"].includes(file.type))return msg("formMsg","Select a JPG, PNG or WebP image.","error");
  if(type==="text"&&!$("textContent").value.trim())return msg("formMsg","Enter the text advert content.","error");
  $("saveBtn").disabled=true;$("saveBtn").textContent="Uploading…";
  try{
-  const metadata={
-   sponsor_name:$("sponsor").value.trim(),title:$("title").value.trim(),
-   destination_url:destination,placement:$("placement").value,
-   start_at:$("startAt").value||"",end_at:$("endAt").value||"",
-   sponsorship_amount:String(Number($("amount").value||0)),payment_status:$("payment").value
+  const dataUrls=type==="text"?[]:[{data_url:await fileAsDataUrl(file),mime_type:file.type,file_name:file.name}];
+  const payload={
+   sponsor_name:$("sponsor").value.trim(),title:$("title").value.trim(),ad_format:type,
+   text_content:type==="text"?$("textContent").value.trim():"",
+   data_urls:dataUrls,destination_url:destination,placement:$("placement").value,
+   start_at:$("startAt").value||null,end_at:$("endAt").value||null,
+   sponsorship_amount:Number($("amount").value||0),payment_status:$("payment").value
   };
-  if(type==="text"){
-   await api("/api/admin/sponsor-ads",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...metadata,ad_format:"text",text_content:$("textContent").value.trim(),data_urls:[]})});
-  }else{
-   const envelope=new Blob([JSON.stringify({...metadata,token:localStorage.getItem(KEY),ad_format:type,mime_type:file.type}),"\n",file],{type:"text/plain"});
-   let response;
-   try{
-    response=await fetch(API+"/api/admin/sponsor-ads/upload",{method:"POST",headers:{"Content-Type":"text/plain"},body:envelope});
-   }catch(uploadError){throw new Error("The upload connection was interrupted. Please retry once; if it repeats, check the internet connection.");}
-   let result={};try{result=await response.json();}catch{}
-   if(!response.ok)throw new Error(result.message||("Upload failed ("+response.status+")."));
-  }
+  await api("/api/admin/sponsor-ads",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
   msg("formMsg","Campaign saved successfully. It is inactive until you activate it.","ok");
   $("adForm").reset();$("amount").value="0";updateMediaFields();await loadAds();
  }catch(e){msg("formMsg",e.message||"Could not upload advert.","error");}
