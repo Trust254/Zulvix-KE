@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Zulvix-KE | Digital Asset Tap & Earn</title>
 
 <link rel="manifest" href="./manifest.json">
@@ -74,6 +77,16 @@ body{
 @media (min-width: 1200px){
  main.flex-grow.max-w-lg{max-width:min(1440px,calc(100% - 96px))}
 }
+
+/* Ads Studio v3: adaptive video and admin layouts */
+.sponsor-ad-card{min-width:0;width:100%;border:1px solid #29352e;border-radius:18px;background:linear-gradient(145deg,#101b15,#090f0c);padding:14px;overflow:hidden}
+.sponsor-video-wrap{position:relative;width:100%;aspect-ratio:16/9;min-height:180px;max-height:520px;background:#000;border-radius:12px;overflow:hidden}
+.sponsor-video-wrap video{display:block;width:100%;height:100%;max-height:520px;object-fit:contain;background:#000}
+.sponsor-play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0009;color:#fff;font-weight:800;font-size:14px;border:0}
+.sponsor-play-overlay[hidden]{display:none}
+.sponsor-sound-toggle{position:absolute;right:10px;top:10px;z-index:3;border:1px solid #ffffff55;border-radius:999px;background:#07100de8;color:#fff;padding:8px 12px;font-size:11px;font-weight:700}
+.sponsor-sound-toggle[hidden]{display:none}
+@media(min-width:768px){.sponsor-video-wrap{min-height:260px}.sponsor-ad-card{padding:18px}}
 </style>
 </head>
 
@@ -1442,41 +1455,63 @@ class="space-y-2 max-h-60 overflow-y-auto">
  <button onclick="loadAdminRecoveryRequests()" class="w-full bg-zinc-800 text-white font-bold py-2 rounded-lg text-xs">Refresh Recovery Requests</button>
  <div id="adminRecoveryRequestsList" class="space-y-2 max-h-60 overflow-y-auto"></div>
 </div>
-<div id="adm-section-ads" class="hidden space-y-3">
-<h4 class="text-xs font-bold uppercase text-brandGreen">Advertising Controls</h4>
-<p class="text-[10px] text-zinc-400">Configure the two proposed ad placements. Saving these settings does not publish ads or load third-party ad code. Connect only a provider that has approved Zulvix-KE's tapping model.</p>
-<div class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-[10px] text-amber-200">Provider approval required before live ads. Do not ask users to click ads, and do not reward ad views with cash or wallet credits.</div>
-<div class="rounded-xl border border-zinc-800 bg-zinc-900 p-3 space-y-2">
-<strong class="text-xs">Before tapping</strong>
-<label class="flex items-center gap-2 text-xs"><input id="adBeforeEnabled" type="checkbox"> Enable placement (configuration only)</label>
-<select id="adBeforeProvider" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="unconfigured">Provider not connected</option><option value="house">Zulvix-KE house advert</option><option value="google_ad_manager">Google Ad Manager (after approval)</option></select>
-<input id="adBeforeUnit" maxlength="160" placeholder="Approved ad unit ID (optional)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
-</div>
-<div class="rounded-xl border border-zinc-800 bg-zinc-900 p-3 space-y-2">
-<strong class="text-xs">After tapping</strong>
-<label class="flex items-center gap-2 text-xs"><input id="adAfterEnabled" type="checkbox"> Enable placement (configuration only)</label>
-<select id="adAfterProvider" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="unconfigured">Provider not connected</option><option value="house">Zulvix-KE house advert</option><option value="google_ad_manager">Google Ad Manager (after approval)</option></select>
-<input id="adAfterUnit" maxlength="160" placeholder="Approved ad unit ID (optional)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
-</div>
-<div class="rounded-xl border border-brandGreen/30 bg-zinc-900 p-3 space-y-2">
-<strong class="text-xs text-brandGreen">Create a sponsored advert — choose a format</strong>
-<input id="sponsorName" maxlength="120" placeholder="Business / sponsor name" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
-<input id="sponsorTitle" maxlength="160" placeholder="Advert title" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
-<select id="sponsorType" onchange="updateSponsorMediaInput()" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="banner">Banner advert</option><option value="image">Image advert</option><option value="video">Video advert</option><option value="text">Text advert</option><option value="carousel">Carousel (multiple images)</option></select>
-<textarea id="sponsorText" rows="3" maxlength="1200" placeholder="Text advert description / offer (required for text adverts)" class="hidden w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"></textarea>
-<label id="sponsorFileLabel" class="text-[10px] text-zinc-400">Image file (JPG/PNG/WebP, max 8 MB)</label>
-<input id="sponsorFile" type="file" accept="image/jpeg,image/png,image/webp,video/mp4" class="w-full text-xs">
-<p class="text-[10px] text-zinc-500">Carousel: choose 2–8 images. Total upload size limit: 8 MB.</p>
-<input id="sponsorLink" type="url" placeholder="Destination HTTPS website / WhatsApp link" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
-<select id="sponsorPlacement" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="before_tap">Before tapping</option><option value="after_tap">After tapping</option></select>
-<div class="grid grid-cols-2 gap-2"><input id="sponsorStart" type="date" class="min-w-0 bg-black border border-zinc-700 rounded-lg p-2 text-xs"><input id="sponsorEnd" type="date" class="min-w-0 bg-black border border-zinc-700 rounded-lg p-2 text-xs"></div>
-<input id="sponsorAmount" type="number" min="0" step="1" placeholder="Sponsorship amount (Ksh)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
-<label class="flex gap-2 text-xs"><input id="sponsorPaid" type="checkbox"> Sponsorship payment received</label>
-<button onclick="createSponsorAd()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Upload & Save Advert</button>
-<div id="sponsorAdsList" class="space-y-2"></div>
-</div>
-<button onclick="saveAdminAdSettings()" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg text-xs">Save Advertising Settings</button>
-<p id="adminAdsResult" class="text-[10px] text-zinc-400"></p>
+<div id="adm-section-ads" class="hidden space-y-5">
+ <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+  <div><p class="text-[10px] uppercase tracking-[.22em] text-brandGreen font-bold">Zulvix-KE · Ads Studio v3</p><h4 class="text-xl font-black text-white">Advertising Studio</h4><p class="text-xs text-zinc-400 mt-1">Create, schedule and manage sponsor adverts from one place.</p></div>
+  <span class="text-[10px] rounded-full border border-zinc-700 px-3 py-1 text-zinc-400">Mobile + Desktop</span>
+ </div>
+ <div class="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-100"><strong>Publisher notice:</strong> Use only adverts you have permission to publish. Never ask users to click adverts or reward advert views with wallet credits.</div>
+ <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+  <section class="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 space-y-3">
+   <div><h5 class="font-bold text-white">Placement settings</h5><p class="text-[10px] text-zinc-500">These provider settings do not publish third-party ad code.</p></div>
+   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-3 space-y-2">
+     <strong class="text-xs text-brandGreen">Before tapping</strong>
+     <label class="flex items-center gap-2 text-xs"><input id="adBeforeEnabled" type="checkbox"> Enable placement</label>
+     <select id="adBeforeProvider" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="unconfigured">Provider not connected</option><option value="house">Zulvix-KE house advert</option><option value="google_ad_manager">Google Ad Manager (after approval)</option></select>
+     <input id="adBeforeUnit" maxlength="160" placeholder="Approved ad unit ID (optional)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
+    </div>
+    <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-3 space-y-2">
+     <strong class="text-xs text-brandGold">After tapping</strong>
+     <label class="flex items-center gap-2 text-xs"><input id="adAfterEnabled" type="checkbox"> Enable placement</label>
+     <select id="adAfterProvider" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="unconfigured">Provider not connected</option><option value="house">Zulvix-KE house advert</option><option value="google_ad_manager">Google Ad Manager (after approval)</option></select>
+     <input id="adAfterUnit" maxlength="160" placeholder="Approved ad unit ID (optional)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
+    </div>
+   </div>
+   <button onclick="saveAdminAdSettings()" class="w-full bg-zinc-100 text-black font-bold py-3 rounded-xl text-xs">Save placement settings</button>
+   <p id="adminAdsResult" class="text-[10px] text-zinc-400" aria-live="polite"></p>
+  </section>
+  <section class="rounded-2xl border border-brandGreen/30 bg-zinc-950/70 p-4 space-y-3">
+   <div><p class="text-[10px] uppercase tracking-widest text-brandGreen font-bold">New campaign</p><h5 class="text-lg font-black text-white">Create sponsored advert</h5><p class="text-[10px] text-zinc-500">Video MP4 up to 8 MB · Images JPG, PNG or WebP · Carousel 2–8 images</p></div>
+   <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+    <input id="sponsorName" maxlength="120" placeholder="Business / sponsor name" class="w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs">
+    <input id="sponsorTitle" maxlength="160" placeholder="Advert title" class="w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs">
+   </div>
+   <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+    <select id="sponsorType" onchange="updateSponsorMediaInput()" class="w-full bg-black border border-zinc-700 rounded-xl p-3 text-xs"><option value="video">Video advert (MP4)</option><option value="image">Image advert</option><option value="banner">Banner advert</option><option value="text">Text advert</option><option value="carousel">Carousel (2–8 images)</option></select>
+    <select id="sponsorPlacement" class="w-full bg-black border border-zinc-700 rounded-xl p-3 text-xs"><option value="before_tap">Show before tapping</option><option value="after_tap">Show after tapping</option></select>
+   </div>
+   <textarea id="sponsorText" rows="3" maxlength="1200" placeholder="Text advert description / offer" class="hidden w-full bg-black border border-zinc-700 rounded-xl p-3 text-xs"></textarea>
+   <label id="sponsorFileLabel" for="sponsorFile" class="block text-xs text-zinc-300">Choose MP4 video · maximum 8 MB</label>
+   <input id="sponsorFile" type="file" accept="video/mp4,.mp4" class="block w-full rounded-xl border border-dashed border-zinc-600 bg-black p-3 text-xs">
+   <div id="sponsorFileInfo" class="text-[10px] text-zinc-500" aria-live="polite">Choose a video file from your phone or computer.</div>
+   <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+    <input id="sponsorLink" type="url" placeholder="Destination HTTPS website link" class="w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs">
+    <input id="sponsorAmount" type="number" min="0" step="1" placeholder="Sponsorship amount (Ksh)" class="w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs">
+   </div>
+   <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+    <label class="text-[10px] text-zinc-400">Start date<input id="sponsorStart" type="date" class="mt-1 block w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs"></label>
+    <label class="text-[10px] text-zinc-400">End date<input id="sponsorEnd" type="date" class="mt-1 block w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs"></label>
+   </div>
+   <label class="flex items-center gap-2 text-xs text-zinc-300"><input id="sponsorPaid" type="checkbox"> Sponsorship payment received</label>
+   <button id="sponsorUploadButton" onclick="createSponsorAd()" class="w-full rounded-xl bg-brandGreen py-3 text-xs font-black text-black shadow-lg">Upload &amp; Save Advert</button>
+   <p class="text-[10px] text-zinc-500">New adverts are saved inactive. Review and activate them in the campaign list.</p>
+  </section>
+ </div>
+ <section class="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 space-y-3">
+  <div class="flex items-center justify-between gap-2"><div><h5 class="font-bold text-white">Campaign library</h5><p class="text-[10px] text-zinc-500">Manage existing sponsor adverts without deleting their records unless you choose Delete.</p></div><button onclick="loadSponsorAds()" class="rounded-lg bg-zinc-800 px-3 py-2 text-[10px] font-bold text-white">Refresh list</button></div>
+  <div id="sponsorAdsList" class="grid grid-cols-1 lg:grid-cols-2 gap-3"><p class="text-xs text-zinc-500">Loading adverts…</p></div>
+ </section>
 </div>
 <div id="adm-section-broadcast" class="hidden space-y-2">
 <h4 class="text-xs font-bold uppercase">Broadcast Centre</h4>
