@@ -66,13 +66,11 @@ body{
  #tab-dashboard> :nth-child(4){grid-column:1}
  #tab-dashboard> :nth-child(5){grid-column:2;align-self:center}
  #levelsListContainer{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
- #sponsorAdsDashboardSlot,#sponsorAdsLevelsSlot,#sponsorAdsWalletSlot,#sponsorAdsProfileSlot,#sponsorAdsWithdrawSlot{width:100%;min-width:0}
- #sponsorAdsBefore,#sponsorAdsAfter{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;width:100%;min-width:0}
- #sponsorAdsBefore article,#sponsorAdsAfter article{min-width:0;width:100%;max-width:100%}
- .sponsor-video-wrap{position:relative;width:100%;min-width:0;background:#000;border-radius:.5rem;overflow:hidden}
+ 
+.sponsor-video-wrap{position:relative;width:100%;min-width:0;background:#000;border-radius:.5rem;overflow:hidden}
  .sponsor-video-wrap video{display:block;width:100%;max-height:420px;min-height:220px;object-fit:contain;background:#000}
  .sponsor-video-start{z-index:2;cursor:pointer}
- #tab-dashboard:not(.hidden)>#sponsorAdsDashboardSlot{grid-column:1 / -1}
+ 
 }
 @media (min-width: 1200px){
  main.flex-grow.max-w-lg{max-width:min(1440px,calc(100% - 96px))}
@@ -424,7 +422,6 @@ class="text-xl font-black text-white">
   <p class="text-[10px] text-zinc-500">Sign in to view announcements.</p>
  </div>
 </div>
-<div id="sponsorAdsAfter" class="space-y-2"></div></div>
 
 <!-- TAP -->
 
@@ -480,7 +477,6 @@ Tap to earn daily profits. Limit: 6 taps every 12 hours.
 </div>
 
 
-<!-- All sponsor adverts are displayed above the TAP ASSET button. -->
 
 <!-- ACTIONS -->
 
@@ -2060,276 +2056,7 @@ async function recoverPasswordWithPasskey(){
 }
 async function requestPasswordRecovery(){const mobile=document.getElementById('recoveryMobile').value.trim();if(!mobile)return showToast('Mobile number required','Enter the registered mobile number.',false);try{const d=await api('/api/auth/password-recovery/request',{method:'POST',body:JSON.stringify({mobile})});document.getElementById('recoveryResult').innerText=d.message||'Request submitted.';showToast('Request submitted','Contact the administrator for identity verification and your one-time code.');}catch(e){showToast('Request failed',e.message,false);}}
 async function resetPasswordWithCode(){const mobile=document.getElementById('recoveryMobile').value.trim(),code=document.getElementById('recoveryCode').value.trim(),newPassword=document.getElementById('recoveryNewPassword').value;if(!mobile||!code||!newPassword)return showToast('Details required','Enter mobile, recovery code and new password.',false);try{const d=await api('/api/auth/password-recovery/reset',{method:'POST',body:JSON.stringify({mobile,code,newPassword})});document.getElementById('recoveryResult').innerText=d.message||'Password reset.';document.getElementById('loginPhone').value=mobile;document.getElementById('loginPassword').value='';document.getElementById('recoveryCode').value='';document.getElementById('recoveryNewPassword').value='';showToast('Password updated','You can now sign in with your new password.');}catch(e){showToast('Password reset failed',e.message,false);}}
-function escapeSponsorText(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function updateSponsorMediaInput(){
- const type=document.getElementById('sponsorType').value,file=document.getElementById('sponsorFile'),label=document.getElementById('sponsorFileLabel'),body=document.getElementById('sponsorText'),info=document.getElementById('sponsorFileInfo');
- const needsFile=type!=='text';
- file.classList.toggle('hidden',!needsFile);label.classList.toggle('hidden',!needsFile);
- file.multiple=type==='carousel';
- file.accept=type==='video'?'video/mp4,.mp4':type==='text'?'':'image/jpeg,image/png,image/webp';
- label.textContent=type==='video'?'Choose MP4 video · maximum 8 MB':type==='carousel'?'Choose 2–8 images · total maximum 8 MB':'Choose JPG, PNG or WebP image · maximum 8 MB';
- body.classList.toggle('hidden',type!=='text');
- file.value='';
- if(info)info.textContent=type==='video'?'Select an MP4 from your phone or computer. The video is uploaded directly without browser file conversion.':type==='carousel'?'Select 2–8 image files. Total size must not exceed 8 MB.':'Select the advert image file.';
-}
-function showSponsorFileInfo(){
- const fileInput=document.getElementById('sponsorFile'),info=document.getElementById('sponsorFileInfo');
- if(!info)return;
- const files=Array.from(fileInput.files||[]);
- if(!files.length){info.textContent='No file selected.';return;}
- const total=files.reduce((sum,file)=>sum+file.size,0);
- info.textContent=files.map(file=>file.name+' ('+(file.size/1024/1024).toFixed(2)+' MB)').join(' · ')+' · Total '+(total/1024/1024).toFixed(2)+' MB';
-}
-function readSponsorFile(file,mimeType){
- return new Promise((resolve,reject)=>{
-  const reader=new FileReader();
-  reader.onload=()=>{
-   if(typeof reader.result!=='string'||!reader.result.startsWith('data:'))return reject(new Error('The selected image could not be prepared. Please choose the image again.'));
-   resolve({data_url:reader.result,mime_type:mimeType,file_name:file.name});
-  };
-  reader.onerror=()=>reject(new Error('Your browser could not read image "'+file.name+'". Try choosing it again.'));
-  reader.onabort=()=>reject(new Error('Reading "'+file.name+'" was cancelled.'));
-  const source=file.type===mimeType?file:file.slice(0,file.size,mimeType);
-  reader.readAsDataURL(source);
- });
-}
-async function createSponsorAd(){
- const format=document.getElementById('sponsorType').value,files=Array.from(document.getElementById('sponsorFile').files||[]);
- const sponsorName=document.getElementById('sponsorName').value.trim(),title=document.getElementById('sponsorTitle').value.trim();
- const textContent=document.getElementById('sponsorText').value.trim(),imageTypes=['image/jpeg','image/png','image/webp'];
- if(!sponsorName||!title)return showToast('Advert details required','Enter the sponsor name and advert title.',false);
- if(format==='text'&&!textContent)return showToast('Text required','Enter the text advert description.',false);
- if(format!=='text'&&!files.length)return showToast('Media required','Choose the advert media file.',false);
- if(format==='carousel'&&(files.length<2||files.length>8))return showToast('Carousel images','Choose between 2 and 8 images.',false);
- const isMp4=file=>/\.mp4$/i.test(file.name||'')&&(!file.type||['video/mp4','application/mp4','application/octet-stream'].includes(file.type));
- if(format==='video'&&(files.length!==1||!isMp4(files[0])))return showToast('Video required','Choose one MP4 video file.',false);
- if(['banner','image','carousel'].includes(format)&&files.some(file=>!imageTypes.includes(file.type)))return showToast('Image format','Use JPG, PNG or WebP images.',false);
- if(files.some(file=>!Number.isFinite(file.size)||file.size<=0))return showToast('Invalid file','A selected file is empty or unavailable.',false);
- const totalBytes=files.reduce((sum,file)=>sum+file.size,0);
- if(totalBytes>8*1024*1024)return showToast('Files too large','The total upload size must be 8 MB or less.',false);
- const destination=document.getElementById('sponsorLink').value.trim();
- if(!/^https:\/\//i.test(destination))return showToast('Secure link required','Enter a destination URL beginning with https://.',false);
- const button=document.getElementById('sponsorUploadButton');
- if(button){button.disabled=true;button.textContent=format==='video'?'Uploading video…':'Uploading advert…';}
- try{
-  const metadata={
-   sponsor_name:sponsorName,title,destination_url:destination,
-   placement:document.getElementById('sponsorPlacement').value,
-   start_at:document.getElementById('sponsorStart').value||'',
-   end_at:document.getElementById('sponsorEnd').value||'',
-   sponsorship_amount:document.getElementById('sponsorAmount').value||'0',
-   payment_status:document.getElementById('sponsorPaid').checked?'paid':'pending'
-  };
-  if(format==='video'){
-   // Native File body: no FileReader and no Base64 expansion for video uploads.
-   const query=new URLSearchParams(metadata),token=localStorage.getItem(ADMIN_TOKEN_KEY);
-   if(!token)throw new Error('Admin session expired. Sign in to Admin again.');
-   const response=await fetch(API+'/api/admin/sponsor-ads/video?'+query.toString(),{
-    method:'POST',
-    headers:{'Authorization':'Bearer '+token,'Content-Type':'application/octet-stream'},
-    body:files[0]
-   });
-   const result=await response.json().catch(()=>({message:'The server returned an unreadable response.'}));
-   if(!response.ok||result.status==='error'||result.success===false)throw new Error(result.message||('Server rejected the video upload ('+response.status+').'));
-  }else{
-   const dataUrls=await Promise.all(files.map(file=>readSponsorFile(file,file.type)));
-   await api('/api/admin/sponsor-ads',{method:'POST',body:JSON.stringify({...metadata,ad_format:format,text_content:textContent,data_urls:dataUrls})});
-  }
-  document.getElementById('sponsorFile').value='';
-  document.getElementById('sponsorText').value='';
-  document.getElementById('sponsorFileInfo').textContent='Advert uploaded successfully. It is saved inactive until you activate it.';
-  await loadSponsorAds();
-  showToast('Advert saved','The new advert is saved inactive. Activate it after checking the details.');
- }catch(error){
-  console.error('SPONSOR AD UPLOAD FAILED',error);
-  showToast('Upload failed',error&&error.message?error.message:'Could not complete the upload. Check your connection and try again.',false);
- }finally{
-  if(button){button.disabled=false;button.textContent='Upload & Save Advert';}
- }
-}
-async function loadSponsorAds(){
- const host=document.getElementById('sponsorAdsList');if(!host)return;
- host.innerHTML='<p class="text-xs text-zinc-500">Loading sponsor campaigns…</p>';
- try{
-  const data=await api('/api/admin/sponsor-ads'),ads=data.ads||[];
-  host.innerHTML=ads.map(ad=>{
-   const active=!!ad.is_active,paid=ad.payment_status==='paid';
-   const format=ad.ad_format||ad.media_type||'advert';
-   return '<article class="rounded-xl border border-zinc-800 bg-zinc-900 p-3 space-y-3">'+
-    '<div class="flex items-start justify-between gap-2"><div class="min-w-0"><p class="font-bold text-sm text-white break-words">'+escapeSponsorText(ad.title||'Untitled advert')+'</p><p class="text-[10px] text-zinc-400">'+escapeSponsorText(ad.sponsor_name||'Sponsor')+' · '+escapeSponsorText(format)+' · '+(ad.placement==='before_tap'?'Before tapping':'After tapping')+'</p></div>'+
-    '<span class="shrink-0 rounded-full px-2 py-1 text-[9px] font-bold '+(active?'bg-emerald-500/15 text-emerald-300':'bg-zinc-700 text-zinc-300')+'">'+(active?'ACTIVE':'INACTIVE')+'</span></div>'+
-    '<div class="flex flex-wrap gap-2 text-[10px]"><span class="rounded-full bg-zinc-800 px-2 py-1 '+(paid?'text-emerald-300':'text-amber-300')+'">'+(paid?'PAYMENT RECEIVED':'PAYMENT PENDING')+'</span><span class="rounded-full bg-zinc-800 px-2 py-1 text-zinc-400">Created '+escapeSponsorText(ad.created_at?new Date(ad.created_at).toLocaleDateString():'—')+'</span></div>'+
-    '<div class="grid grid-cols-2 gap-2"><button data-ad-id="'+escapeSponsorText(ad.id)+'" onclick="toggleSponsorAd(this.dataset.adId,'+(!active)+')" class="rounded-lg '+(active?'bg-amber-500/15 text-amber-200':'bg-brandGreen text-black')+' py-2 text-[10px] font-bold">'+(active?'Deactivate':'Activate')+'</button><button data-ad-id="'+escapeSponsorText(ad.id)+'" data-ad-title="'+escapeSponsorText(ad.title||'advert')+'" onclick="deleteSponsorAd(this.dataset.adId,this.dataset.adTitle)" class="rounded-lg border border-red-500/40 bg-red-500/10 py-2 text-[10px] font-bold text-red-300">Delete advert</button></div>'+
-   '</article>';
-  }).join('')||'<p class="text-xs text-zinc-500">No sponsor adverts have been created yet.</p>';
- }catch(error){host.innerHTML='<p class="text-xs text-red-300">Could not load campaigns: '+escapeSponsorText(error.message)+'</p>';}
-}
-async function toggleSponsorAd(id,active){
- try{await api('/api/admin/sponsor-ads/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({is_active:active})});await loadSponsorAds();showToast('Campaign updated',active?'Advert activated.':'Advert deactivated.');}
- catch(error){showToast('Update failed',error.message,false);}
-}
-async function deleteSponsorAd(id,title){
- if(!confirm('Permanently delete "'+title+'" and its uploaded media? This cannot be undone.'))return;
- try{await api('/api/admin/sponsor-ads/'+encodeURIComponent(id),{method:'DELETE'});await loadSponsorAds();showToast('Advert deleted','The selected advert and its stored media were deleted.');}
- catch(error){showToast('Delete failed',error.message||'Could not delete advert.',false);}
-}
-function updateTapButtonAfterAd(){
- const button=document.getElementById('tapButton');
- if(button){
-  button.disabled=!tapAdReady;
-  button.classList.toggle('opacity-40',!tapAdReady);
-  button.classList.toggle('cursor-not-allowed',!tapAdReady);
-  button.classList.toggle('cursor-pointer',tapAdReady);
- }
-}
-function sponsorAdHost(placement){
- return document.getElementById(placement==='before_tap'?'sponsorAdsBefore':'sponsorAdsAfter');
-}
-function startSponsorVideo(button){
- const card=button.closest('article'),video=card&&card.querySelector('video[data-sponsor-video="1"]');
- if(!video)return;
- video.dataset.started='1';
- video.muted=false;
- video.play().then(()=>{
-  const overlay=card.querySelector('.sponsor-play-overlay');if(overlay)overlay.hidden=true;
-  const sound=card.querySelector('.sponsor-sound-toggle');if(sound)sound.hidden=true;
- }).catch(()=>{
-  video.muted=true;
-  video.play().then(()=>{
-   const overlay=card.querySelector('.sponsor-play-overlay');if(overlay)overlay.hidden=true;
-   const sound=card.querySelector('.sponsor-sound-toggle');if(sound)sound.hidden=false;
-  }).catch(error=>{
-   console.error('Sponsor video start failed',error);
-   const overlay=card.querySelector('.sponsor-play-overlay');if(overlay)overlay.hidden=false;
-  });
- });
-}
-function toggleSponsorSound(button){
- const card=button.closest('article'),video=card&&card.querySelector('video[data-sponsor-video="1"]');
- if(!video)return;
- video.muted=!video.muted;
- if(!video.muted)video.play().catch(()=>{video.muted=true;showToast('Sound unavailable','Your browser did not allow audio playback.',false);});
- button.hidden=!video.muted;
- button.textContent=video.muted?'Enable sound':'Mute sound';
-}
-function startNextSponsorVideo(placement){
- const host=sponsorAdHost(placement);if(!host)return;
- const video=Array.from(host.querySelectorAll('video[data-sponsor-video="1"]')).find(item=>item.dataset.completed!=='1'&&item.dataset.started!=='1');
- if(!video)return;
- const card=video.closest('article'),overlay=card&&card.querySelector('.sponsor-play-overlay');
- video.dataset.started='1';
- video.muted=false;
- video.play().then(()=>{
-  if(overlay)overlay.hidden=true;
-  const sound=card&&card.querySelector('.sponsor-sound-toggle');if(sound)sound.hidden=true;
- }).catch(()=>{
-  video.muted=true;
-  video.play().then(()=>{
-   if(overlay)overlay.hidden=true;
-   const sound=card&&card.querySelector('.sponsor-sound-toggle');if(sound)sound.hidden=false;
-  }).catch(error=>{
-   console.warn('Sponsor autoplay blocked; waiting for user Play action',error);
-   if(overlay)overlay.hidden=false;
-  });
- });
-}
-function markSponsorVideoViewed(video){
- if(!video||video.dataset.completed==='1')return;
- video.dataset.completed='1';
- const placement=video.dataset.adPlacement,card=video.closest('article');
- if(card)card.remove();
- if(placement==='before_tap'){
-  sponsorVideosPending=Math.max(0,sponsorVideosPending-1);
-  if(sponsorVideosPending===0){
-   const host=sponsorAdHost('before_tap');if(host)host.innerHTML='';
-   tapAdReady=true;updateTapButtonAfterAd();
-   showToast('Advert completed','TAP ASSET is now ready.');
-  }else startNextSponsorVideo('before_tap');
- }else{
-  startNextSponsorVideo('after_tap');
-  const host=sponsorAdHost('after_tap');
-  if(host&&!host.querySelector('video[data-sponsor-video="1"]'))host.innerHTML='';
- }
-}
-function enforceSponsorVideo(video){
- if(video.dataset.enforced==='1')return;
- video.dataset.enforced='1';
- let lastTime=0,ended=false,wasPlaying=false;
- video.controls=false;video.removeAttribute('controls');
- video.addEventListener('loadedmetadata',()=>{video.currentTime=0;lastTime=0;});
- video.addEventListener('timeupdate',()=>{if(!video.seeking)lastTime=video.currentTime;});
- video.addEventListener('seeking',()=>{if(Math.abs(video.currentTime-lastTime)>0.75)video.currentTime=lastTime;});
- video.addEventListener('playing',()=>{wasPlaying=true;const card=video.closest('article');const overlay=card&&card.querySelector('.sponsor-play-overlay');if(overlay)overlay.hidden=true;});
- video.addEventListener('ended',()=>{ended=true;markSponsorVideoViewed(video);});
- video.addEventListener('pause',()=>{
-  if(!ended&&wasPlaying&&!video.ended&&video.currentTime<video.duration){
-   setTimeout(()=>{if(!ended&&video.isConnected&&video.paused)video.play().catch(()=>{});},250);
-  }
- });
-}
-async function renderSponsorAds(placement){
- const host=sponsorAdHost(placement);if(!host)return;
- try{
-  host.innerHTML='<p class="text-xs text-zinc-500">Loading sponsor adverts…</p>';
-  const response=await fetchWithRetry(API+'/api/sponsor-feed?placement='+encodeURIComponent(placement),{cache:'no-store'},3);
-  if(!response.ok)throw new Error('Advert feed returned '+response.status+'.');
-  const data=await response.json(),ads=data.ads||[];
-  host.innerHTML='';
-  if(placement==='before_tap'){
-   sponsorVideosPending=ads.filter(ad=>(ad.ad_format||ad.media_type)==='video'||ad.media_type==='video'||(ad.mime_type||'').startsWith('video/')).length;
-   tapAdReady=sponsorVideosPending===0;updateTapButtonAfterAd();
-  }
-  if(!ads.length)return;
-  host.innerHTML=ads.map(ad=>{
-   const raw=ad.ad_format||ad.media_type,isVideo=(ad.mime_type||'').startsWith('video/')||ad.media_type==='video';
-   const format=raw==='image'&&isVideo?'video':raw;
-   const urls=Array.isArray(ad.media_urls)&&ad.media_urls.length?ad.media_urls:(ad.media_url?[ad.media_url]:[]);
-   let creative='';
-   if(format==='text')creative='<p class="text-sm text-zinc-200 whitespace-pre-wrap">'+escapeSponsorText(ad.text_content||'')+'</p>';
-   else if(format==='video')creative='<div class="sponsor-video-wrap"><video autoplay muted playsinline webkit-playsinline preload="auto" disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback" data-sponsor-video="1" data-ad-placement="'+placement+'" class="w-full"><source src="'+escapeSponsorText(urls[0]||ad.media_url||'')+'" type="video/mp4"></video><button type="button" class="sponsor-play-overlay" hidden onclick="startSponsorVideo(this)">▶ Play advert</button><button type="button" class="sponsor-sound-toggle" hidden onclick="toggleSponsorSound(this)">Enable sound</button></div>';
-   else if(format==='carousel')creative='<div class="flex gap-3 overflow-x-auto snap-x snap-mandatory">'+urls.map(url=>'<img loading="lazy" src="'+escapeSponsorText(url)+'" alt="'+escapeSponsorText(ad.title||'Sponsored image')+'" class="w-[82%] shrink-0 snap-center object-contain rounded-xl max-h-80">').join('')+'</div><p class="text-[10px] text-zinc-500">Swipe to view images</p>';
-   else creative='<img loading="lazy" src="'+escapeSponsorText(urls[0]||ad.media_url||'')+'" alt="'+escapeSponsorText(ad.title||'Sponsored advert')+'" class="w-full '+(format==='banner'?'max-h-32 object-cover':'max-h-80 object-contain')+' rounded-xl">';
-   return '<article class="sponsor-ad-card space-y-3"><div class="flex items-center justify-between gap-2"><span class="text-[10px] font-bold uppercase tracking-widest text-brandGold">Sponsored · '+escapeSponsorText(format)+'</span><span class="text-[10px] text-zinc-500">'+(placement==='before_tap'?'Before tapping':'After tapping')+'</span></div><h4 class="text-sm font-bold text-white">'+escapeSponsorText(ad.title||'Sponsored advert')+'</h4>'+creative+'<a href="'+escapeSponsorText(ad.destination_url||'#')+'" target="_blank" rel="noopener noreferrer" class="inline-flex text-xs font-bold text-brandGreen underline underline-offset-4">Learn more</a></article>';
-  }).join('');
-  host.querySelectorAll('video[data-sponsor-video="1"]').forEach(enforceSponsorVideo);
-  startNextSponsorVideo(placement);
- }catch(error){
-  host.innerHTML='<p class="rounded-xl border border-zinc-700 bg-zinc-900 p-3 text-xs text-zinc-400">Sponsor adverts are temporarily unavailable. Please refresh the page.</p>';
-  if(placement==='before_tap'){tapAdReady=true;sponsorVideosPending=0;updateTapButtonAfterAd();}
-  console.error('Sponsor advert load failed',error);
- }
-}
-async function runAdsCenterChecks(){
- const panel=document.getElementById('adsCenterHealth');if(!panel)return;
- panel.innerHTML='<p class="text-zinc-300">Checking backend connection, public advert feeds and secured campaign manager…</p>';
- const results=[];
- const check=async(label,fn)=>{try{const detail=await fn();results.push({label,ok:true,detail});}catch(error){results.push({label,ok:false,detail:error.message||'Check failed'});}};
- await check('Backend connection',async()=>{const r=await fetchWithRetry(API+'/api/sponsor-feed?placement=before_tap',{cache:'no-store'},3);if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();if(d.success!==true||!Array.isArray(d.ads))throw new Error('Unexpected feed response');return 'Reachable';});
- await check('Before-tap advert feed',async()=>{const r=await fetchWithRetry(API+'/api/sponsor-feed?placement=before_tap',{cache:'no-store'},3);if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();if(!Array.isArray(d.ads))throw new Error('Missing advert list');return d.ads.length+' live paid advert(s)';});
- await check('After-tap advert feed',async()=>{const r=await fetchWithRetry(API+'/api/sponsor-feed?placement=after_tap',{cache:'no-store'},3);if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();if(!Array.isArray(d.ads))throw new Error('Missing advert list');return d.ads.length+' live paid advert(s)';});
- await check('Secure campaign manager',async()=>{const d=await api('/api/admin/sponsor-ads');if(!Array.isArray(d.ads))throw new Error('Unexpected manager response');return d.ads.length+' saved campaign(s)';});
- panel.innerHTML=results.map(x=>'<div class="flex items-start justify-between gap-3 border-b border-zinc-800 py-2 last:border-0"><span class="text-zinc-300">'+escapeSponsorText(x.label)+'</span><span class="text-right '+(x.ok?'text-emerald-300':'text-red-300')+'">'+(x.ok?'PASS · ':'FAIL · ')+escapeSponsorText(x.detail)+'</span></div>').join('')+'<p class="mt-2 text-[10px] text-zinc-500">These checks verify live API connectivity and read access. They do not upload a test advert or change campaign data.</p>';
- return results;
-}
 
-async function loadAdminAdSettings(){
- // The old third-party placement settings are retired from the new Ads Management Center.
- // Existing sponsor campaigns remain stored and are loaded through the dedicated campaign API.
- await loadSponsorAds();
- await runAdsCenterChecks();
-}
-async function saveAdminAdSettings(){
- const result=document.getElementById('adminAdsResult');
- const items=[
-  {placement:'before_tap',enabled:document.getElementById('adBeforeEnabled').checked,provider:document.getElementById('adBeforeProvider').value,ad_unit_id:document.getElementById('adBeforeUnit').value.trim()},
-  {placement:'after_tap',enabled:document.getElementById('adAfterEnabled').checked,provider:document.getElementById('adAfterProvider').value,ad_unit_id:document.getElementById('adAfterUnit').value.trim()}
- ];
- try{
-  for(const item of items) await api('/api/admin/ads/'+item.placement,{method:'PUT',body:JSON.stringify(item)});
-  result.textContent='Advertising settings saved. Live ads remain off until an approved provider integration is completed.';
-  showToast('Settings saved','Advertising configuration updated. No ads are live yet.');
- }catch(e){result.textContent='Save failed: '+e.message;showToast('Save failed',e.message,false);}
-}
 async function loadAdminRecoveryRequests(){const host=document.getElementById('adminRecoveryRequestsList');if(!host)return;host.innerHTML='<p class="text-xs text-zinc-500">Loading requests...</p>';try{api('/api/admin/password-recovery/requests').then(d=>{const items=d.requests||[];host.innerHTML=items.length?items.map(r=>'<div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3 space-y-2 text-xs"><div class="flex justify-between gap-2"><strong>'+esc(r.name||'User')+'</strong><span class="text-brandGold uppercase">'+esc(r.status)+'</span></div><p class="text-zinc-400">Mobile: <strong class="text-white">'+esc(r.mobile)+'</strong></p><p class="text-[10px] text-zinc-500">Requested: '+esc(new Date(r.created_at).toLocaleString())+'</p><button data-recovery-id="'+esc(r.id)+'" onclick="issueAdminRecoveryCode(this.dataset.recoveryId)" class="w-full bg-brandGreen text-black font-bold py-2 rounded-lg">Verify Identity & Generate Code</button></div>').join(''):'<p class="text-xs text-zinc-500">No open recovery requests.</p>';}).catch(e=>{host.innerHTML='<p class="text-xs text-red-400">'+esc(e.message)+'</p>';});}catch(e){host.innerHTML='<p class="text-xs text-red-400">'+esc(e.message)+'</p>';}}
 async function issueAdminRecoveryCode(id){if(!confirm('Have you independently verified this user identity? Generate a one-time password recovery code?'))return;try{const d=await api('/api/admin/password-recovery/'+encodeURIComponent(id)+'/issue',{method:'POST',body:'{}'});await loadAdminRecoveryRequests();const nl=String.fromCharCode(10),msg='Recovery code for '+d.mobile+': '+d.code+nl+'Expires in 15 minutes. Share it only with the verified account owner.';try{await navigator.clipboard.writeText(d.code);}catch(_){}alert(msg+nl+nl+'The code has been copied if clipboard access is available.');}catch(e){showToast('Could not issue code',e.message,false);}}
 
