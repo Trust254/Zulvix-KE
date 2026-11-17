@@ -2138,7 +2138,55 @@ function b64urlToBytes(v){const p='='.repeat((4-v.length%4)%4);const b=(v+p).rep
 function bytesToB64url(v){return btoa(String.fromCharCode(...new Uint8Array(v))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
 function prepPasskeyOptions(o){o.challenge=b64urlToBytes(o.challenge);if(o.user&&o.user.id)o.user.id=b64urlToBytes(o.user.id);['allowCredentials','excludeCredentials'].forEach(k=>{if(o[k])o[k]=o[k].map(c=>({...c,id:b64urlToBytes(c.id)}));});return o;}
 function serializePasskey(c){const r=c.response,d={id:c.id,rawId:bytesToB64url(c.rawId),type:c.type,response:{clientDataJSON:bytesToB64url(r.clientDataJSON)},clientExtensionResults:c.getClientExtensionResults()};if(r.attestationObject)d.response.attestationObject=bytesToB64url(r.attestationObject);if(r.authenticatorData)d.response.authenticatorData=bytesToB64url(r.authenticatorData);if(r.signature)d.response.signature=bytesToB64url(r.signature);if(r.userHandle)d.response.userHandle=bytesToB64url(r.userHandle);if(r.getTransports)d.response.transports=r.getTransports();return d;}
-async function registerPasskey(){if(!localStorage.getItem(USER_TOKEN_KEY))return showToast('Sign in required','Sign in before registering a passkey.',false);if(!window.PublicKeyCredential||!navigator.credentials)return showToast('Passkeys unavailable','This browser or device does not support passkeys.',false);const currentPassword=document.getElementById('passkeyCurrentPassword').value;if(!currentPassword)return showToast('Password required','Confirm your current password to add a passkey.',false);try{const s=await api('/api/auth/passkey/register/options',{method:'POST',body:JSON.stringify({currentPassword})});const c=await navigator.credentials.create({publicKey:prepPasskeyOptions(s.options)});if(!c)throw new Error('Passkey registration was cancelled.');const d=await api('/api/auth/passkey/register/verify',{method:'POST',body:JSON.stringify(serializePasskey(c))});document.getElementById('passkeyCurrentPassword').value='';showToast('Passkey registered',d.message||'This device can now sign in with a passkey.');}catch(e){document.getElementById('passkeyCurrentPassword').value='';showToast('Passkey setup failed',e.message||'Unable to register a passkey.',false);}}
+async let preparedPasskeyRegistrationOptions=null;
+let passkeyRegistrationOptionsLoading=false;
+async function registerPasskey(){
+ if(!localStorage.getItem(USER_TOKEN_KEY))return showToast('Sign in required','Sign in before registering a passkey.',false);
+ if(!window.PublicKeyCredential||!navigator.credentials)return showToast('Passkeys unavailable','This browser or device does not support passkeys.',false);
+ if(!window.isSecureContext)return showToast('Secure connection required','Open Zulvix-KE using its HTTPS website address, then try again.',false);
+ const passwordInput=document.getElementById('passkeyCurrentPassword');
+ const currentPassword=passwordInput.value;
+ if(!currentPassword)return showToast('Password required','Confirm your current password to add a passkey.',false);
+ if(!preparedPasskeyRegistrationOptions){
+  if(passkeyRegistrationOptionsLoading)return showToast('Please wait','Passkey security options are still being prepared.',false);
+  passkeyRegistrationOptionsLoading=true;
+  try{
+   const s=await api('/api/auth/passkey/register/options',{method:'POST',body:JSON.stringify({currentPassword})});
+   preparedPasskeyRegistrationOptions=s.options;
+   showToast('Passkey ready','Tap Register This Device as a Passkey once more to open your fingerprint or screen-lock prompt.');
+  }catch(e){
+   showToast('Could not prepare passkey',e.message||'Check your password and try again.',false);
+  }finally{passkeyRegistrationOptionsLoading=false;}
+  return;
+ }
+ const options=preparedPasskeyRegistrationOptions;
+ preparedPasskeyRegistrationOptions=null;
+ let creation;
+ try{
+  // Invoke WebAuthn directly during this button tap, before any further await.
+  creation=navigator.credentials.create({publicKey:prepPasskeyOptions(options)});
+ }catch(e){
+  showToast('Passkey setup failed',passkeyErrorMessage(e),false);
+  return;
+ }
+ try{
+  const credential=await creation;
+  if(!credential)throw new Error('Passkey registration was cancelled.');
+  const result=await api('/api/auth/passkey/register/verify',{method:'POST',body:JSON.stringify(serializePasskey(credential))});
+  passwordInput.value='';
+  showToast('Passkey registered',result.message||'This device can now sign in with a passkey.');
+ }catch(e){
+  showToast('Passkey setup failed',passkeyErrorMessage(e),false);
+ }
+}
+function passkeyErrorMessage(error){
+ const name=error&&error.name||'';
+ if(name==='NotAllowedError')return 'The device prompt was cancelled, timed out, or blocked. Tap Register again and approve the phone security prompt promptly.';
+ if(name==='SecurityError')return 'This browser rejected the website origin. Open Zulvix-KE from https://trust254.github.io/Zulvix-KE/ in Chrome.';
+ if(name==='InvalidStateError')return 'A passkey for this Zulvix-KE account may already exist on this device.';
+ if(name==='NotSupportedError')return 'This device does not currently offer a compatible screen-lock or biometric passkey.';
+ return error&&error.message||'Unable to register a passkey. Please try again.';
+}
 async function handlePasskeyLogin(){const mobile=document.getElementById('loginPhone').value.trim();if(!mobile)return showToast('Mobile number required','Enter your registered mobile number, then choose passkey sign-in.',false);if(!window.PublicKeyCredential||!navigator.credentials)return showToast('Passkeys unavailable','This browser or device does not support passkeys.',false);try{const s=await api('/api/auth/passkey/login/options',{method:'POST',body:JSON.stringify({mobile})});const c=await navigator.credentials.get({publicKey:prepPasskeyOptions(s.options)});if(!c)throw new Error('Passkey sign-in was cancelled.');const d=await api('/api/auth/passkey/login/verify',{method:'POST',body:JSON.stringify({mobile,...serializePasskey(c)})});localStorage.setItem(USER_TOKEN_KEY,d.token);applyUser(d.user);await loadUserNotifications();showToast('Signed In','Passkey sign-in successful.');}catch(e){showToast('Passkey sign-in failed',e.message||'Try signing in with your password.',false);}}
 function toggleRecoveryPanel(){const p=document.getElementById('passwordRecoveryPanel');p.classList.toggle('hidden');const m=document.getElementById('loginPhone').value.trim();if(m&&!document.getElementById('recoveryMobile').value)document.getElementById('recoveryMobile').value=m;}
 async function recoverPasswordWithPasskey(){
