@@ -2077,7 +2077,7 @@ async function handleRegister(){
   localStorage.setItem(USER_TOKEN_KEY,result.token);
   applyUser(result.user);
   await loadUserNotifications();
-  showToast('Registration successful',`Welcome, ${result.user.name}. You can optionally enable a passkey later in Account Security.`);
+  showToast('Registration successful',`Welcome, ${result.user.name}. You can optionally enable Google Authenticator for password recovery in Account Security.`);
  }catch(e){
   showToast('Registration not completed',e.message||'Please try again.',false);
  }
@@ -2205,32 +2205,6 @@ async function resetPasswordWithAuthenticator(){
  }catch(e){showToast('Password reset failed',e.message||'Verify again and retry.',false);}
 }
 function toggleRecoveryPanel(){const p=document.getElementById('passwordRecoveryPanel');p.classList.toggle('hidden');const m=document.getElementById('loginPhone').value.trim();if(m&&!document.getElementById('recoveryMobile').value)document.getElementById('recoveryMobile').value=m;}
-async function recoverPasswordWithPasskey(){
- const mobile=document.getElementById('recoveryMobile').value.trim();
- const newPassword=document.getElementById('passkeyRecoveryNewPassword').value;
- if(!mobile||!newPassword)return showToast('Details required','Enter your registered mobile number and a new password.',false);
- if(newPassword.length<8)return showToast('Password too short','Use at least 8 characters.',false);
- if(!window.PublicKeyCredential||!navigator.credentials)return showToast('Passkeys unavailable','This device or browser does not support passkeys.',false);
- let temporaryToken='';
- try{
-  const start=await api('/api/auth/passkey/login/options',{method:'POST',body:JSON.stringify({mobile})});
-  const credential=await navigator.credentials.get({publicKey:prepPasskeyOptions(start.options)});
-  if(!credential)throw new Error('Fingerprint verification was cancelled.');
-  const verified=await api('/api/auth/passkey/login/verify',{method:'POST',body:JSON.stringify({mobile,challengeId:start.challengeId,...serializePasskey(credential)})});
-  temporaryToken=verified.token;
-  localStorage.setItem(USER_TOKEN_KEY,temporaryToken);
-  const result=await api('/api/auth/password-recovery/passkey-reset',{method:'POST',body:JSON.stringify({newPassword})});
-  localStorage.removeItem(USER_TOKEN_KEY);
-  document.getElementById('loginPhone').value=mobile;
-  document.getElementById('loginPassword').value='';
-  document.getElementById('passkeyRecoveryNewPassword').value='';
-  document.getElementById('recoveryResult').innerText=result.message||'Password updated. Sign in with your new password.';
-  showToast('Password updated','Fingerprint verified. You can now sign in using your new password.');
- }catch(e){
-  if(temporaryToken)localStorage.removeItem(USER_TOKEN_KEY);
-  showToast('Fingerprint recovery failed',e.message||'Use administrator recovery or try again.',false);
- }
-}
 async function requestPasswordRecovery(){const mobile=document.getElementById('recoveryMobile').value.trim();if(!mobile)return showToast('Mobile number required','Enter the registered mobile number.',false);try{const d=await api('/api/auth/password-recovery/request',{method:'POST',body:JSON.stringify({mobile})});document.getElementById('recoveryResult').innerText=d.message||'Request submitted.';showToast('Request submitted','Contact the administrator for identity verification and your one-time code.');}catch(e){showToast('Request failed',e.message,false);}}
 async function resetPasswordWithCode(){const mobile=document.getElementById('recoveryMobile').value.trim(),code=document.getElementById('recoveryCode').value.trim(),newPassword=document.getElementById('recoveryNewPassword').value;if(!mobile||!code||!newPassword)return showToast('Details required','Enter mobile, recovery code and new password.',false);try{const d=await api('/api/auth/password-recovery/reset',{method:'POST',body:JSON.stringify({mobile,code,newPassword})});document.getElementById('recoveryResult').innerText=d.message||'Password reset.';document.getElementById('loginPhone').value=mobile;document.getElementById('loginPassword').value='';document.getElementById('recoveryCode').value='';document.getElementById('recoveryNewPassword').value='';showToast('Password updated','You can now sign in with your new password.');}catch(e){showToast('Password reset failed',e.message,false);}}
 
@@ -2325,8 +2299,6 @@ async function refreshUser(silent=false,loadAds=true){
 function handleLogout(){
 
  if(confirm('Are you sure you want to sign out?')){
-  const passkeyPasswordField=document.getElementById('passkeyCurrentPassword');
-  if(passkeyPasswordField) passkeyPasswordField.value='';
 
   localStorage.removeItem(
    USER_TOKEN_KEY
