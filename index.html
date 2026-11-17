@@ -2138,7 +2138,7 @@ function b64urlToBytes(v){const p='='.repeat((4-v.length%4)%4);const b=(v+p).rep
 function bytesToB64url(v){return btoa(String.fromCharCode(...new Uint8Array(v))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
 function prepPasskeyOptions(o){o.challenge=b64urlToBytes(o.challenge);if(o.user&&o.user.id)o.user.id=b64urlToBytes(o.user.id);['allowCredentials','excludeCredentials'].forEach(k=>{if(o[k])o[k]=o[k].map(c=>({...c,id:b64urlToBytes(c.id)}));});return o;}
 function serializePasskey(c){const r=c.response,d={id:c.id,rawId:bytesToB64url(c.rawId),type:c.type,response:{clientDataJSON:bytesToB64url(r.clientDataJSON)},clientExtensionResults:c.getClientExtensionResults()};if(r.attestationObject)d.response.attestationObject=bytesToB64url(r.attestationObject);if(r.authenticatorData)d.response.authenticatorData=bytesToB64url(r.authenticatorData);if(r.signature)d.response.signature=bytesToB64url(r.signature);if(r.userHandle)d.response.userHandle=bytesToB64url(r.userHandle);if(r.getTransports)d.response.transports=r.getTransports();return d;}
-async let preparedPasskeyRegistrationOptions=null;
+let preparedPasskeyRegistrationOptions=null;
 let passkeyRegistrationOptionsLoading=false;
 async function registerPasskey(){
  if(!localStorage.getItem(USER_TOKEN_KEY))return showToast('Sign in required','Sign in before registering a passkey.',false);
