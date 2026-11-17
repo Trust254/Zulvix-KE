@@ -3390,49 +3390,28 @@ async function sendAdminBroadcast(){
 }
 
 function switchAdminTab(tab){
+ const tabs=['users','levels','deposits','withdrawals','complaints','broadcast','recovery'];
 
- ['users','levels','deposits','withdrawals','complaints','broadcast','recovery','ads']
- .forEach(t=>{
-
-  document
-   .getElementById(
-    'adm-section-'+t
-   )
-   .classList.add('hidden');
-
-  document
-   .getElementById(
-    'adm-tab-'+t
-   )
-   .classList.remove(
-    'bg-zinc-800',
-    'text-brandGreen'
-   );
-
-  document
-   .getElementById(
-    'adm-tab-'+t
-   )
-   .classList.add(
-    'text-zinc-400'
-   );
-
+ tabs.forEach(t=>{
+  const section=document.getElementById('adm-section-'+t);
+  const button=document.getElementById('adm-tab-'+t);
+  if(section) section.classList.add('hidden');
+  if(button){
+   button.classList.remove('bg-zinc-800','text-brandGreen');
+   button.classList.add('text-zinc-400');
+  }
  });
 
- document
-  .getElementById(
-   'adm-section-'+tab
-  )
-  .classList.remove('hidden');
+ const activeSection=document.getElementById('adm-section-'+tab);
+ const activeButton=document.getElementById('adm-tab-'+tab);
+ if(!activeSection||!activeButton){
+  console.warn('Admin tab is unavailable:',tab);
+  return;
+ }
 
- document
-  .getElementById(
-   'adm-tab-'+tab
-  )
-  .classList.add(
-   'bg-zinc-800',
-   'text-brandGreen'
-  );
+ activeSection.classList.remove('hidden');
+ activeButton.classList.add('bg-zinc-800','text-brandGreen');
+ activeButton.classList.remove('text-zinc-400');
 
  if(tab==='recovery') loadAdminRecoveryRequests();
 }
