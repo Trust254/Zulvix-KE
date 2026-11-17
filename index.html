@@ -1456,32 +1456,14 @@ class="space-y-2 max-h-60 overflow-y-auto">
  <div id="adminRecoveryRequestsList" class="space-y-2 max-h-60 overflow-y-auto"></div>
 </div>
 <div id="adm-section-ads" class="hidden space-y-5">
- <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-  <div><p class="text-[10px] uppercase tracking-[.22em] text-brandGreen font-bold">Zulvix-KE · Ads Studio v3</p><h4 class="text-xl font-black text-white">Advertising Studio</h4><p class="text-xs text-zinc-400 mt-1">Create, schedule and manage sponsor adverts from one place.</p></div>
-  <span class="text-[10px] rounded-full border border-zinc-700 px-3 py-1 text-zinc-400">Mobile + Desktop</span>
+ <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+  <div><p class="text-[10px] uppercase tracking-[.22em] text-brandGreen font-bold">ZULVIX-KE · CAMPAIGN CONTROL</p><h4 class="text-xl font-black text-white">Ads Management Center</h4><p class="text-xs text-zinc-400 mt-1">One control center for campaigns, media, scheduling, payment and delivery.</p></div>
+  <div class="flex flex-col gap-2 sm:items-end"><span class="text-[10px] rounded-full border border-zinc-700 px-3 py-1 text-zinc-400">Responsive · Phone + Computer</span><button type="button" onclick="runAdsCenterChecks()" class="rounded-xl border border-brandGreen/50 bg-brandGreen/10 px-4 py-2 text-xs font-bold text-brandGreen">Run connection &amp; system checks</button></div>
  </div>
+ <div id="adsCenterHealth" class="rounded-xl border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-400" aria-live="polite">System checks have not been run yet. Use the check button before managing campaigns.</div>
  <div class="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-100"><strong>Publisher notice:</strong> Use only adverts you have permission to publish. Never ask users to click adverts or reward advert views with wallet credits.</div>
- <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-  <section class="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 space-y-3">
-   <div><h5 class="font-bold text-white">Placement settings</h5><p class="text-[10px] text-zinc-500">These provider settings do not publish third-party ad code.</p></div>
-   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-    <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-3 space-y-2">
-     <strong class="text-xs text-brandGreen">Before tapping</strong>
-     <label class="flex items-center gap-2 text-xs"><input id="adBeforeEnabled" type="checkbox"> Enable placement</label>
-     <select id="adBeforeProvider" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="unconfigured">Provider not connected</option><option value="house">Zulvix-KE house advert</option><option value="google_ad_manager">Google Ad Manager (after approval)</option></select>
-     <input id="adBeforeUnit" maxlength="160" placeholder="Approved ad unit ID (optional)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
-    </div>
-    <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-3 space-y-2">
-     <strong class="text-xs text-brandGold">After tapping</strong>
-     <label class="flex items-center gap-2 text-xs"><input id="adAfterEnabled" type="checkbox"> Enable placement</label>
-     <select id="adAfterProvider" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="unconfigured">Provider not connected</option><option value="house">Zulvix-KE house advert</option><option value="google_ad_manager">Google Ad Manager (after approval)</option></select>
-     <input id="adAfterUnit" maxlength="160" placeholder="Approved ad unit ID (optional)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
-    </div>
-   </div>
-   <button onclick="saveAdminAdSettings()" class="w-full bg-zinc-100 text-black font-bold py-3 rounded-xl text-xs">Save placement settings</button>
-   <p id="adminAdsResult" class="text-[10px] text-zinc-400" aria-live="polite"></p>
-  </section>
-  <section class="rounded-2xl border border-brandGreen/30 bg-zinc-950/70 p-4 space-y-3">
+ <div class="grid grid-cols-1 gap-4">
+ <section class="rounded-2xl border border-brandGreen/30 bg-zinc-950/70 p-4 space-y-3">
    <div><p class="text-[10px] uppercase tracking-widest text-brandGreen font-bold">New campaign</p><h5 class="text-lg font-black text-white">Create sponsored advert</h5><p class="text-[10px] text-zinc-500">Video MP4 up to 8 MB · Images JPG, PNG or WebP · Carousel 2–8 images</p></div>
    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
     <input id="sponsorName" maxlength="120" placeholder="Business / sponsor name" class="w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs">
@@ -1721,6 +1703,22 @@ function hideToast(){
    API
 ========================================================= */
 
+async function fetchWithRetry(url,options={},attempts=3){
+ let lastError;
+ for(let attempt=0;attempt<attempts;attempt++){
+  try{
+   const response=await fetch(url,options);
+   if(response.ok||![502,503,504].includes(response.status)||attempt===attempts-1)return response;
+  }catch(error){
+   lastError=error;
+   if(attempt===attempts-1)throw new Error('The advertising server could not be reached after '+attempts+' attempts. The free hosting service may be waking up; wait briefly and retry.');
+  }
+  await new Promise(resolve=>setTimeout(resolve,900*(attempt+1)));
+ }
+ if(lastError)throw lastError;
+ throw new Error('The advertising server is temporarily unavailable.');
+}
+
 async function api(path,options={}){
 
  const isAdmin=path.startsWith('/api/admin/');
@@ -1739,7 +1737,7 @@ async function api(path,options={}){
  }
 
  const response=
-  await fetch(API+path,{
+  await fetchWithRetry(API+path,{
    ...options,
    headers
   });
@@ -2341,7 +2339,7 @@ async function renderSponsorAds(placement){
  const host=sponsorAdHost(placement);if(!host)return;
  try{
   host.innerHTML='<p class="text-xs text-zinc-500">Loading sponsor adverts…</p>';
-  const response=await fetch(API+'/api/sponsor-feed?placement='+encodeURIComponent(placement),{cache:'no-store'});
+  const response=await fetchWithRetry(API+'/api/sponsor-feed?placement='+encodeURIComponent(placement),{cache:'no-store'},3);
   if(!response.ok)throw new Error('Advert feed returned '+response.status+'.');
   const data=await response.json(),ads=data.ads||[];
   host.innerHTML='';
@@ -2369,22 +2367,24 @@ async function renderSponsorAds(placement){
   console.error('Sponsor advert load failed',error);
  }
 }
+async function runAdsCenterChecks(){
+ const panel=document.getElementById('adsCenterHealth');if(!panel)return;
+ panel.innerHTML='<p class="text-zinc-300">Checking backend connection, public advert feeds and secured campaign manager…</p>';
+ const results=[];
+ const check=async(label,fn)=>{try{const detail=await fn();results.push({label,ok:true,detail});}catch(error){results.push({label,ok:false,detail:error.message||'Check failed'});}};
+ await check('Backend connection',async()=>{const r=await fetchWithRetry(API+'/api/sponsor-feed?placement=before_tap',{cache:'no-store'},3);if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();if(d.success!==true||!Array.isArray(d.ads))throw new Error('Unexpected feed response');return 'Reachable';});
+ await check('Before-tap advert feed',async()=>{const r=await fetchWithRetry(API+'/api/sponsor-feed?placement=before_tap',{cache:'no-store'},3);if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();if(!Array.isArray(d.ads))throw new Error('Missing advert list');return d.ads.length+' live paid advert(s)';});
+ await check('After-tap advert feed',async()=>{const r=await fetchWithRetry(API+'/api/sponsor-feed?placement=after_tap',{cache:'no-store'},3);if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();if(!Array.isArray(d.ads))throw new Error('Missing advert list');return d.ads.length+' live paid advert(s)';});
+ await check('Secure campaign manager',async()=>{const d=await api('/api/admin/sponsor-ads');if(!Array.isArray(d.ads))throw new Error('Unexpected manager response');return d.ads.length+' saved campaign(s)';});
+ panel.innerHTML=results.map(x=>'<div class="flex items-start justify-between gap-3 border-b border-zinc-800 py-2 last:border-0"><span class="text-zinc-300">'+escapeSponsorText(x.label)+'</span><span class="text-right '+(x.ok?'text-emerald-300':'text-red-300')+'">'+(x.ok?'PASS · ':'FAIL · ')+escapeSponsorText(x.detail)+'</span></div>').join('')+'<p class="mt-2 text-[10px] text-zinc-500">These checks verify live API connectivity and read access. They do not upload a test advert or change campaign data.</p>';
+ return results;
+}
+
 async function loadAdminAdSettings(){
- const result=document.getElementById('adminAdsResult');
- loadSponsorAds();
- try{
-  const d=await api('/api/admin/ads');
-  const slots=d.placements||[];
-  const before=slots.find(x=>x.placement==='before_tap')||{};
-  const after=slots.find(x=>x.placement==='after_tap')||{};
-  document.getElementById('adBeforeEnabled').checked=!!before.enabled;
-  document.getElementById('adBeforeProvider').value=before.provider||'unconfigured';
-  document.getElementById('adBeforeUnit').value=before.ad_unit_id||'';
-  document.getElementById('adAfterEnabled').checked=!!after.enabled;
-  document.getElementById('adAfterProvider').value=after.provider||'unconfigured';
-  document.getElementById('adAfterUnit').value=after.ad_unit_id||'';
-  result.textContent='Settings loaded. No live ad code is being served.';
- }catch(e){result.textContent='Could not load advertising settings: '+e.message;}
+ // The old third-party placement settings are retired from the new Ads Management Center.
+ // Existing sponsor campaigns remain stored and are loaded through the dedicated campaign API.
+ await loadSponsorAds();
+ await runAdsCenterChecks();
 }
 async function saveAdminAdSettings(){
  const result=document.getElementById('adminAdsResult');
