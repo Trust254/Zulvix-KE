@@ -66,11 +66,6 @@ body{
  #tab-dashboard> :nth-child(4){grid-column:1}
  #tab-dashboard> :nth-child(5){grid-column:2;align-self:center}
  #levelsListContainer{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
- 
-.sponsor-video-wrap{position:relative;width:100%;min-width:0;background:#000;border-radius:.5rem;overflow:hidden}
- .sponsor-video-wrap video{display:block;width:100%;max-height:420px;min-height:220px;object-fit:contain;background:#000}
- .sponsor-video-start{z-index:2;cursor:pointer}
- 
 }
 @media (min-width: 1200px){
  main.flex-grow.max-w-lg{max-width:min(1440px,calc(100% - 96px))}
@@ -1644,12 +1639,12 @@ async function fetchWithRetry(url,options={},attempts=3){
    if(response.ok||![502,503,504].includes(response.status)||attempt===attempts-1)return response;
   }catch(error){
    lastError=error;
-   if(attempt===attempts-1)throw new Error('The advertising server could not be reached after '+attempts+' attempts. The free hosting service may be waking up; wait briefly and retry.');
+   if(attempt===attempts-1)throw new Error('The server could not be reached after '+attempts+' attempts. The free hosting service may be waking up; wait briefly and retry.');
   }
   await new Promise(resolve=>setTimeout(resolve,900*(attempt+1)));
  }
  if(lastError)throw lastError;
- throw new Error('The advertising server is temporarily unavailable.');
+ throw new Error('The server is temporarily unavailable.');
 }
 
 async function api(path,options={}){
