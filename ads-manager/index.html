@@ -50,6 +50,28 @@ async function fileAsDataUrl(file){
   reader.readAsDataURL(file);
  });
 }
+async function uploadVideoMultipart(file,metadata){
+ const form=new FormData();
+ form.append("token",localStorage.getItem(KEY)||"");
+ form.append("sponsor_name",metadata.sponsor_name);
+ form.append("title",metadata.title);
+ form.append("destination_url",metadata.destination_url);
+ form.append("placement",metadata.placement);
+ form.append("start_at",metadata.start_at||"");
+ form.append("end_at",metadata.end_at||"");
+ form.append("sponsorship_amount",String(metadata.sponsorship_amount||0));
+ form.append("payment_status",metadata.payment_status||"pending");
+ form.append("media",file,file.name);
+ let response;
+ try{
+  response=await fetch(API+"/api/admin/sponsor-ads/video-multipart",{method:"POST",body:form});
+ }catch(error){
+  throw new Error("The video could not be sent. Please check your connection and try again.");
+ }
+ let result={};try{result=await response.json();}catch{}
+ if(!response.ok)throw new Error(result.message||("Video upload failed ("+response.status+")."));
+ return result;
+}
 async function createAd(e){
  e.preventDefault();clearMsg("formMsg");
  const type=$("mediaType").value,file=$("mediaFile").files[0],destination=$("destination").value.trim();
@@ -61,18 +83,28 @@ async function createAd(e){
  if(type==="text"&&!$("textContent").value.trim())return msg("formMsg","Enter the text advert content.","error");
  $("saveBtn").disabled=true;$("saveBtn").textContent="Uploading…";
  try{
-  const dataUrl=type==="text"?"":await fileAsDataUrl(file);
-  const payload={
+  const metadata={
    sponsor_name:$("sponsor").value.trim(),title:$("title").value.trim(),
-   ad_format:type,media_type:type,
-   text_content:type==="text"?$("textContent").value.trim():"",
-   data_url:dataUrl,mime_type:type==="text"?"text/plain":file.type,
-   file_name:type==="text"?"":file.name,
    destination_url:destination,placement:$("placement").value,
    start_at:$("startAt").value||null,end_at:$("endAt").value||null,
    sponsorship_amount:Number($("amount").value||0),payment_status:$("payment").value
   };
-  await api("/api/admin/sponsor-ads",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  if(type==="video"){
+   await uploadVideoMultipart(file,metadata);
+  }else{
+   const dataUrl=type==="image"?await fileAsDataUrl(file):"";
+   const payload={
+    sponsor_name:metadata.sponsor_name,title:metadata.title,
+    ad_format:type,media_type:type,
+    text_content:type==="text"?$("textContent").value.trim():"",
+    data_url:dataUrl,mime_type:type==="text"?"text/plain":file.type,
+    file_name:type==="text"?"":file.name,
+    destination_url:metadata.destination_url,placement:metadata.placement,
+    start_at:metadata.start_at,end_at:metadata.end_at,
+    sponsorship_amount:metadata.sponsorship_amount,payment_status:metadata.payment_status
+   };
+   await api("/api/admin/sponsor-ads",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  }
   msg("formMsg","Campaign saved successfully. It is inactive until you activate it.","ok");
   $("adForm").reset();$("amount").value="0";updateMediaFields();await loadAds();
  }catch(e){msg("formMsg",e.message||"Could not upload advert.", "error");}
