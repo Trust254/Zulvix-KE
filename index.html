@@ -70,6 +70,15 @@ body{
 @media (min-width: 1200px){
  main.flex-grow.max-w-lg{max-width:min(1440px,calc(100% - 96px))}
 }
+/* Keep sponsor adverts visible and properly sized on desktop screens. */
+@media (min-width: 768px){
+ #zulvixAdBefore{grid-column:1 / -1;width:100%;min-width:0}
+ #zulvixAdAfter{width:100%;min-width:0}
+ #zulvixAdBeforeImage:not(.hidden),#zulvixAdBeforeVideo:not(.hidden),
+ #zulvixAdAfterImage:not(.hidden),#zulvixAdAfterVideo:not(.hidden){
+  display:block;width:100%;max-height:min(65vh,560px);object-fit:contain
+ }
+}
 /* Advertising feature removed. */
 </style>
 </head>
