@@ -77,16 +77,7 @@ body{
 @media (min-width: 1200px){
  main.flex-grow.max-w-lg{max-width:min(1440px,calc(100% - 96px))}
 }
-
-/* Ads Studio v3: adaptive video and admin layouts */
-.sponsor-ad-card{min-width:0;width:100%;border:1px solid #29352e;border-radius:18px;background:linear-gradient(145deg,#101b15,#090f0c);padding:14px;overflow:hidden}
-.sponsor-video-wrap{position:relative;width:100%;aspect-ratio:16/9;min-height:180px;max-height:520px;background:#000;border-radius:12px;overflow:hidden}
-.sponsor-video-wrap video{display:block;width:100%;height:100%;max-height:520px;object-fit:contain;background:#000}
-.sponsor-play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0009;color:#fff;font-weight:800;font-size:14px;border:0}
-.sponsor-play-overlay[hidden]{display:none}
-.sponsor-sound-toggle{position:absolute;right:10px;top:10px;z-index:3;border:1px solid #ffffff55;border-radius:999px;background:#07100de8;color:#fff;padding:8px 12px;font-size:11px;font-weight:700}
-.sponsor-sound-toggle[hidden]{display:none}
-@media(min-width:768px){.sponsor-video-wrap{min-height:260px}.sponsor-ad-card{padding:18px}}
+/* Advertising feature removed. */
 </style>
 </head>
 
@@ -433,8 +424,7 @@ class="text-xl font-black text-white">
   <p class="text-[10px] text-zinc-500">Sign in to view announcements.</p>
  </div>
 </div>
-
-<div id="sponsorAdsDashboardSlot" class="space-y-2"><div id="sponsorAdsBefore" class="space-y-2"></div><div id="sponsorAdsAfter" class="space-y-2"></div></div>
+<div id="sponsorAdsAfter" class="space-y-2"></div></div>
 
 <!-- TAP -->
 
@@ -554,8 +544,6 @@ Tiers (8)
 <!-- LEVELS -->
 
 <section id="tab-levels" class="space-y-4 hidden">
-<div id="sponsorAdsLevelsSlot" class="space-y-2"></div>
-
 <div class="mb-2">
 
 <h2 class="text-lg font-bold text-white">
@@ -579,8 +567,6 @@ id="levelsListContainer">
 <!-- WALLET -->
 
 <section id="tab-wallet" class="space-y-4 hidden">
-<div id="sponsorAdsWalletSlot" class="space-y-2"></div>
-
 <div class="bg-brandCard border border-brandGold/30 rounded-2xl p-5 space-y-4">
 
 <div class="flex justify-between items-center">
@@ -688,8 +674,6 @@ Recent Ledger Activity
 <!-- PROFILE / SUPPORT -->
 
 <section id="tab-profile" class="space-y-4 hidden">
-<div id="sponsorAdsProfileSlot" class="space-y-2"></div>
-
 <div class="bg-brandCard border border-zinc-800 rounded-2xl p-5 text-center space-y-3">
 
 <div class="w-16 h-16 rounded-full bg-brandGreen/20 text-brandGreen font-black text-2xl flex items-center justify-center mx-auto border border-brandGreen/40">
@@ -1245,8 +1229,6 @@ id="withdrawModal"
 class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
 
 <div class="bg-brandCard border border-brandGold/40 rounded-2xl max-w-sm w-full p-5 space-y-4">
-<div id="sponsorAdsWithdrawSlot" class="space-y-2"></div>
-
 <div class="flex justify-between">
 
 <h3 class="font-bold">
@@ -1374,8 +1356,6 @@ Support
 Broadcast
 </button>
 <button onclick="switchAdminTab('recovery')" id="adm-tab-recovery" class="min-w-0 w-full px-1 py-2 leading-tight rounded-lg whitespace-normal break-words">Recovery</button>
-<button onclick="switchAdminTab('ads')" id="adm-tab-ads" class="min-w-0 w-full px-1 py-2 leading-tight rounded-lg whitespace-normal break-words">Ads</button>
-
 </div>
 
 
@@ -1454,46 +1434,6 @@ class="space-y-2 max-h-60 overflow-y-auto">
  <p class="text-[10px] text-zinc-400">Verify the user's identity independently before issuing a code. Codes are shown once and expire after 15 minutes.</p>
  <button onclick="loadAdminRecoveryRequests()" class="w-full bg-zinc-800 text-white font-bold py-2 rounded-lg text-xs">Refresh Recovery Requests</button>
  <div id="adminRecoveryRequestsList" class="space-y-2 max-h-60 overflow-y-auto"></div>
-</div>
-<div id="adm-section-ads" class="hidden space-y-5">
- <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-  <div><p class="text-[10px] uppercase tracking-[.22em] text-brandGreen font-bold">ZULVIX-KE · CAMPAIGN CONTROL</p><h4 class="text-xl font-black text-white">Ads Management Center</h4><p class="text-xs text-zinc-400 mt-1">One control center for campaigns, media, scheduling, payment and delivery.</p></div>
-  <div class="flex flex-col gap-2 sm:items-end"><span class="text-[10px] rounded-full border border-zinc-700 px-3 py-1 text-zinc-400">Responsive · Phone + Computer</span><button type="button" onclick="runAdsCenterChecks()" class="rounded-xl border border-brandGreen/50 bg-brandGreen/10 px-4 py-2 text-xs font-bold text-brandGreen">Run connection &amp; system checks</button></div>
- </div>
- <div id="adsCenterHealth" class="rounded-xl border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-400" aria-live="polite">System checks have not been run yet. Use the check button before managing campaigns.</div>
- <div class="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-100"><strong>Publisher notice:</strong> Use only adverts you have permission to publish. Never ask users to click adverts or reward advert views with wallet credits.</div>
- <div class="grid grid-cols-1 gap-4">
- <section class="rounded-2xl border border-brandGreen/30 bg-zinc-950/70 p-4 space-y-3">
-   <div><p class="text-[10px] uppercase tracking-widest text-brandGreen font-bold">New campaign</p><h5 class="text-lg font-black text-white">Create sponsored advert</h5><p class="text-[10px] text-zinc-500">Video MP4 up to 8 MB · Images JPG, PNG or WebP · Carousel 2–8 images</p></div>
-   <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-    <input id="sponsorName" maxlength="120" placeholder="Business / sponsor name" class="w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs">
-    <input id="sponsorTitle" maxlength="160" placeholder="Advert title" class="w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs">
-   </div>
-   <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-    <select id="sponsorType" onchange="updateSponsorMediaInput()" class="w-full bg-black border border-zinc-700 rounded-xl p-3 text-xs"><option value="video">Video advert (MP4)</option><option value="image">Image advert</option><option value="banner">Banner advert</option><option value="text">Text advert</option><option value="carousel">Carousel (2–8 images)</option></select>
-    <select id="sponsorPlacement" class="w-full bg-black border border-zinc-700 rounded-xl p-3 text-xs"><option value="before_tap">Show before tapping</option><option value="after_tap">Show after tapping</option></select>
-   </div>
-   <textarea id="sponsorText" rows="3" maxlength="1200" placeholder="Text advert description / offer" class="hidden w-full bg-black border border-zinc-700 rounded-xl p-3 text-xs"></textarea>
-   <label id="sponsorFileLabel" for="sponsorFile" class="block text-xs text-zinc-300">Choose MP4 video · maximum 8 MB</label>
-   <input id="sponsorFile" type="file" accept="video/mp4,.mp4" onchange="showSponsorFileInfo()" class="block w-full rounded-xl border border-dashed border-zinc-600 bg-black p-3 text-xs">
-   <div id="sponsorFileInfo" class="text-[10px] text-zinc-500" aria-live="polite">Choose a video file from your phone or computer.</div>
-   <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-    <input id="sponsorLink" type="url" placeholder="Destination HTTPS website link" class="w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs">
-    <input id="sponsorAmount" type="number" min="0" step="1" placeholder="Sponsorship amount (Ksh)" class="w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs">
-   </div>
-   <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-    <label class="text-[10px] text-zinc-400">Start date<input id="sponsorStart" type="date" class="mt-1 block w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs"></label>
-    <label class="text-[10px] text-zinc-400">End date<input id="sponsorEnd" type="date" class="mt-1 block w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs"></label>
-   </div>
-   <label class="flex items-center gap-2 text-xs text-zinc-300"><input id="sponsorPaid" type="checkbox"> Sponsorship payment received</label>
-   <button id="sponsorUploadButton" onclick="createSponsorAd()" class="w-full rounded-xl bg-brandGreen py-3 text-xs font-black text-black shadow-lg">Upload &amp; Save Advert</button>
-   <p class="text-[10px] text-zinc-500">New adverts are saved inactive. Review and activate them in the campaign list.</p>
-  </section>
- </div>
- <section class="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 space-y-3">
-  <div class="flex items-center justify-between gap-2"><div><h5 class="font-bold text-white">Campaign library</h5><p class="text-[10px] text-zinc-500">Manage existing sponsor adverts without deleting their records unless you choose Delete.</p></div><button onclick="loadSponsorAds()" class="rounded-lg bg-zinc-800 px-3 py-2 text-[10px] font-bold text-white">Refresh list</button></div>
-  <div id="sponsorAdsList" class="grid grid-cols-1 lg:grid-cols-2 gap-3"><p class="text-xs text-zinc-500">Loading adverts…</p></div>
- </section>
 </div>
 <div id="adm-section-broadcast" class="hidden space-y-2">
 <h4 class="text-xs font-bold uppercase">Broadcast Centre</h4>
@@ -1647,9 +1587,6 @@ let adminLoggedIn=false;
 let countdownTimer=null;
 
 let tapInProgress=false;
-let tapAdReady=true;
-let sponsorVideosPending=0;
-
 let adminPollTimer=null;
 
 let previousPendingCount=null;
@@ -1948,11 +1885,6 @@ function applyUser(u,loadAds=true){
  updateReferralLink();
 
  checkCountdownTimer();
- if(loadAds){
-  if(appState.tapsLeft>0)renderSponsorAds('before_tap');
-  else renderSponsorAds('after_tap');
- }
-
 }
 
 
@@ -2536,22 +2468,8 @@ function handleLogout(){
 /* =========================================================
    NAVIGATION
 ========================================================= */
-
-function moveSponsorAdsTo(slotId){
- const slot=document.getElementById(slotId);
- const before=document.getElementById('sponsorAdsBefore');
- const after=document.getElementById('sponsorAdsAfter');
- if(!slot||!before||!after)return;
- slot.appendChild(before);
- slot.appendChild(after);
-}
-
 function switchTab(id){
-
- const adSlots={dashboard:'sponsorAdsDashboardSlot',levels:'sponsorAdsLevelsSlot',wallet:'sponsorAdsWalletSlot',profile:'sponsorAdsProfileSlot'};
- if(adSlots[id])moveSponsorAdsTo(adSlots[id]);
-
- ['dashboard','levels','wallet','profile']
+['dashboard','levels','wallet','profile']
  .forEach(t=>{
 
   document
@@ -2646,12 +2564,7 @@ async function handleTapAsset(){
  }
 
  if(tapInProgress)return;
-
- if(!tapAdReady){
-  return showToast('Advert first','Please watch the sponsor video to the end. TAP ASSET unlocks automatically.',false);
- }
-
- if(Number(appState.tapsLeft||0)<=0){
+if(Number(appState.tapsLeft||0)<=0){
 
   checkCountdownTimer();
 
@@ -2698,12 +2611,7 @@ async function handleTapAsset(){
 
   const reward=
    Number(d.reward||0);
-
-  if(Number(appState.tapsLeft||0)<=0){
-   await renderSponsorAds('after_tap');
-  }
-
-  showToast(
+showToast(
    'Tap Accepted',
    `${d.message||'Tap completed successfully.'} +Ksh ${reward.toLocaleString()}`
   );
@@ -3148,10 +3056,7 @@ async function submitDeposit(){
 ========================================================= */
 
 function openWithdrawModal(){
-
- moveSponsorAdsTo('sponsorAdsWithdrawSlot');
-
- document
+document
   .getElementById(
    'withdrawPhoneInput'
   )
@@ -3168,10 +3073,7 @@ function openWithdrawModal(){
 
 
 function closeWithdrawModal(){
-
- moveSponsorAdsTo('sponsorAdsWalletSlot');
-
- document
+document
   .getElementById(
    'withdrawModal'
   )
@@ -3694,8 +3596,6 @@ function switchAdminTab(tab){
   );
 
  if(tab==='recovery') loadAdminRecoveryRequests();
- if(tab==='ads') loadAdminAdSettings();
-
 }
 
 
