@@ -1,0 +1,19 @@
+{
+  "name": "Zulvix-KE Ads Manager",
+  "short_name": "Zulvix-KE",
+  "description": "Manage sponsored adverts for Zulvix-KE",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#070d0a",
+  "theme_color": "#00ff88",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon-512-1.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
