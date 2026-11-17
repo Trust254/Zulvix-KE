@@ -489,7 +489,7 @@ Tap to earn daily profits. Limit: 6 taps every 12 hours.
 
 
 
-<div id="zulvixAdAfter" class="hidden mt-4 rounded-2xl border border-brandGold/40 bg-brandCard p-3"><div class="flex justify-between mb-2"><b class="text-[10px] text-brandGold">SPONSORED</b><span id="zulvixAdAfterSponsor" class="text-[10px] text-zinc-400"></span></div><a id="zulvixAdAfterLink" href="#" target="_blank" rel="noopener noreferrer"><img id="zulvixAdAfterImage" class="hidden w-full max-h-64 object-contain rounded-xl" alt="Sponsored advert"><video id="zulvixAdAfterVideo" class="hidden w-full max-h-64 rounded-xl bg-black" autoplay playsinline controls></video><div id="zulvixAdAfterText" class="hidden text-sm text-zinc-200 whitespace-pre-wrap"></div><div id="zulvixAdAfterTitle" class="font-bold text-sm mt-2"></div></a></div>
+<div id="zulvixAdAfter" class="hidden mt-4 rounded-2xl border border-brandGold/40 bg-brandCard p-3"><div class="flex justify-between mb-2"><b class="text-[10px] text-brandGold">SPONSORED</b><span id="zulvixAdAfterSponsor" class="text-[10px] text-zinc-400"></span></div><a id="zulvixAdAfterLink" href="#" target="_blank" rel="noopener noreferrer"><img id="zulvixAdAfterImage" class="hidden w-full max-h-64 object-contain rounded-xl" alt="Sponsored advert"><video id="zulvixAdAfterVideo" class="hidden w-full max-h-64 rounded-xl bg-black" autoplay playsinline></video><div id="zulvixAdAfterText" class="hidden text-sm text-zinc-200 whitespace-pre-wrap"></div><div id="zulvixAdAfterTitle" class="font-bold text-sm mt-2"></div></a></div>
 <!-- ACTIONS -->
 
 <div class="grid grid-cols-3 gap-3">
@@ -1571,7 +1571,8 @@ function showLiveAd(ad,where){
  if(kind==="video"){
   v.src=ad.media_url||(ad.media_urls||[])[0]||"";
   v.preload="auto";
-  v.controls=true;
+  v.controls=false;
+  v.removeAttribute("controls");
   v.classList.remove("hidden");
   if(beforeTap){
    sponsorBeforeTapPending=true;
