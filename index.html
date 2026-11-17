@@ -2228,7 +2228,7 @@ async function setupGoogleAuthenticator(){
 async function copyAuthenticatorSecret(){const secret=document.getElementById('authenticatorSetupSecret').textContent;if(!secret)return;try{await navigator.clipboard.writeText(secret);showToast('Copied','Authenticator setup key copied.');}catch(e){showToast('Copy unavailable','Select and copy the setup key manually.',false);}}
 async function enableGoogleAuthenticator(){
  const code=document.getElementById('authenticatorEnableCode').value.trim();
- if(!/^\\d{6}$/.test(code))return showToast('Code required','Enter the six-digit code shown in Google Authenticator.',false);
+ if(!/^\d{6}$/.test(code))return showToast('Code required','Enter the six-digit code shown in Google Authenticator.',false);
  try{
   const d=await api('/api/authenticator/enable',{method:'POST',body:JSON.stringify({code})});
   document.getElementById('authenticatorSetupPanel').classList.add('hidden');
