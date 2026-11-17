@@ -80,15 +80,23 @@ async function createAd(e){
  if(type==="text"&&!$("textContent").value.trim())return msg("formMsg","Enter the text advert content.","error");
  $("saveBtn").disabled=true;$("saveBtn").textContent="Uploading…";
  try{
-  const dataUrls=type==="text"?[]:[{data_url:await fileAsDataUrl(file),mime_type:file.type,file_name:file.name}];
-  const payload={
-   sponsor_name:$("sponsor").value.trim(),title:$("title").value.trim(),ad_format:type,
-   text_content:type==="text"?$("textContent").value.trim():"",
-   data_urls:dataUrls,destination_url:destination,placement:$("placement").value,
-   start_at:$("startAt").value||null,end_at:$("endAt").value||null,
-   sponsorship_amount:Number($("amount").value||0),payment_status:$("payment").value
+  const metadata={
+   sponsor_name:$("sponsor").value.trim(),title:$("title").value.trim(),
+   destination_url:destination,placement:$("placement").value,
+   start_at:$("startAt").value||"",end_at:$("endAt").value||"",
+   sponsorship_amount:String(Number($("amount").value||0)),payment_status:$("payment").value
   };
-  await api("/api/admin/sponsor-ads",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  if(type==="text"){
+   await api("/api/admin/sponsor-ads",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...metadata,ad_format:"text",text_content:$("textContent").value.trim(),data_urls:[]})});
+  }else{
+   const query=new URLSearchParams(metadata).toString();
+   let response;
+   try{
+    response=await fetch(API+"/api/admin/sponsor-ads/"+type+"?"+query,{method:"POST",headers:{Authorization:"Bearer "+localStorage.getItem(KEY),"Content-Type":file.type},body:file});
+   }catch(uploadError){throw new Error("Could not send the selected file. Check your connection and try again.");}
+   let result={};try{result=await response.json();}catch{}
+   if(!response.ok)throw new Error(result.message||("Upload failed ("+response.status+")."));
+  }
   msg("formMsg","Campaign saved successfully. It is inactive until you activate it.","ok");
   $("adForm").reset();$("amount").value="0";updateMediaFields();await loadAds();
  }catch(e){msg("formMsg",e.message||"Could not upload advert.","error");}
