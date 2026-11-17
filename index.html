@@ -1495,6 +1495,7 @@ const ADMIN_TOKEN_KEY='zulvix_admin_token';
 /* Ads Manager -> public Zulvix-KE ad feed */
 const zulvixLiveAds={before:null,after:null};
 let sponsorBeforeTapPending=false;
+let sponsorBeforeTapStarted=false;
 let sponsorBeforeTapVideo=null;
 let sponsorGestureRetryInstalled=false;
 function setSponsorTapLocked(locked){
@@ -1529,6 +1530,7 @@ function showLiveAd(ad,where){
  if(!root||!ad)return;
  const im=document.getElementById(p+"Image"),v=document.getElementById(p+"Video"),tx=document.getElementById(p+"Text"),a=document.getElementById(p+"Link");
  if(where==="before_tap"){
+  sponsorBeforeTapStarted=true;
   sponsorBeforeTapPending=false;
   sponsorBeforeTapVideo=null;
   removeSponsorGestureRetry();
@@ -1581,7 +1583,7 @@ function showLiveAd(ad,where){
  root.classList.remove("hidden");
 }
 function activatePendingBeforeTapAd(){
- if(appState.isLoggedIn&&zulvixLiveAds.before)showLiveAd(zulvixLiveAds.before,"before_tap");
+ if(appState.isLoggedIn&&zulvixLiveAds.before&&!sponsorBeforeTapStarted)showLiveAd(zulvixLiveAds.before,"before_tap");
 }
 async function loadLiveSponsorAds(){
  try{
