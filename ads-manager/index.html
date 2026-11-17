@@ -40,7 +40,35 @@ function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&l
 async function toggleAd(id,value){try{if(value&&!ads.find(a=>a.id===id)?.payment_status?.includes("paid")){const a=ads.find(x=>x.id===id);if(a?.payment_status!=="paid")throw new Error("Mark the campaign as paid before activating it.");}await api("/api/admin/sponsor-ads/"+encodeURIComponent(id),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({is_active:value})});await loadAds();}catch(e){msg("listMsg",e.message,"error");}}
 async function togglePayment(id,value){try{await api("/api/admin/sponsor-ads/"+encodeURIComponent(id),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({payment_status:value})});await loadAds();}catch(e){msg("listMsg",e.message,"error");}}
 async function deleteAd(id){if(!confirm("Delete this advert and its uploaded media permanently?"))return;try{await api("/api/admin/sponsor-ads/"+encodeURIComponent(id),{method:"DELETE"});msg("listMsg","Advert deleted.","ok");await loadAds();}catch(e){msg("listMsg",e.message,"error");}}
-async function fileAsDataUrl(file){if(!file)throw new Error("Please select the advert file again.");try{if(typeof file.arrayBuffer==="function"){const buffer=await file.arrayBuffer(),bytes=new Uint8Array(buffer);let binary="";for(let offset=0;offset<bytes.length;offset+=32768){binary+=String.fromCharCode(...bytes.subarray(offset,offset+32768));}return "data:"+file.type+";base64,"+btoa(binary);}}catch(error){console.warn("ArrayBuffer media read failed; trying FileReader fallback.",error);}return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error("Your browser could not access this file. Reopen the file picker and select it again from your device storage."));reader.readAsDataURL(file);});}
+async function fileAsDataUrl(file){
+ if(!file)throw new Error("Please select the advert file again.");
+ if(!Number.isFinite(file.size)||file.size<=0)throw new Error("The selected file is empty or unavailable. Please select it again from your device storage.");
+ const chunkSize=256*1024;
+ let binary="";
+ async function readChunk(blob){
+  if(typeof blob.arrayBuffer==="function"){
+   try{return new Uint8Array(await blob.arrayBuffer());}catch(error){console.warn("Chunk ArrayBuffer read failed; trying FileReader.",error);}
+  }
+  return await new Promise((resolve,reject)=>{
+   const reader=new FileReader();
+   reader.onload=()=>resolve(new Uint8Array(reader.result));
+   reader.onerror=()=>reject(new Error("The phone could not read part of the selected file. Please choose it again from Downloads or your device's internal storage."));
+   reader.onabort=()=>reject(new Error("File reading was interrupted. Please select the file again."));
+   reader.readAsArrayBuffer(blob);
+  });
+ }
+ try{
+  for(let offset=0;offset<file.size;offset+=chunkSize){
+   const part=file.slice(offset,Math.min(offset+chunkSize,file.size));
+   const bytes=await readChunk(part);
+   for(let i=0;i<bytes.length;i+=16384)binary+=String.fromCharCode(...bytes.subarray(i,Math.min(i+16384,bytes.length)));
+  }
+  return "data:"+file.type+";base64,"+btoa(binary);
+ }catch(error){
+  console.error("Chunked advert file read failed.",error);
+  throw error instanceof Error?error:new Error("Could not read the selected file. Please select it again from device storage.");
+ }
+}
 async function createAd(e){
  e.preventDefault();clearMsg("formMsg");
  const type=$("mediaType").value,file=$("mediaFile").files[0],destination=$("destination").value.trim();
