@@ -1462,27 +1462,8 @@ class="space-y-2 max-h-60 overflow-y-auto">
  </div>
  <div id="adsCenterHealth" class="rounded-xl border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-400" aria-live="polite">System checks have not been run yet. Use the check button before managing campaigns.</div>
  <div class="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-100"><strong>Publisher notice:</strong> Use only adverts you have permission to publish. Never ask users to click adverts or reward advert views with wallet credits.</div>
- <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-  <section class="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 space-y-3">
-   <div><h5 class="font-bold text-white">Placement settings</h5><p class="text-[10px] text-zinc-500">These provider settings do not publish third-party ad code.</p></div>
-   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-    <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-3 space-y-2">
-     <strong class="text-xs text-brandGreen">Before tapping</strong>
-     <label class="flex items-center gap-2 text-xs"><input id="adBeforeEnabled" type="checkbox"> Enable placement</label>
-     <select id="adBeforeProvider" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="unconfigured">Provider not connected</option><option value="house">Zulvix-KE house advert</option><option value="google_ad_manager">Google Ad Manager (after approval)</option></select>
-     <input id="adBeforeUnit" maxlength="160" placeholder="Approved ad unit ID (optional)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
-    </div>
-    <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-3 space-y-2">
-     <strong class="text-xs text-brandGold">After tapping</strong>
-     <label class="flex items-center gap-2 text-xs"><input id="adAfterEnabled" type="checkbox"> Enable placement</label>
-     <select id="adAfterProvider" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs"><option value="unconfigured">Provider not connected</option><option value="house">Zulvix-KE house advert</option><option value="google_ad_manager">Google Ad Manager (after approval)</option></select>
-     <input id="adAfterUnit" maxlength="160" placeholder="Approved ad unit ID (optional)" class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs">
-    </div>
-   </div>
-   <button onclick="saveAdminAdSettings()" class="w-full bg-zinc-100 text-black font-bold py-3 rounded-xl text-xs">Save placement settings</button>
-   <p id="adminAdsResult" class="text-[10px] text-zinc-400" aria-live="polite"></p>
-  </section>
-  <section class="rounded-2xl border border-brandGreen/30 bg-zinc-950/70 p-4 space-y-3">
+ <div class="grid grid-cols-1 gap-4">
+ <section class="rounded-2xl border border-brandGreen/30 bg-zinc-950/70 p-4 space-y-3">
    <div><p class="text-[10px] uppercase tracking-widest text-brandGreen font-bold">New campaign</p><h5 class="text-lg font-black text-white">Create sponsored advert</h5><p class="text-[10px] text-zinc-500">Video MP4 up to 8 MB · Images JPG, PNG or WebP · Carousel 2–8 images</p></div>
    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
     <input id="sponsorName" maxlength="120" placeholder="Business / sponsor name" class="w-full min-w-0 bg-black border border-zinc-700 rounded-xl p-3 text-xs">
@@ -1508,6 +1489,7 @@ class="space-y-2 max-h-60 overflow-y-auto">
    <button id="sponsorUploadButton" onclick="createSponsorAd()" class="w-full rounded-xl bg-brandGreen py-3 text-xs font-black text-black shadow-lg">Upload &amp; Save Advert</button>
    <p class="text-[10px] text-zinc-500">New adverts are saved inactive. Review and activate them in the campaign list.</p>
   </section>
+ </div>
  </div>
  <section class="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 space-y-3">
   <div class="flex items-center justify-between gap-2"><div><h5 class="font-bold text-white">Campaign library</h5><p class="text-[10px] text-zinc-500">Manage existing sponsor adverts without deleting their records unless you choose Delete.</p></div><button onclick="loadSponsorAds()" class="rounded-lg bg-zinc-800 px-3 py-2 text-[10px] font-bold text-white">Refresh list</button></div>
@@ -2400,21 +2382,10 @@ async function runAdsCenterChecks(){
 }
 
 async function loadAdminAdSettings(){
- const result=document.getElementById('adminAdsResult');
- loadSponsorAds();
- try{
-  const d=await api('/api/admin/ads');
-  const slots=d.placements||[];
-  const before=slots.find(x=>x.placement==='before_tap')||{};
-  const after=slots.find(x=>x.placement==='after_tap')||{};
-  document.getElementById('adBeforeEnabled').checked=!!before.enabled;
-  document.getElementById('adBeforeProvider').value=before.provider||'unconfigured';
-  document.getElementById('adBeforeUnit').value=before.ad_unit_id||'';
-  document.getElementById('adAfterEnabled').checked=!!after.enabled;
-  document.getElementById('adAfterProvider').value=after.provider||'unconfigured';
-  document.getElementById('adAfterUnit').value=after.ad_unit_id||'';
-  result.textContent='Settings loaded. No live ad code is being served.';
- }catch(e){result.textContent='Could not load advertising settings: '+e.message;}
+ // The old third-party placement settings are retired from the new Ads Management Center.
+ // Existing sponsor campaigns remain stored and are loaded through the dedicated campaign API.
+ await loadSponsorAds();
+ await runAdsCenterChecks();
 }
 async function saveAdminAdSettings(){
  const result=document.getElementById('adminAdsResult');
