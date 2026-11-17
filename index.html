@@ -2132,47 +2132,58 @@ async function requestPasswordRecovery(){const mobile=document.getElementById('r
 async function resetPasswordWithCode(){const mobile=document.getElementById('recoveryMobile').value.trim(),code=document.getElementById('recoveryCode').value.trim(),newPassword=document.getElementById('recoveryNewPassword').value;if(!mobile||!code||!newPassword)return showToast('Details required','Enter mobile, recovery code and new password.',false);try{const d=await api('/api/auth/password-recovery/reset',{method:'POST',body:JSON.stringify({mobile,code,newPassword})});document.getElementById('recoveryResult').innerText=d.message||'Password reset.';document.getElementById('loginPhone').value=mobile;document.getElementById('loginPassword').value='';document.getElementById('recoveryCode').value='';document.getElementById('recoveryNewPassword').value='';showToast('Password updated','You can now sign in with your new password.');}catch(e){showToast('Password reset failed',e.message,false);}}
 function escapeSponsorText(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function updateSponsorMediaInput(){
- const type=document.getElementById('sponsorType').value,file=document.getElementById('sponsorFile'),label=document.getElementById('sponsorFileLabel'),body=document.getElementById('sponsorText');
- const needsFile=type!=='text';file.classList.toggle('hidden',!needsFile);label.classList.toggle('hidden',!needsFile);
+ const type=document.getElementById('sponsorType').value,file=document.getElementById('sponsorFile'),label=document.getElementById('sponsorFileLabel'),body=document.getElementById('sponsorText'),info=document.getElementById('sponsorFileInfo');
+ const needsFile=type!=='text';
+ file.classList.toggle('hidden',!needsFile);label.classList.toggle('hidden',!needsFile);
  file.multiple=type==='carousel';
- file.accept=type==='video'?'video/mp4':'image/jpeg,image/png,image/webp';
- label.textContent=type==='video'?'MP4 video, max 8 MB':type==='carousel'?'Choose 2–8 images (JPG/PNG/WebP), total max 8 MB':'Image file (JPG/PNG/WebP), max 8 MB';
+ file.accept=type==='video'?'video/mp4,.mp4':type==='text'?'':'image/jpeg,image/png,image/webp';
+ label.textContent=type==='video'?'Choose MP4 video · maximum 8 MB':type==='carousel'?'Choose 2–8 images · total maximum 8 MB':'Choose JPG, PNG or WebP image · maximum 8 MB';
  body.classList.toggle('hidden',type!=='text');
+ file.value='';
+ if(info)info.textContent=type==='video'?'Select an MP4 from your phone or computer. The video is uploaded directly without browser file conversion.':type==='carousel'?'Select 2–8 image files. Total size must not exceed 8 MB.':'Select the advert image file.';
+}
+function showSponsorFileInfo(){
+ const fileInput=document.getElementById('sponsorFile'),info=document.getElementById('sponsorFileInfo');
+ if(!info)return;
+ const files=Array.from(fileInput.files||[]);
+ if(!files.length){info.textContent='No file selected.';return;}
+ const total=files.reduce((sum,file)=>sum+file.size,0);
+ info.textContent=files.map(file=>file.name+' ('+(file.size/1024/1024).toFixed(2)+' MB)').join(' · ')+' · Total '+(total/1024/1024).toFixed(2)+' MB';
 }
 function readSponsorFile(file,mimeType){
  return new Promise((resolve,reject)=>{
   const reader=new FileReader();
   reader.onload=()=>{
-   if(typeof reader.result!=='string'||!reader.result.startsWith('data:'))return reject(new Error('The selected file could not be converted for upload. Please choose the MP4 again.'));
+   if(typeof reader.result!=='string'||!reader.result.startsWith('data:'))return reject(new Error('The selected image could not be prepared. Please choose the image again.'));
    resolve({data_url:reader.result,mime_type:mimeType,file_name:file.name});
   };
-  reader.onerror=()=>reject(new Error('Your browser could not read "'+file.name+'". Please choose the video again or try a smaller MP4 file.'));
-  reader.onabort=()=>reject(new Error('Reading "'+file.name+'" was cancelled. Please try again.'));
+  reader.onerror=()=>reject(new Error('Your browser could not read image "'+file.name+'". Try choosing it again.'));
+  reader.onabort=()=>reject(new Error('Reading "'+file.name+'" was cancelled.'));
   const source=file.type===mimeType?file:file.slice(0,file.size,mimeType);
   reader.readAsDataURL(source);
  });
 }
 async function createSponsorAd(){
  const format=document.getElementById('sponsorType').value,files=Array.from(document.getElementById('sponsorFile').files||[]);
- const textContent=document.getElementById('sponsorText').value.trim();
- const imageTypes=['image/jpeg','image/png','image/webp'];
+ const sponsorName=document.getElementById('sponsorName').value.trim(),title=document.getElementById('sponsorTitle').value.trim();
+ const textContent=document.getElementById('sponsorText').value.trim(),imageTypes=['image/jpeg','image/png','image/webp'];
+ if(!sponsorName||!title)return showToast('Advert details required','Enter the sponsor name and advert title.',false);
  if(format==='text'&&!textContent)return showToast('Text required','Enter the text advert description.',false);
  if(format!=='text'&&!files.length)return showToast('Media required','Choose the advert media file.',false);
  if(format==='carousel'&&(files.length<2||files.length>8))return showToast('Carousel images','Choose between 2 and 8 images.',false);
  const isMp4=file=>/\.mp4$/i.test(file.name||'')&&(!file.type||['video/mp4','application/mp4','application/octet-stream'].includes(file.type));
  if(format==='video'&&(files.length!==1||!isMp4(files[0])))return showToast('Video required','Choose one MP4 video file.',false);
- if(['banner','image','carousel'].includes(format)&&files.some(x=>!imageTypes.includes(x.type)))return showToast('Image format','Use JPG, PNG or WebP images.',false);
- if(files.some(x=>!Number.isFinite(x.size)||x.size<=0))return showToast('Invalid file','The selected file is empty or cannot be read.',false);
- if(files.reduce((n,x)=>n+x.size,0)>8*1024*1024)return showToast('Files too large','All selected files together must be 8 MB or less.',false);
- const destination=document.getElementById('sponsorLink').value.trim();if(!/^https:\/\//i.test(destination))return showToast('Secure link required','Enter an HTTPS destination URL.',false);
- const uploadButton=document.querySelector('button[onclick="createSponsorAd()"]');
- const originalButtonText=uploadButton?uploadButton.textContent:'Upload & Save Advert';
- if(uploadButton){uploadButton.disabled=true;uploadButton.textContent='Uploading advert…';uploadButton.classList.add('opacity-60');}
+ if(['banner','image','carousel'].includes(format)&&files.some(file=>!imageTypes.includes(file.type)))return showToast('Image format','Use JPG, PNG or WebP images.',false);
+ if(files.some(file=>!Number.isFinite(file.size)||file.size<=0))return showToast('Invalid file','A selected file is empty or unavailable.',false);
+ const totalBytes=files.reduce((sum,file)=>sum+file.size,0);
+ if(totalBytes>8*1024*1024)return showToast('Files too large','The total upload size must be 8 MB or less.',false);
+ const destination=document.getElementById('sponsorLink').value.trim();
+ if(!/^https:\/\//i.test(destination))return showToast('Secure link required','Enter a destination URL beginning with https://.',false);
+ const button=document.getElementById('sponsorUploadButton');
+ if(button){button.disabled=true;button.textContent=format==='video'?'Uploading video…':'Uploading advert…';}
  try{
   const metadata={
-   sponsor_name:document.getElementById('sponsorName').value.trim(),
-   title:document.getElementById('sponsorTitle').value.trim(),
-   destination_url:destination,
+   sponsor_name:sponsorName,title,destination_url:destination,
    placement:document.getElementById('sponsorPlacement').value,
    start_at:document.getElementById('sponsorStart').value||'',
    end_at:document.getElementById('sponsorEnd').value||'',
@@ -2180,27 +2191,30 @@ async function createSponsorAd(){
    payment_status:document.getElementById('sponsorPaid').checked?'paid':'pending'
   };
   if(format==='video'){
-   // Send the File directly as binary. This avoids FileReader/base64 failures on Android document providers.
-   const query=new URLSearchParams(metadata);
-   const token=localStorage.getItem(ADMIN_TOKEN_KEY);
+   // Native File body: no FileReader and no Base64 expansion for video uploads.
+   const query=new URLSearchParams(metadata),token=localStorage.getItem(ADMIN_TOKEN_KEY);
+   if(!token)throw new Error('Admin session expired. Sign in to Admin again.');
    const response=await fetch(API+'/api/admin/sponsor-ads/video?'+query.toString(),{
     method:'POST',
-    headers:{'Authorization':'Bearer '+token,'Content-Type':'video/mp4'},
+    headers:{'Authorization':'Bearer '+token,'Content-Type':'application/octet-stream'},
     body:files[0]
    });
    const result=await response.json().catch(()=>({message:'The server returned an unreadable response.'}));
-   if(!response.ok||result.status==='error'||result.success===false)throw new Error(result.message||'The video upload was rejected by the server.');
+   if(!response.ok||result.status==='error'||result.success===false)throw new Error(result.message||('Server rejected the video upload ('+response.status+').'));
   }else{
    const dataUrls=await Promise.all(files.map(file=>readSponsorFile(file,file.type)));
    await api('/api/admin/sponsor-ads',{method:'POST',body:JSON.stringify({...metadata,ad_format:format,text_content:textContent,data_urls:dataUrls})});
   }
-  document.getElementById('sponsorFile').value='';document.getElementById('sponsorText').value='';await loadSponsorAds();showToast('Advert saved','New advert is inactive. Activate it after confirming payment.');
- }catch(e){
-  const message=e&&e.message?e.message:'The upload could not be completed. Please check the connection and try again.';
-  console.error('SPONSOR AD UPLOAD FAILED',e);
-  showToast('Upload failed',message,false);
+  document.getElementById('sponsorFile').value='';
+  document.getElementById('sponsorText').value='';
+  document.getElementById('sponsorFileInfo').textContent='Advert uploaded successfully. It is saved inactive until you activate it.';
+  await loadSponsorAds();
+  showToast('Advert saved','The new advert is saved inactive. Activate it after checking the details.');
+ }catch(error){
+  console.error('SPONSOR AD UPLOAD FAILED',error);
+  showToast('Upload failed',error&&error.message?error.message:'Could not complete the upload. Check your connection and try again.',false);
  }finally{
-  if(uploadButton){uploadButton.disabled=false;uploadButton.textContent=originalButtonText;uploadButton.classList.remove('opacity-60');}
+  if(button){button.disabled=false;button.textContent='Upload & Save Advert';}
  }
 }
 async function loadSponsorAds(){
