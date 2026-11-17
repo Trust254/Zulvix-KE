@@ -2124,8 +2124,8 @@ async function createSponsorAd(){
  if(format==='text'&&!textContent)return showToast('Text required','Enter the text advert description.',false);
  if(format!=='text'&&!files.length)return showToast('Media required','Choose the advert media file.',false);
  if(format==='carousel'&&(files.length<2||files.length>8))return showToast('Carousel images','Choose between 2 and 8 images.',false);
- const videoMime=format==='video'&&files.length===1&&/\.mp4$/i.test(files[0].name)?(files[0].type||'video/mp4'):'';
- if(format==='video'&&(files.length!==1||!['video/mp4','application/mp4'].includes(videoMime)))return showToast('Video required','Choose one MP4 video file.',false);
+ const isMp4=file=>/\.mp4$/i.test(file.name||'')&&(!file.type||['video/mp4','application/mp4','application/octet-stream'].includes(file.type));
+ if(format==='video'&&(files.length!==1||!isMp4(files[0])))return showToast('Video required','Choose one MP4 video file.',false);
  if(['banner','image','carousel'].includes(format)&&files.some(x=>!imageTypes.includes(x.type)))return showToast('Image format','Use JPG, PNG or WebP images.',false);
  if(files.some(x=>!Number.isFinite(x.size)||x.size<=0))return showToast('Invalid file','The selected file is empty or cannot be read.',false);
  if(files.reduce((n,x)=>n+x.size,0)>8*1024*1024)return showToast('Files too large','All selected files together must be 8 MB or less.',false);
@@ -2134,11 +2134,34 @@ async function createSponsorAd(){
  const originalButtonText=uploadButton?uploadButton.textContent:'Upload & Save Advert';
  if(uploadButton){uploadButton.disabled=true;uploadButton.textContent='Uploading advert…';uploadButton.classList.add('opacity-60');}
  try{
-  const dataUrls=await Promise.all(files.map(file=>readSponsorFile(file,format==='video'?'video/mp4':file.type)));
-  await api('/api/admin/sponsor-ads',{method:'POST',body:JSON.stringify({sponsor_name:document.getElementById('sponsorName').value.trim(),title:document.getElementById('sponsorTitle').value.trim(),ad_format:format,text_content:textContent,data_urls:dataUrls,destination_url:destination,placement:document.getElementById('sponsorPlacement').value,start_at:document.getElementById('sponsorStart').value||null,end_at:document.getElementById('sponsorEnd').value||null,sponsorship_amount:Number(document.getElementById('sponsorAmount').value||0),payment_status:document.getElementById('sponsorPaid').checked?'paid':'pending'})});
+  const metadata={
+   sponsor_name:document.getElementById('sponsorName').value.trim(),
+   title:document.getElementById('sponsorTitle').value.trim(),
+   destination_url:destination,
+   placement:document.getElementById('sponsorPlacement').value,
+   start_at:document.getElementById('sponsorStart').value||'',
+   end_at:document.getElementById('sponsorEnd').value||'',
+   sponsorship_amount:document.getElementById('sponsorAmount').value||'0',
+   payment_status:document.getElementById('sponsorPaid').checked?'paid':'pending'
+  };
+  if(format==='video'){
+   // Send the File directly as binary. This avoids FileReader/base64 failures on Android document providers.
+   const query=new URLSearchParams(metadata);
+   const token=localStorage.getItem(ADMIN_TOKEN_KEY);
+   const response=await fetch(API+'/api/admin/sponsor-ads/video?'+query.toString(),{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+token,'Content-Type':'video/mp4'},
+    body:files[0]
+   });
+   const result=await response.json().catch(()=>({message:'The server returned an unreadable response.'}));
+   if(!response.ok||result.status==='error'||result.success===false)throw new Error(result.message||'The video upload was rejected by the server.');
+  }else{
+   const dataUrls=await Promise.all(files.map(file=>readSponsorFile(file,file.type)));
+   await api('/api/admin/sponsor-ads',{method:'POST',body:JSON.stringify({...metadata,ad_format:format,text_content:textContent,data_urls:dataUrls})});
+  }
   document.getElementById('sponsorFile').value='';document.getElementById('sponsorText').value='';await loadSponsorAds();showToast('Advert saved','New advert is inactive. Activate it after confirming payment.');
  }catch(e){
-  const message=e&&e.message?e.message:'The browser could not read or send the selected file. Please retry with an MP4 under 8 MB.';
+  const message=e&&e.message?e.message:'The upload could not be completed. Please check the connection and try again.';
   console.error('SPONSOR AD UPLOAD FAILED',e);
   showToast('Upload failed',message,false);
  }finally{
