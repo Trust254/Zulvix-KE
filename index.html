@@ -2120,7 +2120,7 @@ async function handleRegister(){
   localStorage.setItem(USER_TOKEN_KEY,result.token);
   applyUser(result.user);
   await loadUserNotifications();
-  showToast('Registration successful',`Welcome, ${result.user.name}. You can optionally enable Google Authenticator for password recovery in Account Security.`);
+  showToast('Registration successful',`Welcome, ${result.user.name}. KSh 200 welcome bonus has been added to your account.`);
  }catch(e){
   showToast('Registration not completed',e.message||'Please try again.',false);
  }
