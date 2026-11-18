@@ -423,11 +423,6 @@ class="text-xl font-black text-white">
 
 </div>
 
-<div class="bg-brandCard border border-brandGold/30 rounded-xl p-3 space-y-3">
- <div class="flex items-center justify-between"><div><h3 class="text-xs font-bold text-white">Achievements</h3><p class="text-[10px] text-zinc-500">Milestones earned through your account activity</p></div><i class="fa-solid fa-trophy text-brandGold"></i></div>
- <div id="achievementBadges" class="grid grid-cols-2 gap-2"><p class="text-[10px] text-zinc-500">Sign in to view your achievements.</p></div>
-</div>
-
 <div class="bg-brandCard border border-zinc-800 rounded-xl p-3 space-y-2">
  <div class="flex justify-between items-center">
   <div><h3 class="text-xs font-bold text-white">Notifications</h3><p class="text-[10px] text-zinc-500">Official updates from Zulvix-KE</p></div>
@@ -492,12 +487,17 @@ Tap to earn daily profits. Limit: 6 taps every 12 hours.
 
 </div>
 
+<div class="bg-brandCard border border-brandGold/30 rounded-xl p-3 space-y-3">
+ <div class="flex items-center justify-between"><div><h3 class="text-xs font-bold text-white">Achievements</h3><p class="text-[10px] text-zinc-500">Milestones earned through your account activity</p></div><i class="fa-solid fa-trophy text-brandGold"></i></div>
+ <div id="achievementBadges" class="grid grid-cols-2 gap-2"><p class="text-[10px] text-zinc-500">Sign in to view your achievements.</p></div>
+</div>
+
 <div class="w-full max-w-xl mx-auto mt-4 bg-brandCard border border-zinc-800 rounded-xl p-3 space-y-2">
  <p class="text-xs font-bold text-white">Browser notification test</p>
  <p id="browserNotificationStatus" class="text-[10px] text-zinc-400">Check whether this browser supports notifications.</p>
  <div class="grid grid-cols-2 gap-2">
   <button onclick="enableBrowserNotifications()" class="w-full rounded-lg bg-zinc-800 text-white text-[10px] font-bold py-2">Enable notifications</button>
-  <button onclick="sendDemoBrowserNotification()" class="w-full rounded-lg bg-brandGreen text-black text-[10px] font-bold py-2">Send sample</button>
+  <button onclick="sendBrowserNotificationTest()" class="w-full rounded-lg bg-brandGreen text-black text-[10px] font-bold py-2">Send test notification</button>
  </div>
 </div>
 
@@ -4330,22 +4330,36 @@ function updateBrowserNotificationStatus(){
  const el=document.getElementById('browserNotificationStatus');
  if(!el)return;
  if(!('Notification' in window)){el.textContent='This browser does not support browser notifications.';return;}
- el.textContent='Browser permission: '+Notification.permission+'. Sample notifications are local to this device.';
+ el.textContent='Browser permission: '+Notification.permission+'. Test notifications are displayed by this device’s browser.';
 }
 async function enableBrowserNotifications(){
  if(!('Notification' in window)){showToast('Not supported','This browser does not support notifications.',false);updateBrowserNotificationStatus();return;}
  try{
   const permission=await Notification.requestPermission();
   updateBrowserNotificationStatus();
-  if(permission==='granted')showToast('Notifications enabled','This browser can now show sample notifications.');
+  if(permission==='granted')showToast('Notifications enabled','Browser notification permission has been granted on this device.');
   else showToast('Permission not granted','Allow notifications in your browser settings to use this feature.',false);
  }catch(e){showToast('Notification unavailable','Could not request browser notification permission.',false);}
 }
-function sendDemoBrowserNotification(){
+async function sendBrowserNotificationTest(){
  if(!('Notification' in window)){showToast('Not supported','This browser does not support notifications.',false);return;}
+ if(!('serviceWorker' in navigator)){showToast('Not supported','This browser cannot display service-worker notifications.',false);return;}
  if(Notification.permission!=='granted'){showToast('Permission needed','Select Enable notifications first.',false);updateBrowserNotificationStatus();return;}
- try{new Notification('Zulvix-KE',{body:'This is a sample browser notification. No account action is required.'});showToast('Sample sent','A sample notification was sent to this browser.');}
- catch(e){showToast('Could not send','This browser could not display the sample notification.',false);}
+ try{
+  const registration=await navigator.serviceWorker.ready;
+  if(!registration||!registration.showNotification)throw new Error('Service worker notifications are unavailable.');
+  await registration.showNotification('Zulvix-KE notification test',{
+   body:'Success! Your browser displayed a real notification on this device.',
+   icon:'./icon-512-1.png',
+   badge:'./icon-512-1.png',
+   tag:'zulvix-browser-notification-test',
+   renotify:true
+  });
+  showToast('Notification sent','Check your device notification area for the Zulvix-KE test notification.');
+ }catch(e){
+  console.error('Browser notification test failed:',e);
+  showToast('Could not send','The browser could not display a notification. Check browser notification and site settings.',false);
+ }
 }
 
 function updateUI(){
