@@ -77,7 +77,7 @@ async function createAd(e){
  const type=$("mediaType").value,file=$("mediaFile").files[0],destination=$("destination").value.trim();
  if(!destination.startsWith("https://"))return msg("formMsg","Destination link must start with https://.","error");
  if(type!=="text"&&!file)return msg("formMsg","Please select the advert media file.","error");
- if(file&&file.size>10*1024*1024)return msg("formMsg","Media file must be 10 MB or smaller.","error");
+ if(file&&file.size>(type==="video"?35:10)*1024*1024)return msg("formMsg",type==="video"?"MP4 video must be 35 MB or smaller.":"Image file must be 10 MB or smaller.","error");
  if(type==="video"&&file.type!=="video/mp4")return msg("formMsg","Select an MP4 video file.","error");
  if(type==="image"&& !["image/jpeg","image/png","image/webp"].includes(file.type))return msg("formMsg","Select a JPG, PNG or WebP image.","error");
  if(type==="text"&&!$("textContent").value.trim())return msg("formMsg","Enter the text advert content.","error");
@@ -110,7 +110,7 @@ async function createAd(e){
  }catch(e){msg("formMsg",e.message||"Could not upload advert.", "error");}
  finally{$("saveBtn").disabled=false;$("saveBtn").textContent="Save advert campaign";}
 }
-function updateMediaFields(){const t=$("mediaType").value;$("fileField").classList.toggle("hidden",t==="text");$("textField").classList.toggle("hidden",t!=="text");$("fileLabel").textContent=t==="video"?"MP4 video (max 10 MB)":"Image file (JPG, PNG, WebP; max 10 MB)";$("mediaFile").accept=t==="video"?"video/mp4":"image/jpeg,image/png,image/webp";}
+function updateMediaFields(){const t=$("mediaType").value;$("fileField").classList.toggle("hidden",t==="text");$("textField").classList.toggle("hidden",t!=="text");$("fileLabel").textContent=t==="video"?"MP4 video (max 35 MB)":"Image file (JPG, PNG, WebP; max 10 MB)";$("mediaFile").accept=t==="video"?"video/mp4":"image/jpeg,image/png,image/webp";}
 $("loginForm").addEventListener("submit",login);$("logoutBtn").addEventListener("click",logout);$("adForm").addEventListener("submit",createAd);$("mediaType").addEventListener("change",updateMediaFields);$("refreshBtn").addEventListener("click",loadAds);
 if(localStorage.getItem(KEY)){showApp();loadAds();}else showLogin();updateMediaFields();
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));}
