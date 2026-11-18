@@ -423,6 +423,11 @@ class="text-xl font-black text-white">
 
 </div>
 
+<div class="bg-brandCard border border-brandGold/30 rounded-xl p-3 space-y-3">
+ <div class="flex items-center justify-between"><div><h3 class="text-xs font-bold text-white">Achievements</h3><p class="text-[10px] text-zinc-500">Milestones earned through your account activity</p></div><i class="fa-solid fa-trophy text-brandGold"></i></div>
+ <div id="achievementBadges" class="grid grid-cols-2 gap-2"><p class="text-[10px] text-zinc-500">Sign in to view your achievements.</p></div>
+</div>
+
 <div class="bg-brandCard border border-zinc-800 rounded-xl p-3 space-y-2">
  <div class="flex justify-between items-center">
   <div><h3 class="text-xs font-bold text-white">Notifications</h3><p class="text-[10px] text-zinc-500">Official updates from Zulvix-KE</p></div>
@@ -430,6 +435,14 @@ class="text-xl font-black text-white">
  </div>
  <div id="userNotificationList" class="space-y-2 max-h-48 overflow-y-auto">
   <p class="text-[10px] text-zinc-500">Sign in to view announcements.</p>
+ </div>
+ <div class="border-t border-zinc-800 pt-2 space-y-2">
+  <p class="text-[10px] text-zinc-400">Browser notification test</p>
+  <p id="browserNotificationStatus" class="text-[10px] text-zinc-500">Check whether this browser supports notifications.</p>
+  <div class="grid grid-cols-2 gap-2">
+   <button onclick="enableBrowserNotifications()" class="rounded-lg bg-zinc-800 text-white text-[10px] font-bold py-2">Enable notifications</button>
+   <button onclick="sendDemoBrowserNotification()" class="rounded-lg bg-brandGreen text-black text-[10px] font-bold py-2">Send sample</button>
+  </div>
  </div>
 </div>
 
@@ -2029,6 +2042,8 @@ function applyUser(u,loadAds=true){
   Array.isArray(u.transactions)
    ?u.transactions
    :[];
+
+ appState.tapCount=Number(u.tap_count||u.tapCount||0);
 
  checkAuthUI();
 
@@ -4293,6 +4308,47 @@ function updateWalletHistory(){
  const more=document.getElementById('walletHistoryMore');
  if(more)more.classList.toggle('hidden',filtered.length<=walletHistoryLimit);
 }
+function renderAchievementBadges(){
+ const host=document.getElementById('achievementBadges');
+ if(!host)return;
+ const taps=Number(appState.tapCount||0);
+ const levels=Array.isArray(appState.unlockedLevels)?appState.unlockedLevels.map(Number):[1];
+ const achievements=[
+  {name:'Welcome Member',detail:'Account successfully registered',earned:true,icon:'fa-user-check'},
+  {name:'First Tap',detail:'Complete your first tap',earned:taps>=1,icon:'fa-hand-pointer'},
+  {name:'10 Taps',detail:'Complete 10 taps',earned:taps>=10,icon:'fa-bullseye'},
+  {name:'50 Taps',detail:'Complete 50 taps',earned:taps>=50,icon:'fa-fire'},
+  {name:'Level Explorer',detail:'Unlock another level',earned:levels.some(level=>level>1),icon:'fa-layer-group'}
+ ];
+ host.innerHTML=achievements.map(a=>`
+  <div class="rounded-lg border ${a.earned?'border-brandGold/40 bg-brandGold/5':'border-zinc-800 bg-zinc-900/50'} p-2 flex items-center gap-2">
+   <i class="fa-solid ${a.icon} ${a.earned?'text-brandGold':'text-zinc-600'} text-sm"></i>
+   <div class="min-w-0"><p class="text-[10px] font-bold ${a.earned?'text-white':'text-zinc-500'}">${a.name}</p><p class="text-[9px] text-zinc-500">${a.detail}</p></div>
+  </div>`).join('');
+}
+
+function updateBrowserNotificationStatus(){
+ const el=document.getElementById('browserNotificationStatus');
+ if(!el)return;
+ if(!('Notification' in window)){el.textContent='This browser does not support browser notifications.';return;}
+ el.textContent='Browser permission: '+Notification.permission+'. Sample notifications are local to this device.';
+}
+async function enableBrowserNotifications(){
+ if(!('Notification' in window)){showToast('Not supported','This browser does not support notifications.',false);updateBrowserNotificationStatus();return;}
+ try{
+  const permission=await Notification.requestPermission();
+  updateBrowserNotificationStatus();
+  if(permission==='granted')showToast('Notifications enabled','This browser can now show sample notifications.');
+  else showToast('Permission not granted','Allow notifications in your browser settings to use this feature.',false);
+ }catch(e){showToast('Notification unavailable','Could not request browser notification permission.',false);}
+}
+function sendDemoBrowserNotification(){
+ if(!('Notification' in window)){showToast('Not supported','This browser does not support notifications.',false);return;}
+ if(Notification.permission!=='granted'){showToast('Permission needed','Select Enable notifications first.',false);updateBrowserNotificationStatus();return;}
+ try{new Notification('Zulvix-KE',{body:'This is a sample browser notification. No account action is required.'});showToast('Sample sent','A sample notification was sent to this browser.');}
+ catch(e){showToast('Could not send','This browser could not display the sample notification.',false);}
+}
+
 function updateUI(){
 
  const bal=
@@ -4351,6 +4407,9 @@ function updateUI(){
   )
   .innerText=
    `Level ${l.id}: ${l.name}`;
+
+ renderAchievementBadges();
+ updateBrowserNotificationStatus();
 
 
  document
