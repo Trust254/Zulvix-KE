@@ -558,6 +558,17 @@ Tiers (8)
 
 </div>
 
+
+<!-- SALAMACHECK ENTRY -->
+<div class="bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-950 border border-emerald-500/40 rounded-2xl p-4 shadow-lg space-y-3">
+ <div class="flex items-center gap-3">
+  <div class="w-11 h-11 rounded-xl bg-emerald-400/15 border border-emerald-400/30 flex items-center justify-center text-emerald-300 text-xl"><i class="fa-solid fa-shield-heart"></i></div>
+  <div class="min-w-0 flex-1"><p class="text-sm font-black text-white">SalamaCheck</p><p class="text-xs text-emerald-100/70">Emergency Protection & Safety Check-ins</p></div>
+  <span class="text-[9px] font-bold tracking-wider uppercase text-emerald-300 border border-emerald-400/30 rounded-full px-2 py-1">Optional</span>
+ </div>
+ <p class="text-xs text-zinc-300">Set up trusted contacts, send an SOS alert, and schedule check-ins so someone can follow up if you miss one.</p>
+ <button onclick="openSalamaCheck()" class="w-full rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-extrabold text-sm py-3 flex items-center justify-center gap-2"><i class="fa-solid fa-shield-heart"></i> Open SalamaCheck <i class="fa-solid fa-arrow-right text-xs"></i></button>
+</div>
 </section>
 
 
@@ -2386,6 +2397,8 @@ function handleLogout(){
 /* =========================================================
    NAVIGATION
 ========================================================= */
+
+function openSalamaCheck(){ if(!appState.isLoggedIn){showToast('Sign In Required','Please sign in to open SalamaCheck.',false);return;} window.location.href='./salamacheck.html'; }
 function switchTab(id){
 ['dashboard','levels','wallet','profile']
  .forEach(t=>{
